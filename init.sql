@@ -1,0 +1,52 @@
+/* Metadata used for migrating databases if need be */
+create table if not exists metadata (
+	version int default 0
+);
+
+/* User table (NOTE: groups are "users") */
+create table if not exists users (
+	id serial unique primary key;
+	name varchar(32) not null;
+	salt char(32) not null;
+	hash char(64) not null;
+	made timestamp default now();
+	seen timestamp;
+);
+
+/* User inclusion in groups (group is assumed a member of itself) */
+create table if not exists groups (
+	gid int references users(id);
+	uid int references users(id);
+	
+	/* When the user was added to the group */
+	added timestamp default now();
+);
+
+/* Board definitions */
+create table if not exists boards (
+	id serial unique primary key;
+	name varchar(32) not null;
+	
+	/* The group which is allowed to use the board */
+	group int references users(id);
+);
+
+/* Topics are posts with parent=0 */
+create table if not exists posts (
+	id serial unique primary key;
+	parent int references topics(id);
+	board int references boards(id);
+	author int references users(id);
+	
+	created timestamp;
+	title varchar(256);
+	body text;
+);
+
+create table if not exists bulletin (
+	id serial unique primary key;
+	author int references users(id);
+	
+	created timestamp;
+	body varchar(140);
+);
