@@ -24,7 +24,6 @@ create table if not exists members (
 	gid int references groups(id);
 	uid int references users(id);
 	
-	gid int references users(id);
 	/* When the user was added to the group */
 	added timestamp default now();
 );
