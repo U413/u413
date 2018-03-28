@@ -1,4 +1,5 @@
 const
+	fs = require("fs"),
 	{Client} = require("pg");
 
 const client = new Client();
@@ -11,19 +12,19 @@ function query_promise(q, args, ok, no) {
 	});
 }
 
-function query(fn, ...args) {
+function query(q, ...args) {
 	return new Promise((ok, no) => {
-		if(fn in run_file.cache) {
-			query_promise(run_file.cache[fn], args, ok, no);
+		if(q in run_file.cache) {
+			query_promise(run_file.cache[q], args, ok, no);
 		}
 		else {
-			fs.read(fn + ".sql", (err, data) => {
+			fs.read(`db/${q}.sql`, (err, data) => {
 				if(err) {
 					no(err);
 				}
 				else {
 					query_promise(
-						run_file.cache[fn] = data.toString(),
+						run_file.cache[q] = data.toString(),
 						args, ok, no
 					);
 				}
