@@ -5,10 +5,11 @@
 	"main": "index.js",
 	"author": "ConsciousCode",
 	"dependencies": {
-		"q": "^1.5.1",
 		"body-parser": "*",
 		"cookie-parser": "*",
-		"serve-index": "*",
-		"express": "*"
+		"express": "*",
+		"pug": "^2.0.3",
+		"q": "^1.5.1",
+		"serve-index": "*"
 	}
 }

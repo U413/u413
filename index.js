@@ -11,6 +11,8 @@ require("./init");
 
 let app = express();
 
+app.set('view engine', 'pug');
+
 app.use(cookieParser());
 app.use((req, res, next) => {
 	req.user = req.cookies.user || "<<<FAKE>>>";
@@ -18,6 +20,10 @@ app.use((req, res, next) => {
 });
 
 app.use("/dev", require("./dev/index"));
+
+app.get('/', (req, res) => {
+	res.render('index');
+});
 
 app.use(serveIndex('public'));
 app.use(express.static('public', {
