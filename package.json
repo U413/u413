@@ -1,0 +1,14 @@
+{
+	"name": "u413",
+	"version": "0.0.1",
+	"description": "Terminal-themed BBS forum",
+	"main": "index.js",
+	"author": "ConsciousCode",
+	"dependencies": {
+		"q": "^1.5.1",
+		"body-parser": "*",
+		"cookie-parser": "*",
+		"serve-index": "*",
+		"express": "*"
+	}
+}

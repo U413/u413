@@ -1,0 +1,27 @@
+Public directory:
+	/dev/
+		api/
+			topic
+			reply
+			bulletin
+			rss
+		tty (post-MVP)
+		random
+		urandom
+		stdin ?
+		stdout
+	/etc/
+		passwd
+	/usr/
+		<user>/
+			...
+	/tmp/
+		...
+	/srv/
+		<board name>/
+			next (current id count)
+			<topic id>
+	/bin/
+		<js files>
+	/var/
+		<css files>
