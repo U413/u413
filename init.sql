@@ -13,11 +13,18 @@ create table if not exists users (
 	seen timestamp;
 );
 
-/* User inclusion in groups (group is assumed a member of itself) */
 create table if not exists groups (
-	gid int references users(id);
+	id serial unique primary key;
+	name varchar(32) not null;
+	made timestamp default now();
+);
+
+/* User inclusion in groups */
+create table if not exists members (
+	gid int references groups(id);
 	uid int references users(id);
 	
+	gid int references users(id);
 	/* When the user was added to the group */
 	added timestamp default now();
 );
