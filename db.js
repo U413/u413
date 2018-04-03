@@ -3,7 +3,8 @@ const
 	{Client} = require("pg");
 
 const client = new Client({
-	database: process.env.PGDATABASE || process.env.DB || "u413"
+	database: process.env.PGDATABASE || process.env.DB || "u413",
+	password: process.env.PGPASSWORD || process.env.PASS
 });
 client.connect();
 
