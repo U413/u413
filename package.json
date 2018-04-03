@@ -2,12 +2,16 @@
 	"name": "u413",
 	"version": "0.0.1",
 	"description": "Terminal-themed BBS forum",
+	"repository": "http://github.com/ConsciousCode/unix-u413",
+	"license": "MIT",
 	"main": "index.js",
 	"author": "ConsciousCode",
 	"dependencies": {
 		"body-parser": "*",
 		"cookie-parser": "*",
 		"express": "*",
+		"npm": "^5.8.0",
+		"pg": "*",
 		"pug": "^2.0.3",
 		"q": "^1.5.1",
 		"serve-index": "*"

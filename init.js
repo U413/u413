@@ -1,7 +1,11 @@
 'use strict';
 
 const
-	fs = require("fs");
+	fs = require("fs"),
+	db = require("./db");
+
+/** DB init **/
+db.query('init');
 
 /**
  * Make sure we have the basic files which git ignores.
@@ -39,11 +43,15 @@ function build_if_missing(fn, init, msg) {
 	});
 }
 
+/*
+
 build_if_missing(
 	"public/etc/passwd.txt",
 	"root:x:0:0:root:/usr/root:/bin/bash",
 	"Building /etc/passwd"
 );
 build_if_missing(
-	"public/srv/bulletin.md", "", "Building /srv/bulletin"
+	"public/var/bulletin.md", "", "Building /var/bulletin"
 );
+
+*/

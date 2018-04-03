@@ -3,56 +3,55 @@ create table if not exists metadata (
 	version int default 0
 );
 
-/* User table (NOTE: groups are "users") */
 create table if not exists users (
-	id serial unique primary key;
-	name varchar(32) not null;
-	salt char(32) not null;
-	hash char(64) not null;
-	made timestamp default now();
-	seen timestamp;
+	id serial unique primary key,
+	name varchar(32) not null,
+	salt char(32) not null,
+	hash char(64) not null,
+	made timestamp default now(),
+	seen timestamp
 );
 
 create table if not exists groups (
-	id serial unique primary key;
-	name varchar(32) not null;
-	made timestamp default now();
+	id serial unique primary key,
+	name varchar(32) not null,
+	made timestamp default now()
 );
 
 /* User inclusion in groups */
 create table if not exists members (
-	gid int references groups(id);
-	uid int references users(id);
+	gid int references groups(id),
+	uid int references users(id),
 	
 	/* When the user was added to the group */
-	added timestamp default now();
+	added timestamp default now()
 );
 
 /* Board definitions */
 create table if not exists boards (
-	id serial unique primary key;
-	name varchar(32) not null;
+	id serial unique primary key,
+	name varchar(32) not null,
 	
 	/* The group which is allowed to use the board */
-	group int references users(id);
+	gid int references groups(id)
 );
 
 /* Topics are posts with parent=0 */
 create table if not exists posts (
-	id serial unique primary key;
-	parent int references topics(id);
-	board int references boards(id);
-	author int references users(id);
+	id serial unique primary key,
+	parent int references posts(id),
+	board int references boards(id),
+	author int references users(id),
 	
-	created timestamp;
-	title varchar(256);
-	body text;
+	created timestamp,
+	title varchar(256),
+	body text
 );
 
 create table if not exists bulletin (
-	id serial unique primary key;
-	author int references users(id);
+	id serial unique primary key,
+	author int references users(id),
 	
-	created timestamp;
-	body varchar(140);
+	created timestamp,
+	body varchar(140)
 );

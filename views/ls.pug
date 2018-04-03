@@ -1,0 +1,17 @@
+doctype html
+html
+	head
+		link(rel="stylesheet" href="/var/styles/main.css")
+	body
+		h2= directory
+		ul.ls
+			li
+				h4.name Name
+				h4.time Last modified
+				h4.size Size
+			each f in fileList
+				li
+					a(href=f)= f.name
+					time.size= f.stat.mtime
+					.size= f.stat.size + "B"
+		include shell
