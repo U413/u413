@@ -4,8 +4,11 @@ const
 	fs = require("fs"),
 	db = require("./db");
 
+const log = require("./log");
+
 /** DB init **/
-db.query('init');
+log.info("Initializing via db/init.sql");
+db.queryFile('init');
 
 /**
  * Make sure we have the basic files which git ignores.
@@ -16,10 +19,11 @@ db.query('init');
 function touch_dir_if_missing(dn) {
 	try {
 		if(!fs.statSync(dn).isDirectory()) {
-			console.warn(dn, "is not a directory");
+			log.warn(dn, "is not a directory");
 		}
 	}
 	catch(e) {
+		log.info("Creating directory", dn);
 		fs.mkdirSync(dn);
 	}
 }
@@ -27,6 +31,7 @@ function touch_dir_if_missing(dn) {
 ['bin', 'etc', 'srv', 'tmp', 'usr', 'var'].map(
 	v => touch_dir_if_missing(`public/${v}`)
 );
+touch_dir_if_missing("private");
 
 // Files with user data
 

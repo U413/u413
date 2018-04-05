@@ -3,10 +3,11 @@ html
 	head
 		include style-main
 	body
-		ul
-			each post in bulletin
-				li
-					.user= post.user
-					.body= post.body
-					time= post.time
+		main
+			ul
+				each post in bulletin
+					li
+						.user= post.user
+						.body= post.body
+						time= post.time
 		include shell

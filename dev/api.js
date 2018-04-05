@@ -12,6 +12,9 @@ const
 	write = Q.denodeify(fs.write),
 	fs_stat = Q.denodeify(fs.stat);
 
+const
+	log = require("../log");
+
 async function stat(f) {
 	try {
 		return await fs_stat(f);
@@ -62,15 +65,14 @@ function make_id(n) {
 	return s;
 }
 
+log.info("Building /dev/api routes");
 let router = new express.Router();
 
 router.use("/topic", async (req, res, next) => {
 	let {board, title, body} = req.body;
 	
 	body = body || "";
-	console.log(next);
 	if(board && title) {
-		console.log(next);
 		if(!await stat(board)) {
 			next();
 			return;
@@ -122,13 +124,9 @@ router.use("/reply", async (req, res, next) => {
 
 router.use("/bulletin", async (req, res, next) => {
 	let user = req.user, body = req.body;
-	let fid = await open("srv/bulletin", 'a');
-	await write(fid,
-		`[*${user}*] ${sanitize(body.split('\n', 1)[0])}`
-	);
-	await close(fid);
 	
-	res.send("srv/bulletin");
+	let posts = await db.bulletin.getAll();
+	res.render('bulletin', {bulletin: posts.rows});
 })
 
 module.exports = router;

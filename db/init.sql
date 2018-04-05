@@ -7,7 +7,7 @@ create table if not exists users (
 	id serial unique primary key,
 	name varchar(32) not null,
 	salt char(32) not null,
-	hash char(64) not null,
+	pass char(64) not null,
 	made timestamp default now(),
 	seen timestamp
 );
@@ -16,6 +16,11 @@ create table if not exists groups (
 	id serial unique primary key,
 	name varchar(32) not null,
 	made timestamp default now()
+);
+
+create table if not exists subgroups (
+	parent int references groups(id),
+	child int references groups(id)
 );
 
 /* User inclusion in groups */
