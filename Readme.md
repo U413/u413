@@ -37,6 +37,14 @@ Make sure the postgreSQL server is running.
 * User data
   - /home/<username>/*
 * Private messaging
+* Vanity features
+  - /dev/
+    * (u)random
+	* null
+	* zero
+	* std(in|out|err)
+	* log
+  - Easter eggs, hidden commands, dotfiles
 
 ### Long-term goals
 * Access to u413 via ssh and shell emulation
