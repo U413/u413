@@ -32,22 +32,19 @@ function query(q, args) {
 	log.silly(q, args);
 	args = args || {};
 	return new Promise((ok, no) => {
-		let k = Object.keys(args), v = Object.values(args), i = 0;
+		let k = Object.keys(args), v = Object.values(args);
+		log.info(k, v);
 		
-		try {
-			var qq = q.replace(/$\{([\w\d]+)\}/g, m => {
-				let x = k.indexOf(m[1]);
-				if(x !== -1) {
-					return `$${x}`;
-				}
-				else {
-					throw new Error("Undefined key " + m[1]);
-				}
-			});
-		}
-		catch(e) {
-			return no(e);
-		}
+		var qq = q.replace(/\$\{([\w\d]+)\}/g, ($0, $1) => {
+			let x = k.indexOf($1) + 1;
+			if(x) {
+				return `$${x}`;
+			}
+			else {
+				throw new Error("Undefined key " + $1);
+			}
+		});
+		log.debug("Final query:", qq);
 		
 		client.query(qq, v, (err, rows) => {
 			if(err) no(err)
@@ -59,8 +56,8 @@ function query(q, args) {
 function queryFile(q, args) {
 	log.debug("Running query", q);
 	return new Promise((ok, no) => {
-		if(q in query.cache) {
-			query(query.cache[q], args).then(ok, no);
+		if(q in queryFile.cache) {
+			query(queryFile.cache[q], args).then(ok, no);
 		}
 		else {
 			fs.readFile(`db/${q}.sql`, (err, data) => {
@@ -69,13 +66,13 @@ function queryFile(q, args) {
 				}
 				else {
 					log.debug("Caching", `db/${q}.sql`);
-					query(query.cache[q] = data.toString(), args).then(ok, no);
+					query(queryFile.cache[q] = data.toString(), args).then(ok, no);
 				}
 			});
 		}
 	});
 }
-query.cache = {};
+queryFile.cache = {};
 
 module.exports = {
 	query,

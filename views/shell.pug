@@ -1,22 +1,11 @@
 .shell
-	.user= user.id
-	|@
-	.host u413.com
-	|:
+	|#[.user= user.name]@#[.host u413.com]:
 	.cwd= user.cwd
-	.prompt= user.prompt
+	.prompt= user.prompt || "$"
 	| 
 	input#cli(
 		autofocus
 		autocomplete="off" autocorrect="off"
 		autocapitalize="off" spellcheck="false"
 	)
-	script.
-		var cli = document.getElementById("cli");
-		document.addEventListener('click', () => {
-			console.log("click");
-			let cvl = cli.value.length;
-			cli.focus();
-			cli.setSelectionRange(cvl, cvl);
-		});
-		cli.addEventListener('click', ev => ev.stopPropagation());
+	script(src="/etc/scripts/shell.js")

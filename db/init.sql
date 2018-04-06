@@ -48,7 +48,7 @@ create table if not exists posts (
 	board int references boards(id),
 	author int references users(id),
 	
-	created timestamp,
+	created timestamp default now(),
 	title varchar(256),
 	body text
 );
@@ -57,6 +57,6 @@ create table if not exists bulletin (
 	id serial unique primary key,
 	author int references users(id),
 	
-	created timestamp,
+	created timestamp default now(),
 	body varchar(140)
 );

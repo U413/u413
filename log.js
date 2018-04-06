@@ -3,8 +3,8 @@
 const
 	winston = require("winston");
 
-const level = process.env.DEBUG?
-	"debug" : (process.env.LOG || "info");
+const level = process.env.LOG ||
+	(process.env.DEBUG? "debug" : "info");
 
 const logger = new winston.Logger({
 	level,
@@ -21,9 +21,13 @@ const logger = new winston.Logger({
 		new winston.transports.Console({
 			// Undefined? It's documented...
 			//format: winston.format.simple()
+			prettyPrint: true,
+			colorize: true
 		})
 	]
 });
+
+logger.log('info', "Using logging level", level);
 
 module.exports = {
 	level,

@@ -13,7 +13,8 @@ const
 	fs_stat = Q.denodeify(fs.stat);
 
 const
-	log = require("../log");
+	log = require.main.require("./log"),
+	db = require.main.require("./db");
 
 async function stat(f) {
 	try {
@@ -125,8 +126,9 @@ router.use("/reply", async (req, res, next) => {
 router.use("/bulletin", async (req, res, next) => {
 	let user = req.user, body = req.body;
 	
+	await db.bulletin.add("<<FAKE>>", req.body);
 	let posts = await db.bulletin.getAll();
-	res.render('bulletin', {bulletin: posts.rows});
+	res.send({rows: posts.rows});
 })
 
 module.exports = router;

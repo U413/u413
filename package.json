@@ -16,6 +16,8 @@
 		"q": "^1.5.1",
 		"serve-index": "*",
 		"serve-static": "*",
-		"winston": "*"
+		"winston": "*",
+		"passport": "*",
+		"passport-local": "*"
 	}
 }

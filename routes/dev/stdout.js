@@ -8,7 +8,7 @@ process.stdout.write = function(str, enc, fd) {
 	stdout_write.apply(process.stdout, str, enc, fd);
 }
 */
-let buf = "10";
+let buf = "Not implemented";
 module.exports = function(req, res, next) {
 	res.end(buf);
 }
