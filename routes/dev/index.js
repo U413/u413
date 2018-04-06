@@ -20,7 +20,7 @@ router.use("/stdout", require("./stdout"));
 router.use('/', (req, res, next) => {
 	res.location('/dev/');
 	res.render('ls', {
-		directory: p,
+		directory: "something?",
 		fileList: [
 			{
 				name: "/dev/",

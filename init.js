@@ -31,4 +31,3 @@ function touch_dir_if_missing(dn) {
 ['bin', 'etc', 'srv', 'tmp', 'usr', 'var'].map(
 	v => touch_dir_if_missing(`public/${v}`)
 );
-touch_dir_if_missing("private");

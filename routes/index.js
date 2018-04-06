@@ -28,6 +28,7 @@ router.use('/', serveStatic('public', {
 }));
 
 router.use('/dev/', require("./dev/"));
+router.use('/bin/', require("./bin/"));
 router.use(require("./bulletin"));
 
 router.use(require("./404"));

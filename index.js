@@ -3,7 +3,9 @@
 const
 	express = require("express"),
 	cookieParser = require("cookie-parser"),
-	fs = require("fs");
+	fs = require("fs"),
+	passport = require("passport"),
+	passportLocal = require("passport-local");
 
 const
 	log = require("./log");
@@ -15,6 +17,19 @@ let app = express();
 app.set('view engine', 'pug');
 
 app.use(cookieParser());
+
+passport.use(new passportLocal.Strategy());
+
+// Generate a new secret every time the server is run
+const secret = Array.from((function*() {
+	for(let i = 0; i < 32; ++i) {
+		yield String.fromCharCode((Math.random()*256)|0);
+	}
+})()).join("");
+
+app.use(session({secret}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use((req, res, next) => {
 	var body = "";
