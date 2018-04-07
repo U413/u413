@@ -1,8 +1,6 @@
-doctype html
-html
-	head
-		include style-main
-		script(src="scripts/main.js")
-	body
-		form(action="/api.json!" method="post")
-			input(name="cmd")
+extends partial/main
+
+block body
+	|Not implemented
+	form(action="/api.json!" method="post")
+		input(name="cmd")

@@ -1,50 +1,46 @@
 'use strict';
 
 const
-	express = require("express"),
-	cookieParser = require("cookie-parser"),
+	crypto = require("crypto"),
 	fs = require("fs"),
+	qs = require("querystring"),
+	express = require("express"),
+	expressSession = require("express-session"),
+	cookieParser = require("cookie-parser"),
 	passport = require("passport"),
-	passportLocal = require("passport-local");
+	bodyParser = require("body-parser");
 
 const
 	log = require("./log");
 
-require("./init");
+require("./init/");
+
 
 let app = express();
 
 app.set('view engine', 'pug');
 
 app.use(cookieParser());
-
-passport.use(new passportLocal.Strategy());
-
 // Generate a new secret every time the server is run
-const secret = Array.from((function*() {
-	for(let i = 0; i < 32; ++i) {
-		yield String.fromCharCode((Math.random()*256)|0);
-	}
-})()).join("");
+app.use(expressSession({
+	secret: crypto.randomBytes(32) + "",
+	resave: false,
+	saveUninitialized: false
+}));
 
-app.use(session({secret}));
 app.use(passport.initialize());
 app.use(passport.session());
-
+app.use(bodyParser.raw());
 app.use((req, res, next) => {
 	var body = "";
 	req.on("data", chunk => {
 		body += chunk;
 	});
 	req.on("end", () => {
-		req.body = body;
+		req.rawBody = body;
+		req.body = qs.parse(body);
 		next();
 	})
-})
-
-app.use((req, res, next) => {
-	req.user = req.cookies.user || "<<<FAKE>>>";
-	next();
 });
 
 app.use((req, res, next) => {

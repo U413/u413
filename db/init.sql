@@ -6,10 +6,12 @@ create table if not exists metadata (
 create table if not exists users (
 	id serial unique primary key,
 	name varchar(32) not null,
+	/*
 	salt char(32) not null,
 	pass char(64) not null,
+	*/
 	made timestamp default now(),
-	seen timestamp
+	seen timestamp default now()
 );
 
 create table if not exists groups (

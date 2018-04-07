@@ -1,6 +1,9 @@
+include util
+
 .shell
+	- user = user || {name: "guest"};
 	|#[.user= user.name]@#[.host u413.com]:
-	.cwd= user.cwd
+	.cwd= cwd || "./"
 	.prompt= user.prompt || "$"
 	| 
 	input#cli(
@@ -8,4 +11,4 @@
 		autocomplete="off" autocorrect="off"
 		autocapitalize="off" spellcheck="false"
 	)
-	script(src="/etc/scripts/shell.js")
+	+script("shell")

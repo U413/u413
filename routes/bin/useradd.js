@@ -1,6 +1,7 @@
 'use strict';
 
 const
+	qs = require("querystring"),
 	passport = require("passport"),
 	express = require("express");
 
@@ -9,15 +10,15 @@ const
 
 const router = new express.Router();
 
-router.route('/login').
-	post(passport.authenticate('local-login', {
+router.route('/useradd').
+	post(passport.authenticate('local-signup', {
 		successRedirect: '/var/bulletin',
-		failureRedirect: '/bin/login'
+		failureRedirect: '/bin/useradd'
 	})).
 	get((req, res, next) => {
-		res.render('login', {
+		res.render('useradd', {
 			user: req.user,
-			cwd: "/bin/login"
+			cwd: "/bin/useradd"
 		});
 	});
 

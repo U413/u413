@@ -123,12 +123,9 @@ router.use("/reply", async (req, res, next) => {
 	}
 })
 
-router.use("/bulletin", async (req, res, next) => {
-	let user = req.user, body = req.body;
-	
-	await db.bulletin.add("<<FAKE>>", req.body);
-	let posts = await db.bulletin.getAll();
-	res.send({rows: posts.rows});
+router.post("/bulletin", async (req, res, next) => {
+	db.bulletin.add(req.user, req.rawBody);
+	res.redirect("/var/bulletin");
 })
 
 module.exports = router;

@@ -1,0 +1,12 @@
+include util
+doctype html
+html
+	head
+		block styles
+			+style("main")
+		block scripts
+			+script("main")
+	body
+		main
+			block body
+		include shell

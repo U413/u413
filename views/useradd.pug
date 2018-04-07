@@ -1,0 +1,12 @@
+extends partial/main
+
+append scripts
+	+script("form")
+
+block body
+	form.useradd(action="/bin/useradd" method="post")
+		label(for="name") Username: 
+		input(name="name" type="text")
+		br
+		label(for="pass") Password: 
+		input(name="pass" type="password")

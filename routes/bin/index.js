@@ -5,8 +5,12 @@ if(require.main === module) {
 	process.exit(1);
 }
 
+const
+	express = require("express");
+
 const router = new express.Router();
 
 router.use(require("./login"));
+router.use(require("./useradd"));
 
 module.exports = router;

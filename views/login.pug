@@ -1,0 +1,14 @@
+extends partial/main
+
+append scripts
+	+script("form")
+
+block body
+	form.login(action="/bin/login" method="post")
+		label(for="name") Username: 
+		input(name="name" type="text")
+		br
+		label(for="pass") Password: 
+		input(name="pass" type="password")
+	
+	a(href="/bin/useradd") Register

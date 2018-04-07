@@ -14,7 +14,7 @@ router.use(function(req, res, next){
 
 	// respond with html page
 	if(req.accepts('html')) {
-		res.render('404', {url: req.url});
+		res.render('error/404', {url: req.url});
 	}
 	// respond with json
 	else if(req.accepts('json')) {

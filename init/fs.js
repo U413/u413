@@ -1,14 +1,10 @@
 'use strict';
 
 const
-	fs = require("fs"),
-	db = require("./db");
+	fs = require("fs");
 
-const log = require("./log");
-
-/** DB init **/
-log.info("Initializing via db/init.sql");
-db.queryFile('init');
+const
+	log = requireRoot("./log");
 
 /**
  * Make sure we have the basic files which git ignores.

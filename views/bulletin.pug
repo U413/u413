@@ -1,13 +1,8 @@
-doctype html
-html
-	head
-		include style-main
-		include script-main
-	body
-		main.bulletin
-			ul
-				each post in bulletin
-					li
-						|#[.user= post.user] #[.body= post.body]
-						| #[time= post.created.toGMTString()]
-		include shell
+extends partial/main
+
+block body
+	ul.bulletin
+		each post in bulletin
+			li
+				|#[.user= post.username] #[.body= post.body]
+				| #[time= post.created.toGMTString()]

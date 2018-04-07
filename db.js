@@ -33,22 +33,37 @@ function query(q, args) {
 	args = args || {};
 	return new Promise((ok, no) => {
 		let k = Object.keys(args), v = Object.values(args);
-		log.info(k, v);
+		let f = new Set();
 		
 		var qq = q.replace(/\$\{([\w\d]+)\}/g, ($0, $1) => {
-			let x = k.indexOf($1) + 1;
-			if(x) {
-				return `$${x}`;
+			let x = k.indexOf($1);
+			if(x === -1) {
+				log.warn("Unsupplied query key", JSON.stringify($1));
 			}
 			else {
-				throw new Error("Undefined key " + $1);
+				f.add(x);
+				return `$${x + 1}`;
 			}
 		});
-		log.debug("Final query:", qq);
 		
-		client.query(qq, v, (err, rows) => {
+		if(f.size) {
+			log.debug("Final query:", qq);
+		}
+		
+		v = v.filter((x, i) => {
+			if(f.has(i)) {
+				return true;
+			}
+			else {
+				log.warn("Ignoring query key", JSON.stringify(k[i]));
+				return false;
+			}
+		});
+		log.info("v", v);
+		
+		client.query(qq, v, (err, res) => {
 			if(err) no(err)
-			else ok(rows);
+			else ok(res.rows);
 		});
 	});
 }
@@ -82,10 +97,22 @@ module.exports = {
 			return queryFile("bulletin-get");
 		},
 		add(user, text) {
+			log.info("User", user);
 			return queryFile("bulletin-new", {
-				username: user,
+				author: user.id,
 				body: text
 			});
+		}
+	},
+	user: {
+		authenticate(name, pass) {
+			return queryFile("user-auth", {name, pass}).then(rows => rows[0])
+		},
+		byId(id) {
+			return queryFile("user-byid", {id}).then(rows => rows[0]);
+		},
+		add(name, pass) {
+			return queryFile("useradd", {name, pass}).then(rows => rows[0]);
 		}
 	}
 };
