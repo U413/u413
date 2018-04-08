@@ -1,0 +1,70 @@
+/* Base styles */
+
+body {
+	background-color: black;
+	color: ghostwhite;
+	font-family: courier;
+}
+
+time {
+	color: darkgrey;
+	display: inline-block;
+	font-size: 0.8em;
+}
+time::before {
+	content: '[';
+}
+time::after {
+	content: ']';
+}
+
+input {
+	outline: none;
+	border: none;
+	font-family: courier;
+	background-color: black;
+	color: ghostwhite;
+}
+
+input::selection {
+	background-color: ghostwhite;
+	color: black;
+}
+
+/* Classes */
+
+.shell {
+	font-weight: bold;
+}
+
+.shell div {
+	display: inline-block;
+}
+
+.shell .user, .shell .host {
+	color: limegreen;
+}
+.shell .cwd {
+	color: cornflowerblue;
+}
+.shell .prompt {
+	color: cyan;
+}
+
+.bulletin .user {
+	display: inline-block;
+}
+.bulletin .user::before {
+	content: '<';
+}
+.bulletin .user::after {
+	content: '>';
+}
+
+.bulletin .body {
+	display: inline-block;
+}
+
+.login input, .useradd input {
+	border-bottom: 1px solid darkgrey;
+}
