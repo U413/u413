@@ -1,12 +1,14 @@
 const
 	fs = require("fs"),
+	os = require("os"),
 	{Client} = require("pg");
 
 const
 	log = require("./log");
 
 let
-	user = process.env.PGUSERNAME || process.env.USER,
+	user = process.env.PGUSERNAME || process.env.USER ||
+		os.userInfo().username,
 	database = process.env.PGDATABASE || process.env.DB || "u413";
 	
 log.info("Starting PostgreSQL client with", {user, database});
