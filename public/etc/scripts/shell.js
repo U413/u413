@@ -22,8 +22,8 @@ cli.addEventListener("keydown", function(ev) {
 			}
 		}
 		xhr.open("POST", "/dev/api/bulletin");
-		xhr.send(encodeURI(rest));
-		console.log("Sending", encodeURI(rest));
+		xhr.send(rest);
+		console.log("Sending", rest);
 	}
 	
 	this.value = "";
