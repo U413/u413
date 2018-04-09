@@ -15,7 +15,7 @@ const
 	log = requireRoot("./log");
 
 /** DB init **/
-log.info("Initializing via db/init.sql");
+log.info("init db/init.sql");
 db.queryFile('init');
 
 require("./fs");

@@ -12,7 +12,7 @@ const
 const
 	log = require.main.require("./log");
 
-log.info("Building routes");
+log.info("init routes");
 
 const router = new express.Router();
 

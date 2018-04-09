@@ -66,7 +66,7 @@ function make_id(n) {
 	return s;
 }
 
-log.info("Building /dev/api routes");
+log.info("init /dev/api routes");
 let router = new express.Router();
 
 router.use("/topic", async (req, res, next) => {
