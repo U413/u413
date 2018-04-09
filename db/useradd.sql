@@ -1,1 +1,1 @@
-insert into users (name) values (${name});
+insert into users (name) values (${name}) returning *;

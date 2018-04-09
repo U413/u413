@@ -7,6 +7,12 @@ html
 		block scripts
 			+script("main")
 	body
+		header
+			ul.horiz
+				li: a(href="/bin/login") /bin/login
+				li: a(href="/bin/useradd") /bin/useradd
+				li: a(href="/var/bulletin") /var/bulletin
+				
 		main
 			block body
 		include shell

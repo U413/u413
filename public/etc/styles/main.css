@@ -31,6 +31,21 @@ input::selection {
 	color: black;
 }
 
+ul.horiz {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+ul.horiz li {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+a, a:visited {
+	color: cornflowerblue;
+	font-weight: bold;
+}
+
 /* Classes */
 
 .shell {

@@ -11,7 +11,7 @@ const
 const router = new express.Router();
 
 router.route('/useradd').
-	post(passport.authenticate('local-signup', {
+	post(passport.authenticate('local-useradd', {
 		successRedirect: '/var/bulletin',
 		failureRedirect: '/bin/useradd'
 	})).

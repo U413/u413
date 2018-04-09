@@ -6,6 +6,8 @@ const
 const
 	log = requireRoot("./log");
 
+log.info("init fs");
+
 /**
  * Make sure we have the basic files which git ignores.
 **/
