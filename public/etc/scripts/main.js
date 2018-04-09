@@ -1,6 +1,8 @@
 'use strict';
 
-document.addEventListener("DOMContentLoaded", () => {
+const todo = [];
+
+todo.push(() => {
 	/**
 	 * Replace all time tags with local equivalents
 	**/
@@ -12,3 +14,17 @@ document.addEventListener("DOMContentLoaded", () => {
 			`${d.getDate()}/${d.getMonth()}/${d.getFullYear()%100}`
 	}
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+	for(let task of todo) {
+		task();
+	}
+});
+
+function $id(id) {
+	return document.getElementById(id);
+}
+
+function $class(k) {
+	return document.getElementsByClassName(k);
+}

@@ -4,7 +4,7 @@
 
 'use strict';
 
-document.addEventListener("DOMContentLoaded", () => {
+todo.push(() => {
 	for(let fin of document.querySelectorAll("form input")) {
 		fin.addEventListener('keydown', function(ev) {
 			if(ev.key === "Enter") {

@@ -1,8 +1,12 @@
 extends partial/main
 
+append scripts
+	+script("bulletin")
+
 block body
 	ul.bulletin
 		each post in bulletin
 			li
 				|#[.user= post.username] #[.body= post.body]
 				| #[time= post.created.toGMTString()]
+		input.highlight(type="text")
