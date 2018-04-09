@@ -11,7 +11,7 @@ cli.addEventListener("keydown", function(ev) {
 	
 	let value = this.value || this.placeholder;
 	
-	let [cmd, rest] = value.split(/\s+/g, 2);
+	let [all, cmd, rest] = /^(\S+)\s+.*$/g.exec(value);
 	if(cmd === 'bulletin') {
 		let xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
