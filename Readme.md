@@ -15,6 +15,10 @@ Make sure the postgreSQL server is running.
 
 ### Utilities
 * query.sh allows the invocation of named SQL queries, eg `query.sh nuke`
+* run.sh uses files from private/ to start the server with a simple invocation
+  - db.pwd gives the password for the server (make sure this has proper
+     permissions!!)
+* genssl.sh generates SSL certificates (*NOTE:* doesn't work yet)
 
 ### Todo
 * /var/bulletin
@@ -35,7 +39,7 @@ Make sure the postgreSQL server is running.
   - Implement database handling
   - Implement client-side commands
 * User data
-  - /home/<username>/*
+  - /home/&lt;username&gt;/*
 * Private messaging
 * Vanity features
   - /dev/
