@@ -3,9 +3,10 @@
 todo.push(() => {
 	const
 		bp = $id("bulletin-post"),
-		cli = $class("cli");
-	
+		cli = $id("cli");
+
 	bp.addEventListener("input", () => {
-		cli.placeholder = bp.value;
+		console.log("GO");
+		cli.placeholder = "bulletin " + bp.value;
 	});
 });

@@ -63,7 +63,6 @@ function query(q, args) {
 		});
 		
 		client.query(qq, v, (err, res) => {
-			console.log("RES", res);
 			if(err) no(err)
 			else ok(res.rows);
 		});

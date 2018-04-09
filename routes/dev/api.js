@@ -124,8 +124,13 @@ router.use("/reply", async (req, res, next) => {
 })
 
 router.post("/bulletin", async (req, res, next) => {
-	db.bulletin.add(req.user, req.rawBody);
-	res.redirect("/var/bulletin");
+	if(req.user) {
+		db.bulletin.add(req.user, req.rawBody);
+		res.end("Success");
+	}
+	else {
+		res.status(401).end("You are not logged in");
+	}
 })
 
 module.exports = router;

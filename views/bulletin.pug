@@ -9,4 +9,5 @@ block body
 			li
 				|#[.user= post.username] #[.body= post.body]
 				| #[time= post.created.toGMTString()]
-		input.highlight(type="text")
+	#error
+	input#bulletin-post(type="text")

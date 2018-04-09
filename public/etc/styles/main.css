@@ -31,6 +31,10 @@ input::selection {
 	color: black;
 }
 
+#bulletin-post {
+	border-bottom: 1px solid darkgrey;
+}
+
 ul.horiz {
 	list-style: none;
 	margin: 0;
@@ -44,6 +48,10 @@ ul.horiz li {
 a, a:visited {
 	color: cornflowerblue;
 	font-weight: bold;
+}
+
+#error {
+	color: red;
 }
 
 /* Classes */
