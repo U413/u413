@@ -1,6 +1,7 @@
 const
 	fs = require("fs"),
 	os = require("os"),
+	bcrypt = require("bcrypt"),
 	{Client} = require("pg");
 
 const
@@ -90,16 +91,26 @@ function queryFile(q, args) {
 }
 queryFile.cache = {};
 
+function queryFileFirst(name, args) {
+	return queryFile(name, args).then(rows => rows[0]);
+}
+
+function normalizeName(name) {
+	// TODO: normalize homoglyphs
+	// TODO: sanitize invalid unicode
+	// TODO: sanitize unpaired control characters
+	return name.toLowerCase().replace(/[\0-\x1f]+/g, '');
+}
+
 module.exports = {
 	query,
 	queryFile,
 	bulletin: {
 		getAll() {
-			return queryFile("bulletin-get");
+			return queryFile("bulletin/all");
 		},
 		add(user, text) {
-			log.info("User", user);
-			return queryFile("bulletin-new", {
+			return queryFile("bulletin/new", {
 				author: user.id,
 				body: text
 			});
@@ -107,13 +118,29 @@ module.exports = {
 	},
 	user: {
 		authenticate(name, pass) {
-			return queryFile("user-auth", {name, pass}).then(rows => rows[0])
+			return this.byName(name).then(user => {
+				if(user) {
+					// Don't chain the promise because we need user
+					return bcrypt.compare(pass, user.pass).then(eq => {
+						return eq? user : null;
+					});
+				}
+				else {
+					return null;
+				}
+			})
 		},
 		byId(id) {
-			return queryFile("user-byid", {id}).then(rows => rows[0]);
+			return queryFileFirst("user/byid", {id});
+		},
+		byName(name) {
+			return queryFileFirst("user/byname", {name: normalizeName(name)});
 		},
 		add(name, pass) {
-			return queryFile("useradd", {name, pass}).then(rows => rows[0]);
+			return queryFileFirst("user/add", {
+				name, pass,
+				searchname: normalizeName(name)
+			});
 		}
 	}
 };

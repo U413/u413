@@ -2,11 +2,14 @@
 
 const
 	passport = require("passport"),
-	{Strategy: LocalStrategy} = require("passport-local");
+	{Strategy: LocalStrategy} = require("passport-local"),
+	bcrypt = require("bcrypt")
 
 const
 	log = requireRoot("./log"),
 	db = requireRoot("./db");
+
+const SALTS = 10;
 
 passport.serializeUser((user, done) => {
 	done(null, user.id);
@@ -20,9 +23,16 @@ passport.use('local-useradd', new LocalStrategy({
 	usernameField: 'name',
 	passwordField: 'pass'
 }, (name, pass, done) => {
-	/* TODO: check for duplicate username */
-	
-	db.user.add(name, pass).then(user => {
+	db.user.byName(name).then(user => {
+		if(user) {
+			done(null, false);
+		}
+		else {
+			return bcrypt.hash(pass, SALTS);
+		}
+	}).then(hash => {
+		return db.user.add(name, hash);
+	}).then(user => {
 		log.info("passport", user);
 		done(null, user);
 	});

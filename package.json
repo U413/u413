@@ -19,6 +19,7 @@
 		"q": "^1.5.1",
 		"serve-index": "^1.9.1",
 		"serve-static": "^1.13.1",
-		"winston": "^2.4.1"
+		"winston": "^2.4.1",
+		"bcrypt": "^2.0.0"
 	}
 }

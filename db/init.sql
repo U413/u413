@@ -6,10 +6,9 @@ create table if not exists metadata (
 create table if not exists users (
 	id serial unique primary key,
 	name varchar(32) not null,
-	/*
-	salt char(32) not null,
-	pass char(64) not null,
-	*/
+	/* a normalized name to make searching easy */
+	searchname varchar(32) not null,
+	pass char(60) not null,
 	made timestamp default now(),
 	seen timestamp default now()
 );
