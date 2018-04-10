@@ -1,1 +1,1 @@
-insert into bulletin (author, body) values (${author}, ${body}) returning *;
+insert into bulletin (author, body) values ($1, $2) returning *;

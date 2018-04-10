@@ -16,7 +16,7 @@ const
 
 /** DB init **/
 log.info("init db/init.sql");
-db.queryFile('init');
+db.query('init');
 
 require("./fs");
 require("./passport");

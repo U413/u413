@@ -1,3 +1,1 @@
-insert into users (name, searchname, pass) values (
-	${name}, ${searchname}, ${pass}
-) returning *;
+insert into users (name, searchname, pass) values ($1, $2, $3) returning *;

@@ -15,7 +15,7 @@ passport.serializeUser((user, done) => {
 	done(null, user.id);
 });
 passport.deserializeUser((id, done) => {
-	db.user.byId(id).then(user => done(null, user));
+	db.user.byId(id).then(user => done(null, user || false));
 })
 
 log.info("init passport strategy local-useradd");
@@ -43,5 +43,5 @@ passport.use('local-login', new LocalStrategy({
 	usernameField: "name",
 	passwordField: "pass"
 }, (name, pass, done) => {
-	db.user.authenticate(name, pass).then(user => done(null, user));
+	db.user.authenticate(name, pass).then(user => done(null, user || false));
 }));
