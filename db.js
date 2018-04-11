@@ -87,10 +87,6 @@ function blacklistName(name) {
 		black.indexOf(name) === -1 ||
 		// Bad characters
 		/[@&|`'"%?]+/.test(name) ||
-		// Javascript literals from toString()
-		/\b(true|false|null|undefined|[-+]?infinity|nan)\b/.test(name) ||
-		/\[(object\s+object|native\s+code)\]/.test(name) ||
-		/^\d+(\.\d*(e[-+]?\d+)?)?$/.test(name) ||
 		// Content filetype extensions which could introduce security holes
 		/\.(xml|svg|pdf|rss|atom|.?html?)$/.test(name) ||
 		// Dynamic content filetype extensions
