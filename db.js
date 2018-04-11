@@ -88,13 +88,13 @@ function blacklistName(name) {
 		// Bad characters
 		/[@&|`'"%?]+/.test(name) ||
 		// Javascript literals from toString()
-		/true|false|null|undefined|[-+]?infinity|nan/.test(name) ||
+		/\b(true|false|null|undefined|[-+]?infinity|nan)\b/.test(name) ||
 		/\[(object\s+object|native\s+code)\]/.test(name) ||
 		/^\d+(\.\d*(e[-+]?\d+)?)?$/.test(name) ||
 		// Content filetype extensions which could introduce security holes
-		/\.(xml|svg|pdf|rss|atom|.?html?)/.test(name) ||
+		/\.(xml|svg|pdf|rss|atom|.?html?)$/.test(name) ||
 		// Dynamic content filetype extensions
-		/\.(php(\d+)?|cgi|axd|as[mhp]?x|pl|jspx?|swf|ht[ac]|rb)/.test(name) ||
+		/\.(php(\d+)?|cgi|axd|as[mhp]?x|pl|jspx?|swf|ht[ac]|rb)$/.test(name) ||
 		// Dotfiles
 		/^\./.test(name)
 	)? name : "nobody";
