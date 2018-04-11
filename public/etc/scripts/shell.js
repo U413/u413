@@ -25,6 +25,9 @@ cli.addEventListener("keydown", function(ev) {
 		xhr.send(rest);
 		console.log("Sending", rest);
 	}
+	else if(cmd === 'cd') {
+		window.location.replace(rest);
+	}
 	
 	this.value = "";
 });

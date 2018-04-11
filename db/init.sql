@@ -8,9 +8,13 @@ create table if not exists users (
 	name varchar(32) not null,
 	/* a normalized name to make searching easy */
 	searchname varchar(32) not null,
-	pass char(60) not null,
+	pass char(60),
 	made timestamp default now(),
 	seen timestamp default now()
+);
+insert into users (id, name, searchname, pass) values (
+	/* Note: pass set to null to prevent anyone from logging in */
+	0, "nobody", "nobody", null
 );
 
 create table if not exists groups (

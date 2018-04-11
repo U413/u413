@@ -7,6 +7,8 @@ const
 const
 	log = require("./log");
 
+const black = require("blacklist.json");
+
 let
 	user = process.env.PGUSERNAME || process.env.USER ||
 		os.userInfo().username,
@@ -50,11 +52,52 @@ function queryFirst(name, args) {
 	return query(name, args).then(rows => rows[0]);
 }
 
-function normalizeName(name) {
-	// TODO: normalize homoglyphs
+/**
+ * Get rid of any characters which may be problematic and are clearly there
+ *  to trip up the system.
+**/
+function sanitizeName(name) {
+	// TODO: strip invisible format characters
+	return name.
+		// Space normalization
+		replace(/\s+/g, ' ').
+		// Control characters
+		replace(/[\0-\x1f]/g, '');
+}
+
+/**
+ * Produces a string which normalizes all look-alikes for use in the
+ *  searchname field.
+**/
+function searchableName(name) {
+	// TODO: normalize homoglyphs (including stuff like l and 1)
 	// TODO: sanitize invalid unicode
-	// TODO: sanitize unpaired control characters
-	return name.toLowerCase().replace(/[\0-\x1f]+/g, '');
+	// TODO: strip combining characters
+	return sanitizeName(name).toLowerCase().replace(/[\s\/]+/g, '');
+}
+
+/**
+ * Converts invalid usernames to "nobody", which is special.
+**/
+function blacklistName(name) {
+	name = searchableName(name);
+	return (
+		// Names that are misleading or could easily leak from a bug and give
+		//  unexpected privilege escalation
+		black.indexOf(name) === -1 ||
+		// Bad characters
+		/[@&|`'"%?]+/.test(name) ||
+		// Javascript literals from toString()
+		/true|false|null|undefined|[-+]?infinity|nan/.test(name) ||
+		/\[(object\s+object|native\s+code)\]/.test(name) ||
+		/^\d+(\.\d*(e[-+]?\d+)?)?$/.test(name) ||
+		// Content filetype extensions which could introduce security holes
+		/\.(xml|svg|pdf|rss|atom|.?html?)/.test(name) ||
+		// Dynamic content filetype extensions
+		/\.(php(\d+)?|cgi|axd|as[mhp]?x|pl|jspx?|swf|ht[ac]|rb)/.test(name) ||
+		// Dotfiles
+		/^\./.test(name)
+	)? name : "nobody";
 }
 
 module.exports = {
@@ -86,10 +129,10 @@ module.exports = {
 			return queryFirst("user/byid", [id]);
 		},
 		byName(name) {
-			return queryFirst("user/byname", [normalizeName(name)]);
+			return queryFirst("user/byname", [searchableName(name)]);
 		},
 		add(name, pass) {
-			return queryFirst("user/add", [name, normalizeName(name), pass]);
+			return queryFirst("user/add", [name, searchableName(name), pass]);
 		}
 	}
 };
