@@ -7,7 +7,7 @@ const
 const
 	log = require("./log");
 
-const black = require("blacklist.json");
+const black = require("./blacklist.json");
 
 let
 	user = process.env.PGUSERNAME || process.env.USER ||

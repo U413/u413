@@ -14,7 +14,7 @@ create table if not exists users (
 );
 insert into users (id, name, searchname, pass) values (
 	/* Note: pass set to null to prevent anyone from logging in */
-	0, "nobody", "nobody", null
+	0, 'nobody', 'nobody', null
 );
 
 create table if not exists groups (
