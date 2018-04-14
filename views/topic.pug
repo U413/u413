@@ -1,0 +1,15 @@
+extends partial/main
+
+append scripts
+	+script("topic")
+
+block body
+	ul.topic
+		li.op
+			+post(topic.op)
+		
+		each post in topic.replies
+			li
+				+post(post)
+	#error
+	input#bulletin-post(type="text")

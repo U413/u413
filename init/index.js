@@ -18,5 +18,7 @@ const
 log.info("init db/init.sql");
 db.query('init');
 
-require("./fs");
-require("./passport");
+module.exports = function(app) {
+	require("./express")(app);
+	require("./fs")(app);
+}

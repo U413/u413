@@ -12,10 +12,11 @@ create table if not exists users (
 	made timestamp default now(),
 	seen timestamp default now()
 );
+
 insert into users (id, name, searchname, pass) values (
 	/* Note: pass set to null to prevent anyone from logging in */
 	0, 'nobody', 'nobody', null
-);
+) on conflict(id) do nothing;
 
 create table if not exists groups (
 	id serial unique primary key,

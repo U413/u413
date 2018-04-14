@@ -1,5 +1,6 @@
-include util
+include mixins
 
+//- Usage: include shell
 .shell
 	- user = user || {name: "guest"};
 	|#[.user= user.name]@#[.host u413.com]:

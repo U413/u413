@@ -1,0 +1,16 @@
+mixin script(name)
+	script(src=`/etc/scripts/${name}.js`)
+
+mixin style(name)
+	link(rel="stylesheet" href=`/etc/styles/${name}.css`)
+
+mixin postinfo(post)
+	.info
+		a.user(href=`/home/${post.username}`)= post.username
+		time= post.created.toGMTString()
+		block extra
+
+mixin post(post)
+	.post
+		+postinfo(post)
+		blockquote= post.body
