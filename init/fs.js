@@ -32,5 +32,4 @@ module.exports = function(app) {
 	);
 	
 	touch_dir_if_missing("private");
-	touch_dir_if_missing("private/cache");
 }
