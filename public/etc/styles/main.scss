@@ -53,28 +53,60 @@ a, a:visited {
 	font-weight: bold;
 }
 
-#error {
-	color: red;
+#buffer {
+	& > div {
+		margin: 0;
+	}
+	
+	.error {
+		color: red;
+	}
 }
 
 /* Classes */
 
 .shell {
-	font-weight: bold;
-
-	div {
-		display: inline-block;
-	}
-
 	.user, .host {
 		color: limegreen;
 	}
 	.cwd {
 		color: cornflowerblue;
 	}
-	.prompt {
+	.access {
 		color: cyan;
 	}
+}
+
+#buffer {
+	display: block;
+	border: 1px solid darkgrey;
+	
+	.item {
+		display: block;
+	}
+}
+
+#shellinfo {
+	display: inline-block;
+	div {
+		display: inline-block;
+		font-weight: bold;
+	}
+}
+
+#prompt {
+	margin-left: 0.5em;
+	display: inline-block;
+}
+
+#cli, #stdin {
+	display: none;
+}
+.show-cli #cli {
+	display: inline-block;
+}
+.show-stdin #stdin {
+	display: inline-block;
 }
 
 .bulletin {
