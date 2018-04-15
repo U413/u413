@@ -16,6 +16,7 @@ let router = new express.Router();
 
 router.use(bodyParser.json({type: "*/json"}));
 router.use("/api", require("./api"));
+router.use("/sql", require("./sql"));
 router.use("/stdout", require("./stdout"));
 router.use('/', (req, res, next) => {
 	res.location('/dev/');

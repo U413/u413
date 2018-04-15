@@ -47,15 +47,26 @@ create table if not exists boards (
 	gid int references groups(id)
 );
 
-/* Topics are posts with parent=0 */
-create table if not exists posts (
+create table if not exists topics (
 	id serial unique primary key,
-	parent int references posts(id),
+	
 	board int references boards(id),
 	author int references users(id),
 	
 	created timestamp default now(),
 	title varchar(256),
+	body text
+);
+
+/* Topics are posts with parent=0 */
+create table if not exists posts (
+	id serial unique primary key,
+	
+	topic int references topics(id),
+	board int references boards(id),
+	author int references users(id),
+	
+	created timestamp default now(),
 	body text
 );
 

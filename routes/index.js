@@ -27,6 +27,7 @@ router.use('/', serveStatic('public', {
 	extensions: ['txt', 'md']
 }));
 
+router.use('/var/', require("./var"));
 router.use('/dev/', require("./dev/"));
 router.use('/bin/', require("./bin/"));
 router.use(require("./bulletin"));

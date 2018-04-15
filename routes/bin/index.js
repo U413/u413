@@ -11,6 +11,7 @@ const
 const router = new express.Router();
 
 router.use(require("./login"));
+router.use(require("./logout"));
 router.use(require("./useradd"));
 
 module.exports = router;

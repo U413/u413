@@ -16,8 +16,9 @@ const
 require.root = __dirname;
 
 let app = express();
+app.set('view engine', 'pug');
 
-require("./init/")(app);
+app.use(require("./init/"));
 
 let port = process.env.PORT || 8080;
 log.info("Listening on port", port);

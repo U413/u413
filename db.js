@@ -107,6 +107,14 @@ module.exports = {
 			return query("bulletin/new", [user.id, text]);
 		}
 	},
+	board: {
+		getAll() {
+			return query("board/all");
+		},
+		list() {
+			return query("board/list");
+		}
+	},
 	user: {
 		authenticate(name, pass) {
 			return this.byName(name).then(user => {

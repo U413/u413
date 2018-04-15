@@ -2,6 +2,35 @@
 
 let shell = {cmds: {}};
 
+const path = {
+	normalize(p) {
+		let a = (p[0] === '/');
+		let f = p.split(/[\\\/]/g);
+		for(let i = 0; i < f.length; ++i) {
+			if(f[i] === "" || f[i] === '.') {
+				f.splice(i--, 1);
+			}
+		}
+		
+		return (a? "/" : "") + f.join("/");
+	},
+	isAbsolute(p) {
+		return (p[0] === '/');
+	},
+	join(...args) {
+		let out;
+		for(let arg of args) {
+			if(out === undefined) {
+				out = arg;
+			}
+			else {
+				out += "/" + arg;
+			}
+		}
+		return out;
+	}
+}
+
 todo.push(() => {
 	let
 		prompt = $id("prompt"),
@@ -25,7 +54,10 @@ todo.push(() => {
 		cmds: {
 			// Simple one-liner commands don't need their own files
 			cd(rest) {
-				window.location.replace(rest);
+				let p = path.normalize(rest);
+				if(!path.isAbsolute(p)) p = path.join(cwd, p);
+				
+				window.location.replace(p);
 			},
 			help(rest) {
 				shell.log("Try lsbin");
@@ -62,6 +94,30 @@ todo.push(() => {
 						window.location.replace(`${cwd}/${topic.id}`);
 					});
 				})
+			},
+			login(rest) {
+				let m = /(\S+)\s+(\S+)/.exec(rest);
+				if(m) {
+					fetch("post", "/bin/login", `name=${m[1]}&pass=${m[2]}`).
+						then(res => shell.log(res));
+				}
+				else {
+					shell.error("Need both username and password");
+				}
+			},
+			logout() {
+				fetch("post", "/bin/logout").then(res => shell.log(res));
+			},
+			sql(rest) {
+				if(user.name === "root") {
+					fetch("post", "/dev/sql", rest).then(
+						res => shell.log(res),
+						err => shell.error(err)
+					);
+				}
+				else {
+					shell.error("/dev/sql is write-protected");
+				}
 			},
 			
 			...shell.cmds

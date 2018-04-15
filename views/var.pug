@@ -1,0 +1,10 @@
+extends partial/main
+
+block body
+	ul
+		li
+			a(href="/") ..
+			a(href="/var/bulletin") bulletin
+		each board in boards
+			li
+				a(href=`/var/${board.name}`)= board.name
