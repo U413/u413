@@ -1,7 +1,7 @@
 'use strict';
 
 const
-	qs = require("querystring"),
+	bodyParser = require("body-parser"),
 	passport = require("passport"),
 	express = require("express");
 

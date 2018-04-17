@@ -8,7 +8,7 @@ log.info("init /dev/sql");
 
 module.exports = (req, res, next) => {
 	if(req.user.name === "root") {
-		db.rawQuery(req.rawBody).then(
+		db.rawQuery(req.body).then(
 			data => {
 				res.send(JSON.stringify(data));
 			},

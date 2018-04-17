@@ -15,7 +15,7 @@ const SALTS = 10;
 let router = module.exports = new express.Router();
 
 passport.serializeUser((user, done) => {
-	done(null, user.id);
+	done(null, user.id);``
 });
 passport.deserializeUser((id, done) => {
 	db.user.byId(id).then(user => done(null, user || false));
@@ -25,20 +25,18 @@ log.info("init passport strategy local-useradd");
 passport.use('local-useradd', new LocalStrategy({
 	usernameField: 'name',
 	passwordField: 'pass'
-}, (name, pass, done) => {
-	db.user.byName(name).then(user => {
-		if(user) {
-			done(null, false);
-		}
-		else {
-			return bcrypt.hash(pass, SALTS);
-		}
-	}).then(hash => {
-		return db.user.add(name, hash);
-	}).then(user => {
-		log.info("passport", user);
+}, async (name, pass, done) => {
+	let user = await db.user.byName(name);
+	
+	if(user) {
+		done(null, false);
+	}
+	else {
+		let hash = await bcrypt.hash(pass, SALTS);
+		user = await db.user.add(name, hash);
+		log.debug("/bin/useradd:", user);
 		done(null, user);
-	});
+	}
 }));
 
 log.info("init passport strategy local-login");
@@ -46,6 +44,7 @@ passport.use('local-login', new LocalStrategy({
 	usernameField: "name",
 	passwordField: "pass"
 }, (name, pass, done) => {
+	console.log("local-login", name, pass);
 	db.user.authenticate(name, pass).then(user => done(null, user || false));
 }));
 

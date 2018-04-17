@@ -1,15 +1,44 @@
 extends partial/main
 
 block body
-	|Not implemented
-	h2= directory
-	ul.ls
-		li
-			h4.name Name
-			h4.time Last modified
-			h4.size Size
-		each f in fileList
-			li
-				a(href=f)= f.name
-				time.size= f.stat.mtime
-				.size= f.stat.size + "B"
+	h2= `Index of ${cwd}`
+	table
+		thead
+			tr
+				th Name
+				th Size
+				th Modified
+		tbody
+			if cwd != webroot
+				tr
+					td: a(href="..") ..
+					td
+					td
+			
+			- files.sort();
+			each f in files
+				- var {mtime, size} = f.stat || {};
+				tr
+					td: a(href=`${cwd}/${f.name}`)= f.name
+					td
+						if mtime
+							time= stat.mtime
+						else
+							|-
+					td.size
+						- const KB = 1024, MB = KB*KB, GB = KB*MB
+						- var size = stat.size
+						if typeof size === "undefined"
+							
+						else if Number.isNaN(size)
+							|∅
+						else if !Number.isFinite(size)
+							|∞
+						else if size < KB
+							= `${size} B`
+						else if size < MB
+							= `${size} kB`
+						else if size < GB
+							= `${size} MB`
+						else
+							= `${size} GB`

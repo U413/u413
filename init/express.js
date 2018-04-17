@@ -12,7 +12,8 @@ const
 	bodyParser = require("body-parser");
 
 const
-	log = requireRoot("./log");
+	log = requireRoot("./log"),
+	db = requireRoot("./db");
 
 let router = module.exports = new express.Router();
 
@@ -23,7 +24,7 @@ router.use(cookieParser());
 // Generate a new secret every time the server is run
 const secret = crypto.randomBytes(32) + "";
 router.use(expressSession({
-	secret: secret,
+	secret,
 	resave: false,
 	saveUninitialized: false
 }));
@@ -31,18 +32,9 @@ log.silly("Session secret:", secret);
 
 router.use(require("./passport"));
 
-router.use(bodyParser.raw());
-router.use((req, res, next) => {
-	var body = "";
-	req.on("data", chunk => {
-		body += chunk;
-	});
-	req.on("end", () => {
-		req.rawBody = body;
-		req.body = qs.parse(body);
-		next();
-	})
-});
+router.use(bodyParser.text());
+router.use(bodyParser.urlencoded({extended: true}));
+//router.use(bodyParser.json());
 
 router.use((req, res, next) => {
 	// Overwrite res.render with a proxy that echoes what it's rendering
@@ -65,5 +57,12 @@ router.use('/etc/styles', sassMiddleware({
 	debug: log.level === 'debug',
 	outputStyle: "compressed"
 }));
+
+router.use("/etc/passwd", (req, res, next) => {
+	db.user.list().then(users => {
+		res.setHeader("Content-Type", "application/json");
+		res.end(JSON.stringify(users));
+	})
+})
 
 router.use(requireRoot("./routes/"));

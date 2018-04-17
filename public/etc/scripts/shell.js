@@ -27,7 +27,7 @@ const path = {
 				out += "/" + arg;
 			}
 		}
-		return out;
+		return this.normalize(out);
 	}
 }
 
@@ -84,36 +84,60 @@ todo.push(() => {
 				shell.log(rest);
 			},
 			bulletin(rest) {
-				fetch('post', '/dev/api/bulletin', rest);
+				fetch('post', '/dev/api/bulletin', rest).then(() => {
+					window.location.reload();
+				}).catch(err => {
+					shell.error(err);
+				})
 			},
 			newtopic(title) {
 				shell.read().then(body => {
-					fetch('post', `/dev/api/topic`, JSON.stringify({
-						cwd, title, body
-					})).then(topic => {
-						window.location.replace(`${cwd}/${topic.id}`);
-					});
+					let m = /^\/var\/([^\/]+)/.exec(cwd);
+					if(m) {
+						let board = m[1];
+						fetch('post', `/dev/api/topic`, JSON.stringify({
+							board, title, body
+						})).then(topic => {
+							window.location.replace(`${cwd}/${topic}`);
+						});
+					}
+					else {
+						shell.error("Need a board (try cd)");
+					}
 				})
+			},
+			useradd(rest) {
+				let m = /(\S+)\s+(\S+)/.exec(rest);
+				if(m) {
+					fetch("post", "/bin/useradd", `name=${m[1]}&pass=${m[2]}`, "application/x-www-form-urlencoded").
+						then(res => window.location.replace("/var/bulletin")).
+						catch(err => shell.error(err));
+				}
+				else {
+					shell.error("Need both username and password");
+				}
 			},
 			login(rest) {
 				let m = /(\S+)\s+(\S+)/.exec(rest);
 				if(m) {
-					fetch("post", "/bin/login", `name=${m[1]}&pass=${m[2]}`).
-						then(res => shell.log(res));
+					fetch("post", "/bin/login", `name=${m[1]}&pass=${m[2]}`, "application/x-www-form-urlencoded").
+						then(res => window.location.replace("/var/bulletin")).
+						catch(err => shell.error(err));
 				}
 				else {
 					shell.error("Need both username and password");
 				}
 			},
 			logout() {
-				fetch("post", "/bin/logout").then(res => shell.log(res));
+				fetch("post", "/bin/logout").
+					then(res => shell.log(res)).
+					catch(err => shell.error(err));
 			},
 			sql(rest) {
 				if(user.name === "root") {
-					fetch("post", "/dev/sql", rest).then(
-						res => shell.log(res),
-						err => shell.error(err)
-					);
+					fetch("post", "/dev/sql", rest).
+						then(res => shell.log(res)).
+						catch(err => shell.error(err));
 				}
 				else {
 					shell.error("/dev/sql is write-protected");
@@ -167,22 +191,32 @@ todo.push(() => {
 			this.wrap('item', args);
 		},
 		error(...args) {
+			if(args[0].xhr) {
+				console.log(args[0].xhr);
+			}
 			this.wrap('error', args);
 		},
 		
 		// Read from stdin and fulfill a promise when it's submitted
 		read() {
-			cli.classList.remove("show-cli");
-			cli.classList.add("show-stdin");
+			prompt.classList.remove("show-cli");
+			prompt.classList.add("show-stdin");
+			stdin.focus();
 			
 			return new Promise((ok, no) => {
-				this.target = ok;
+				this.target = function(body) {
+					prompt.classList.remove("show-stdin");
+					prompt.classList.add("show-cli");
+					cli.focus();
+					
+					ok(body);
+				}
 			});
 		}
 	};
 	
 	// Submit when ENTER is pressed without SHIFT
-	prompt.addEventListener("keydown", ev => {
+	prompt.addEventListener("keyup", ev => {
 		if(ev.key === "Enter" && !ev.shift) {
 			shell.submit();
 		}
@@ -199,16 +233,4 @@ todo.push(() => {
 	}
 	
 	document.addEventListener('click', focus);
-	//prompt.addEventListener("click", focus);
-	
-	/*
-	function stop_prop(ev) {
-		return ev.stopPropagation();
-	}
-	
-	//
-	document.getElementsByTagName("main")[0].
-		addEventListener("click", stop_prop);
-	$id("shell").addEventListener('click', stop_prop)
-	*/
 });

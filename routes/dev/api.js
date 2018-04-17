@@ -70,62 +70,36 @@ log.info("init /dev/api routes");
 let router = new express.Router();
 
 router.use("/topic", async (req, res, next) => {
-	let {board, title, body} = req.body;
-	
-	body = body || "";
-	if(board && title) {
-		if(!await stat(board)) {
-			next();
-			return;
-		}
-		let fid = await open("srv/next", "rw");
-		let next = (await read(fid)).toString();
-		await write(fid, next + 1);
-		await close(fid);
+	if(req.user) {
+		let
+			data = JSON.parse(req.body),
+			board = await db.board.byName(data.board);
+		await db.topic.create(board.id, req.user.id, data.title, data.body);
 		
-		let id = make_id(next);
-		
-		fid = await open(`srv/${board}/${id}`, "w");
-		await write(fid,
-			`# ${title}\n` +
-			`## [usr/${user}](${user}) : <time>${new Date()}</time>\n` +
-			sanitize(body) + SEP
-		);
-		await close(fid);
-		
-		res.send(`srv/${board}/${id}`);
+		res.status(200).end("Success");
 	}
 	else {
-		res.status(406).send("{board title body}");
+		res.status(401).end("You must be logged in");
 	}
 });
 
 router.use("/reply", async (req, res, next) => {
-	let {board, parent, body} = req.body;
-	if(!board || !parent) {
-		return res.status(406).send("{board parent body}");
-	}
-	
-	if(
-		await stat(`srv/${board}`) &&
-		await stat(`srv/${board}/${topic}`)
-	) {
-		let fid = await open(`srv/${board}/${topic}`, "a");
-		await write(
-			`## [usr/${user}](${user}) : <time>${new Date()}</time>\n` +
-			sanitize(body) + SEP
-		);
-		await close(fid);
-		res.send(`srv/${board}/${id}`);
+	if(req.user) {
+		let
+			data = JSON.parse(req.body),
+			board = await db.board.byName(data.board);
+		await db.topic.create(board, req.user.id, data.title, data.body);
+		
+		res.status(200).end("Success");
 	}
 	else {
-		next();
+		res.status(401).end("You must be logged in");
 	}
 })
 
 router.post("/bulletin", async (req, res, next) => {
 	if(req.user) {
-		db.bulletin.add(req.user, req.rawBody);
+		db.bulletin.add(req.user, req.body);
 		res.end("Success");
 	}
 	else {

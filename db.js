@@ -111,8 +111,28 @@ module.exports = {
 		getAll() {
 			return query("board/all");
 		},
-		list() {
-			return query("board/list");
+		byName(name) {
+			return queryFirst("board/byname", [name]);
+		},
+		list(id) {
+			return query("board/list", [id]);
+		}
+	},
+	topic: {
+		getAll(id) {
+			return query("topic/all", [id]);
+		},
+		byId(id) {
+			return queryFirst("topic/byid", [id]);
+		},
+		replies(id) {
+			return query("topic/replies", [id]);
+		},
+		create(board, author, title, body) {
+			return query("topic/create", [board, author, title, body]);
+		},
+		reply(topic, author, body) {
+			return query("topic/reply", [topic, author, body]);
 		}
 	},
 	user: {
@@ -137,6 +157,9 @@ module.exports = {
 		},
 		add(name, pass) {
 			return queryFirst("user/add", [name, searchableName(name), pass]);
+		},
+		list() {
+			return query("user/list");
 		}
 	}
 };
