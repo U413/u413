@@ -18,15 +18,14 @@ const router = module.exports = new express.Router();
 try {
 	log.info("init git webhook redeploy");
 	
-	const hash = crypto.createHash("sha1");
-	hash.update(fs.readFileSync("private/gitpush.secret") + "");
-	const secret = hash.digest("hex");
-	console.log("The secret is", secret);
+	const auth = crypto.createHMAC('sha1',
+		fs.readFileSync("private/gitpush.secret") + ""
+	);
 
 	router.use("/!!!gitpush!!!", (req, res, next) => {
 		log.info("Request for !!!gitpush!!!");
 		res.end("Success");
-		console.log(req.headers);
+		console.log(req.headers, req.body);
 		//if(req.get("X-Hub-Signature") === secret) {
 			// TODO: save session data
 			log.info("Redeploying server...");
