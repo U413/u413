@@ -96,7 +96,7 @@ function blacklistName(name) {
 	)? name : "nobody";
 }
 
-module.exports = {
+const db = module.exports = {
 	rawQuery,
 	query,
 	bulletin: {
@@ -125,8 +125,13 @@ module.exports = {
 		byId(id) {
 			return queryFirst("topic/byid", [id]);
 		},
-		replies(id) {
-			return query("topic/replies", [id]);
+		async replies(id) {
+			return query("topic/replies", [id]).then(replies => {
+				return Promise.all(replies.map(async r => {
+					r.author = await db.user.byId(r.author);
+					return r;
+				}));
+			});
 		},
 		create(board, author, title, body) {
 			return query("topic/create", [board, author, title, body]);

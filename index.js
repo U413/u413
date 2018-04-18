@@ -11,12 +11,15 @@ const
 	bodyParser = require("body-parser");
 
 const
-	log = require("./log");
+	log = require("./log"),
+	config = require("./config");
 
 require.root = __dirname;
 
 let app = express();
 app.set('view engine', 'pug');
+app.locals.config = config;
+app.locals.baseurl = `${config.scheme}://${config.domain}`;
 
 app.use(require("./init/"));
 

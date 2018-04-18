@@ -44,7 +44,6 @@ passport.use('local-login', new LocalStrategy({
 	usernameField: "name",
 	passwordField: "pass"
 }, (name, pass, done) => {
-	console.log("local-login", name, pass);
 	db.user.authenticate(name, pass).then(user => done(null, user || false));
 }));
 

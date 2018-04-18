@@ -1,11 +1,9 @@
 extends partial/main
 
-append scripts
-	+script("topic")
-
 block body
 	ul.topic
 		li.op
+			h3= topic.op.title
 			+post(topic.op)
 		
 		each post in topic.replies

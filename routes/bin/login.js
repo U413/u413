@@ -6,7 +6,8 @@ const
 	express = require("express");
 
 const
-	db = requireRoot("./db");
+	db = requireRoot("./db"),
+	log = requireRoot("./log");
 
 const router = new express.Router();
 
@@ -18,25 +19,22 @@ router.route('/login').
 			}
 			else if(user) {
 				req.logIn(user, err => {
-					console.log("arguments", arguments);
 					if(err) {
 						res.status(500).end(err.stack + "");
 					}
 					else {
+						log.debug("/bin/login:", user.name);
 						res.status(200).end("Success");
 					}
 				});
 			}
 			else {
-				res.status(400).end(info.message);
+				res.status(400).end(info);
 			}
 		})(req, res, next);
 	}).
 	get((req, res, next) => {
-		res.render('login', {
-			user: req.user,
-			cwd: "/bin/login"
-		});
+		res.render('login');
 	});
 
 module.exports = router;

@@ -8,5 +8,6 @@ drop table if exists users cascade;
 drop table if exists groups cascade;
 drop table if exists members cascade;
 drop table if exists boards cascade;
-drop table if exists posts cascade;
+drop table if exists topics cascade;
+drop table if exists replies cascade;
 drop table if exists bulletin cascade;

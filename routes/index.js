@@ -6,18 +6,34 @@ if(require.main === module) {
 }
 
 const
+	fs = require("fs"),
 	express = require("express"),
 	serveStatic = require("serve-static");
 
 const
-	log = require.main.require("./log");
+	log = requireRoot("./log"),
+	ls = requireRoot("./ls");
 
 log.info("init routes");
 
 const router = new express.Router();
 
-router.get(/^\/?$/g, (req, res) => {
-	res.render('index');
+router.get(/^\/?$/g, async (req, res) => {
+	let files = [
+		ls.virtualDir({name: 'bin'}),
+		ls.virtualDir({name: 'dev'}),
+		ls.virtualDir({name: 'var'})
+	];
+	
+	files.push(...await ls.readdir('public-optimized'));
+	files.push(...await ls.readdir('public'));
+	
+	console.log(files);
+	res.render('ls', {
+		files,
+		user: req.user,
+		cwd: '/'
+	});
 });
 
 router.use('/', serveStatic('public-optimized', {

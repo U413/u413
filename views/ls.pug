@@ -9,36 +9,32 @@ block body
 				th Size
 				th Modified
 		tbody
-			if cwd != webroot
-				tr
-					td: a(href="..") ..
-					td
-					td
+			tr
+				td: a(href="..") ..
+				td
+				td
 			
-			- files.sort();
+			//- Get rid of duplicates caused by overlaying multiple
+			//-  route handlers for the same routes
+			- var seen = [];
+			- files = files.filter(v => {
+			-	if(seen.indexOf(v.name) === -1) {
+			-		seen.push(v.name);
+			-		return true;
+			-	}
+			-	else {
+			-		return false;
+			-	}
+			- });
+			- files.sort((a, b) => b.isDirectory() - a.isDirectory() || b - a);
 			each f in files
 				- var {mtime, size} = f.stat || {};
 				tr
-					td: a(href=`${cwd}/${f.name}`)= f.name
+					td: a(href=`${cwd}${f.name}`)= f.name
+					td.size
+						+size(size)
 					td
 						if mtime
 							time= stat.mtime
 						else
 							|-
-					td.size
-						- const KB = 1024, MB = KB*KB, GB = KB*MB
-						- var size = stat.size
-						if typeof size === "undefined"
-							
-						else if Number.isNaN(size)
-							|∅
-						else if !Number.isFinite(size)
-							|∞
-						else if size < KB
-							= `${size} B`
-						else if size < MB
-							= `${size} kB`
-						else if size < GB
-							= `${size} MB`
-						else
-							= `${size} GB`

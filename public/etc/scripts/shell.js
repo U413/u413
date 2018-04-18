@@ -98,13 +98,25 @@ todo.push(() => {
 						fetch('post', `/dev/api/topic`, JSON.stringify({
 							board, title, body
 						})).then(topic => {
-							window.location.replace(`${cwd}/${topic}`);
+							window.location.replace(`/var/${board}/${topic}`);
 						});
 					}
 					else {
 						shell.error("Need a board (try cd)");
 					}
 				})
+			},
+			reply(body) {
+				let m = /^\/var\/([^\/]+)\/([^\/]+)/.exec(cwd);
+				if(m) {
+					let [, board, topic] = m;
+					console.log(JSON.stringify({board, topic, body}))
+					fetch('post', '/dev/api/reply', JSON.stringify({
+						board, topic, body
+					}), 'application/json').then(topic => {
+						window.location.replace(`/var/${board}/${topic}`);
+					});
+				}
 			},
 			useradd(rest) {
 				let m = /(\S+)\s+(\S+)/.exec(rest);
@@ -121,8 +133,8 @@ todo.push(() => {
 				let m = /(\S+)\s+(\S+)/.exec(rest);
 				if(m) {
 					fetch("post", "/bin/login", `name=${m[1]}&pass=${m[2]}`, "application/x-www-form-urlencoded").
-						then(res => window.location.replace("/var/bulletin")).
-						catch(err => shell.error(err));
+						then(res => window.location.reload()).
+						catch(err => shell.error(err.xhr.response || "Unknown username or password"));
 				}
 				else {
 					shell.error("Need both username and password");

@@ -11,11 +11,11 @@ time {
 	display: inline-block;
 	font-size: 0.8em;
 	
-	::before {
+	&::before {
 		content: '[';
 	}
 	
-	::after {
+	&::after {
 		content: ']';
 	}
 }
@@ -27,10 +27,14 @@ input, textarea {
 	background-color: black;
 	color: ghostwhite;
 	
-	::selection {
+	&::selection {
 		background-color: ghostwhite;
 		color: black;
 	}
+}
+
+table {
+	width: 100%;
 }
 
 #bulletin-post {
@@ -113,11 +117,11 @@ a, a:visited {
 	.user {
 		display: inline-block;
 		
-		::before {
+		&::before {
 			content: '<';
 		}
 		
-		::after {
+		&::after {
 			content: '>';
 		}
 	}

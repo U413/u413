@@ -32,6 +32,12 @@ log.silly("Session secret:", secret);
 
 router.use(require("./passport"));
 
+router.use((req, res, next) => {
+	res.locals.cwd = req.path;
+	res.locals.user = req.user;
+	next();
+});
+
 router.use(bodyParser.text());
 router.use(bodyParser.urlencoded({extended: true}));
 //router.use(bodyParser.json());
