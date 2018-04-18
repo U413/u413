@@ -19,7 +19,7 @@ try {
 	log.info("init git webhook redeploy");
 	
 	const hash = crypto.createHash("sha1");
-	hash.update(fs.readFileSync("private/gitpush.secret"));
+	hash.update(fs.readFileSync("private/gitpush.secret") + "");
 	const secret = hash.digest("hex");
 	console.log("The secret is", secret);
 
