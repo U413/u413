@@ -25,7 +25,7 @@ catch(e) {
 	return;
 }
 
-const auth = crypto.createHMAC('sha1', secret);
+const auth = crypto.createHmac('sha1', secret);
 
 router.use("/!!!gitpush!!!", (req, res, next) => {
 	log.info("Request for !!!gitpush!!!");
