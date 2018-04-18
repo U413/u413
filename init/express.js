@@ -7,7 +7,6 @@ const
 	express = require("express"),
 	sassMiddleware = require("node-sass-middleware"),
 	cookieParser = require("cookie-parser"),
-	expressSession = require("express-session"),
 	passport = require("passport"),
 	bodyParser = require("body-parser");
 
@@ -21,15 +20,7 @@ log.info("init express");
 
 router.use(cookieParser());
 
-// Generate a new secret every time the server is run
-const secret = crypto.randomBytes(32) + "";
-router.use(expressSession({
-	secret,
-	resave: false,
-	saveUninitialized: false
-}));
-log.silly("Session secret:", secret);
-
+router.use(require("./session"));
 router.use(require("./passport"));
 
 router.use((req, res, next) => {
