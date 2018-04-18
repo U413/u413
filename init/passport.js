@@ -15,7 +15,7 @@ const SALTS = 10;
 let router = module.exports = new express.Router();
 
 passport.serializeUser((user, done) => {
-	done(null, user.id);``
+	done(null, user.id);
 });
 passport.deserializeUser((id, done) => {
 	db.user.byId(id).then(user => done(null, user || false));

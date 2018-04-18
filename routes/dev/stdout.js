@@ -2,6 +2,11 @@
 
 const MAXBUF = 1024*64;
 
+const
+	log = requireRoot("./log");
+
+log.info("init /dev/stdout");
+
 let buf = "";
 let stdout_write = process.stdout.write;
 process.stdout.write = function(str, enc, fd) {

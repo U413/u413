@@ -29,11 +29,11 @@ catch(e) {
 
 router.use(sessions({
 	secret,
-	cookieName: 's',
+	cookieName: 'user',
 	duration: 24*60*60*1000, // 24 hours
 	activeDuration: 1000*60*5 // 5 minutes
 }));
 router.use((req, res, next) => {
-	console.log(req.session);
+	console.log('session', req.session);
 	next();
 })
