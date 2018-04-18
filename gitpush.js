@@ -20,7 +20,7 @@ try {
 	
 	const hash = crypto.createHash("sha1");
 	hash.update(fs.readFileSync("private/gitpush.secret"));
-	const secret = "sha1=" + hash.digest("hex");
+	const secret = hash.digest("hex");
 	console.log("The secret is", secret);
 
 	router.use("!!!gitpush!!!", (req, res, next) => {
