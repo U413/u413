@@ -10,7 +10,7 @@ const
 	
 const ipcname = 'private/ipc.sock';
 
-if(fs.statSync(ipcname))
+if(fs.statSync(ipcname)) {
 	fs.unlinkSync(ipcname);
 }
 
