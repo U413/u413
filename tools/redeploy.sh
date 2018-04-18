@@ -7,16 +7,23 @@ disown
 GIT=/usr/bin/git
 NPM=npm
 
+echo "KILLING"
 # Kill the host node process
 kill $1
+
+echo "GIT"
 
 # Fetch the new git data
 $GIT fetch origin master
 $GIT reset --hard FETCH_HEAD
 $GIT clean -df
 
+echo "NPM"
+
 # Install any new npm packages
 $NPM install
 
+echo "REDEPLOY"
+
 # Run the server (defer to run.sh)
-nohup ./run.sh & disown
+/bin/bash ./run-disown.sh
