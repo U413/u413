@@ -17,4 +17,4 @@ $GIT clean -df
 $NPM install
 
 # Run the server (defer to run.sh)
-/bin/bash ./tools/run-disown.sh
+nohup ./tools/run.sh & disown
