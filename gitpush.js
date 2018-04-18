@@ -26,6 +26,7 @@ try {
 	router.use("!!!gitpush!!!", (req, res, next) => {
 		log.info("Request for !!!gitpush!!!");
 		res.end("Success");
+		console.log(req.headers);
 		//if(req.get("X-Hub-Signature") === secret) {
 			// TODO: save session data
 			log.info("Redeploying server...");
