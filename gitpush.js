@@ -28,7 +28,7 @@ try {
 		//if(req.get("X-Hub-Signature") === secret) {
 			// TODO: save session data
 			log.info("Redeploying server...");
-			execFile("tools/redeploy.sh", [process.pid]);
+			execFile("tools/redeploy.sh", [process.pid + ""]);
 			throw new Error("UNREACHABLE");
 		//}
 		//else {
