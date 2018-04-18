@@ -19,6 +19,7 @@ log.info("init git webhook redeploy");
 // Catch an IO error if private/gitpush.secret doesn't exist
 try {
 	var secret = fs.readFileSync("private/gitpush.secret") + "";
+}
 catch(e) {
 	log.info("Failed to init git webhook redeploy, missing file");
 	return;
