@@ -53,5 +53,4 @@ router.use("/!!!gitpush!!!", (req, res, next) => {
 		console.log("Digest:", auth.digest('hex'));
 		app.redeploy();
 	});
-	
 });
