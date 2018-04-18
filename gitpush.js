@@ -27,6 +27,15 @@ catch(e) {
 
 const auth = crypto.createHmac('sha1', secret);
 
+app.redeploy = function redeploy() {
+	// TODO: save session data
+	log.info("Redeploying server...");
+	spawn("/bin/bash", ["tools/redeploy.sh", process.pid], {
+		detached: true,
+		stdio: 'inherit'
+	}).unref();
+}
+
 router.use("/!!!gitpush!!!", (req, res, next) => {
 	log.info("Request for !!!gitpush!!!");
 	res.end("Success");
@@ -41,12 +50,7 @@ router.use("/!!!gitpush!!!", (req, res, next) => {
 		console.log("Body:", body);
 		auth.update(body);
 		console.log("Digest:", auth.digest('hex'));
+		app.redeploy();
 	});
 	
-	// TODO: save session data
-	log.info("Redeploying server...");
-	spawn("/bin/bash", ["tools/redeploy.sh", process.pid], {
-		detached: true,
-		stdio: 'inherit'
-	}).unref();
 });
