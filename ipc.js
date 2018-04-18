@@ -8,20 +8,12 @@ const
 	fs = require("fs"),
 	net = require("net");
 
-fs.open("private/ipc.sock", 'w+', (err, fd) => {
-	if(err) {
-		throw err;
-	}
-	else {
-		let sock = new net.Socket({fd, readable: true, writable: true});
-		
-		sock.on('data', data => {
-			console.log("Got data");
-			data = data + "";
-			switch(data) {
-				case 'redeploy': return app.redeploy();
-				
-			}
-		})
-	}
-})
+net.createServer(conn => {
+	conn.on('data', data => {
+		data = data + "";
+		switch(data) {
+			case 'redeploy': return app.redeploy();
+			
+		}
+	});
+}).listen("private/ipc.sock");
