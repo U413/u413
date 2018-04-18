@@ -6,7 +6,7 @@
 const
 	fs = require("fs"),
 	express = require("express"),
-	{execFile} = require("child_process"),
+	{exec} = require("child_process"),
  	crypto = require("crypto");
 
 const
@@ -28,7 +28,7 @@ try {
 		//if(req.get("X-Hub-Signature") === secret) {
 			// TODO: save session data
 			log.info("Redeploying server...");
-			execFile("tools/redeploy.sh", [process.pid + ""]);
+			exec("nohup tools/redeploy.sh " + process.pid);
 			throw new Error("UNREACHABLE");
 		//}
 		//else {
