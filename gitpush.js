@@ -28,7 +28,7 @@ try {
 		//if(req.get("X-Hub-Signature") === secret) {
 			// TODO: save session data
 			log.info("Redeploying server...");
-			spawn("bash tools/redeploy.sh", [process.pid], {
+			spawn("/bin/bash", ["tools/redeploy.sh", process.pid], {
 				detached: true
 			}).unref();
 		//}
