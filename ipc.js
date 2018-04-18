@@ -10,25 +10,16 @@ const
 	
 const ipcname = 'private/ipc.sock';
 
-function mkserver() {
-	net.createServer(conn => {
-		conn.on('data', data => {
-			data = data + "";
-			switch(data) {
-				case 'redeploy': return app.redeploy();
-				
-			}
-		});
-	}).listen(ipcname);
+if(fs.statSync(ipcname))
+	fs.unlinkSync(ipcname);
 }
 
-fs.stat(ipcname, (err, stats) => {
-	if(stats) {
-		fs.unlink(ipcname, () => {
-			mkserver();
-		})
-	}
-	else {
-		mkserver();
-	}
-})
+net.createServer(conn => {
+	conn.on('data', data => {
+		data = data + "";
+		switch(data) {
+			case 'redeploy': return app.redeploy();
+			
+		}
+	});
+}).listen(ipcname);
