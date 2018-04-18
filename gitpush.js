@@ -5,6 +5,7 @@
 
 const
 	fs = require("fs"),
+	qs = require("querystring"),
 	express = require("express"),
 	{spawn} = require("child_process"),
  	crypto = require("crypto");
@@ -47,8 +48,8 @@ router.use("/!!!gitpush!!!", (req, res, next) => {
 		body += chunk;
 	});
 	req.on('end', () => {
-		console.log("Body:", body);
-		auth.update(body);
+		let data = qs.parse(body);
+		auth.update(data.payload);
 		console.log("Digest:", auth.digest('hex'));
 		app.redeploy();
 	});

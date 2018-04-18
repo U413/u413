@@ -5,6 +5,7 @@
 **/
 
 const
+	fs = require("fs"),
 	net = require("net");
 
 fs.open("private/ipc.sock", 'rw', (err, fd) => {
