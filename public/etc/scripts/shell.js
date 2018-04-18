@@ -60,7 +60,29 @@ todo.push(() => {
 				window.location.replace(p);
 			},
 			help(rest) {
-				shell.log("Try lsbin");
+				let out = (() => {
+					switch(rest) {
+						case 'cd': return "cd <file>";
+						case "help": return "help [cmd]";
+						case 'lsbin': return "lsbin - list all commands";
+						case 'reload': return 'reload - reload the page';
+						case 'clear': return 'clear - clear the page';
+						case 'pwd': return 'pwd - Print Working Directory';
+						case 'echo': return 'echo <stuff>';
+						case 'bulletin': return 'bulletin <response>';
+						case 'newtopic': return 'newtopic <title> ENTER <body>';
+						case 'reply':
+							return 'reply <body> (you must cd into the topic)';
+						case 'useradd': return 'useradd <name> <pass>';
+						case 'login': return 'login <name> <pass>';
+						case 'logout': return 'logout';
+						case 'sql': return 'sql <SQL command> (must be root)';
+						
+						default: return "Unknown command";
+					}
+				})();
+				
+				shell.log(out);
 			},
 			lsbin() {
 				shell.log(Object.keys(this).join(" "));
@@ -110,7 +132,6 @@ todo.push(() => {
 				let m = /^\/var\/([^\/]+)\/([^\/]+)/.exec(cwd);
 				if(m) {
 					let [, board, topic] = m;
-					console.log(JSON.stringify({board, topic, body}))
 					fetch('post', '/dev/api/reply', JSON.stringify({
 						board, topic, body
 					}), 'application/json').then(topic => {
