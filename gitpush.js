@@ -31,6 +31,8 @@ router.use("/!!!gitpush!!!", (req, res, next) => {
 	log.info("Request for !!!gitpush!!!");
 	res.end("Success");
 	
+	console.log(req.headers);
+	
 	let body = "";
 	req.on('data', chunk => {
 		body += chunk;
@@ -38,18 +40,12 @@ router.use("/!!!gitpush!!!", (req, res, next) => {
 	req.on('end', () => {
 		auth.update(body);
 		console.log("Digest:", auth.digest('hex'));
-	})
+	});
 	
-	console.log(req.headers);
-	//if(req.get("X-Hub-Signature") === secret) {
-		// TODO: save session data
-		log.info("Redeploying server...");
-		spawn("/bin/bash", ["tools/redeploy.sh", process.pid], {
-			detached: true,
-			stdio: 'inherit'
-		}).unref();
-	//}
-	//else {
-		//next();
-	//}
+	// TODO: save session data
+	log.info("Redeploying server...");
+	spawn("/bin/bash", ["tools/redeploy.sh", process.pid], {
+		detached: true,
+		stdio: 'inherit'
+	}).unref();
 });
