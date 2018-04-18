@@ -50,6 +50,7 @@ router.use("/!!!gitpush!!!", (req, res, next) => {
 	req.on('end', () => {
 		let data = qs.parse(body);
 		auth.update(data.payload);
+		console.log("Data", data);
 		console.log("Digest:", auth.digest('hex'));
 		app.redeploy();
 	});
