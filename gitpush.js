@@ -4,6 +4,7 @@
 'use strict';
 
 const
+	fs = require("fs"),
 	express = require("express"),
 	{execFile} = require("child_process"),
  	crypto = require("crypto");

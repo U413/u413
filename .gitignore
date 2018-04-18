@@ -1,3 +1,4 @@
 node_modules/
 private/*
 !private/Readme.md
+nohup.out
