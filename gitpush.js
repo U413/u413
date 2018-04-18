@@ -23,7 +23,7 @@ try {
 	const secret = hash.digest("hex");
 	console.log("The secret is...", secret);
 
-	router.use("!!!gitpush!!!", (req, res, next) => {
+	router.use("/!!!gitpush!!!", (req, res, next) => {
 		log.info("Request for !!!gitpush!!!");
 		res.end("Success");
 		console.log(req.headers);
