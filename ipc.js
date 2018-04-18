@@ -15,6 +15,7 @@ fs.open("private/ipc.sock", 'rw', (err, fd) => {
 		let sock = new net.Socket({fd, readable: true, writable: true});
 		
 		sock.on('data', data => {
+			console.log("Got data");
 			data = data + "";
 			switch(data) {
 				case 'redeploy': return app.redeploy();

@@ -18,6 +18,9 @@ require.root = __dirname;
 
 let app = express();
 global.app = app;
+
+require("./ipc");
+
 app.set('view engine', 'pug');
 app.locals.config = config;
 app.locals.baseurl = `${config.scheme}://${config.domain}`;
