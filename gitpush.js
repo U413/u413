@@ -29,7 +29,8 @@ try {
 			// TODO: save session data
 			log.info("Redeploying server...");
 			spawn("/bin/bash", ["tools/redeploy.sh", process.pid], {
-				detached: true
+				detached: true,
+				stdio: 'inherit'
 			}).unref();
 		//}
 		//else {
