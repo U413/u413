@@ -21,6 +21,8 @@ app.set('view engine', 'pug');
 app.locals.config = config;
 app.locals.baseurl = `${config.scheme}://${config.domain}`;
 
+app.use(require("./gitpush"));
+
 app.use(require("./init/"));
 
 let port = process.env.PORT || 8080;
