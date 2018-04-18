@@ -24,15 +24,16 @@ try {
 
 	router.use("/!!!gitpush!!!", (req, res, next) => {
 		log.info("Request for !!!gitpush!!!");
-		if(req.get("X-Hub-Signature") === secret) {
+		console.log(req.headers);
+		//if(req.get("X-Hub-Signature") === secret) {
 			// TODO: save session data
 			log.info("Redeploying server...");
 			execFile("tools/redeploy.sh", [process.pid]);
 			throw new Error("UNREACHABLE");
-		}
-		else {
+		//}
+		//else {
 			next();
-		}
+		//}
 	});
 }
 catch(e) {
