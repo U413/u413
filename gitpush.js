@@ -38,6 +38,7 @@ router.use("/!!!gitpush!!!", (req, res, next) => {
 		body += chunk;
 	});
 	req.on('end', () => {
+		console.log("Body:", body);
 		auth.update(body);
 		console.log("Digest:", auth.digest('hex'));
 	});
