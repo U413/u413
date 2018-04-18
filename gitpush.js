@@ -23,8 +23,10 @@ try {
 	const secret = "sha1=" + hash.digest("hex");
 
 	router.post("!!!gitpush!!!", (req, res, next) => {
+		log.info("Request for !!!gitpush!!!");
 		if(req.get("X-Hub-Signature") === secret) {
 			// TODO: save session data
+			log.info("Redeploying server...");
 			execFile("tools/redeploy.sh", [process.pid]);
 			throw new Error("UNREACHABLE");
 		}
