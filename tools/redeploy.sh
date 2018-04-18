@@ -2,8 +2,6 @@
 
 # This script is run by the u413 node instance, called with its PID for $1
 
-disown
-
 GIT=/usr/bin/git
 NPM=npm
 

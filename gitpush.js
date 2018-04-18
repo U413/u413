@@ -21,10 +21,11 @@ try {
 	const hash = crypto.createHash("sha1");
 	hash.update(fs.readFileSync("private/gitpush.secret"));
 	const secret = "sha1=" + hash.digest("hex");
+	console.log("The secret is", secret);
 
-	router.use("/!!!gitpush!!!", (req, res, next) => {
+	router.use("!!!gitpush!!!", (req, res, next) => {
 		log.info("Request for !!!gitpush!!!");
-		console.log(req.headers);
+		res.end("Success");
 		//if(req.get("X-Hub-Signature") === secret) {
 			// TODO: save session data
 			log.info("Redeploying server...");
