@@ -14,32 +14,31 @@ A typical invocation: `DEBUG=1 USER=postgres PASS=password node .`
 Make sure the postgreSQL server is running.
 
 ### Utilities
-* query.sh allows the invocation of named SQL queries, eg `query.sh nuke`
-* run.sh uses files from private/ to start the server with a simple invocation
+* tools/query allows the invocation of named SQL queries, eg `tools/query nuke`
+* tools/run uses files from private/ to start the server with a simple
+   invocation
   - db.pwd gives the password for the server (make sure this has proper
      permissions!!)
-* genssl.sh generates SSL certificates (*NOTE:* doesn't work yet)
+* tools/genssl generates SSL certificates (*NOTE:* doesn't work yet)
 
 ### Todo
-* /var/bulletin
-  - /var/bulletin route works and allows unauthorized posting without usernames using the client-side `bulletin` command.
-* User registration & authentication
+* Shell features
+  - History
+  - Tab completion
+  - Shell rewrite
+    * Shell takes up the whole page
+	* Previous commands stay
+	* Use contentEditable instead of input/textarea
+  - Proper command parsing and composition
+* Nicer styling
+  - User-defined styling
 * HTTPS (high priority)
-* User group integration (admin/mod/user/etc)
+* User groups
 * Admin commands
-  - create boards
-  - raw sql execution (with a sanity check showing the number of affected records)
-  - JS code injection
-* Boards
-  - Write the view
-  - Implement database handling
-  - Implement client-side commands
-* Topics
-  - Write the view
-  - Implement database handling
-  - Implement client-side commands
-* User data
-  - /home/&lt;username&gt;/*
+  - Add SQL sanity check (# affected rows)
+  - JS injection
+  - Board creation? (currently easy with sql)
+* User profiles (/home/\*)
 * Private messaging
 * Vanity features
   - /dev/
@@ -49,6 +48,11 @@ Make sure the postgreSQL server is running.
 	* std(in|out|err)
 	* log
   - Easter eggs, hidden commands, dotfiles
+* IPC
+  - More commands (examples..?)
+* Markdown support for bulletin and replies
+* Make reply work for bulletin
+* Directory index route for /etc/
 
 ### Long-term goals
 * Access to u413 via ssh and shell emulation

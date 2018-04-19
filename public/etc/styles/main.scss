@@ -119,10 +119,12 @@ a, a:visited {
 		
 		&::before {
 			content: '<';
+			color: darkgrey;
 		}
 		
 		&::after {
 			content: '>';
+			color: darkgrey;
 		}
 	}
 	
