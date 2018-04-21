@@ -212,7 +212,7 @@ todo.push(() => {
 			
 			realign();
 			stdin.focus();
-		}
+		},
 		// Do whatever it will with the current input
 		async submit() {
 			let value = stdin.value;
