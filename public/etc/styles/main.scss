@@ -4,6 +4,12 @@ body {
 	background-color: black;
 	color: ghostwhite;
 	font-family: courier;
+	margin: 0;
+}
+
+footer {
+	text-align: center;
+	color: dimgrey;
 }
 
 time {
@@ -20,12 +26,37 @@ time {
 	}
 }
 
-input, textarea {
+textarea#stdin {
 	outline: none;
 	border: none;
 	font-family: courier;
+	font-size: inherit;
 	background-color: black;
 	color: ghostwhite;
+	box-sizing: border-box;
+	
+	width: 100%;
+	
+	margin-top: -2px;
+	margin-left: -2px;
+	resize: none;
+	overflow: auto;
+	
+	&::selection {
+		background-color: ghostwhite;
+		color: black;
+	}
+}
+
+input {
+	outline: none;
+	border: none;
+	font-family: courier;
+	font-size: inherit;
+	background-color: black;
+	color: ghostwhite;
+	
+	width: 100%;
 	
 	&::selection {
 		background-color: ghostwhite;
@@ -35,6 +66,10 @@ input, textarea {
 
 table {
 	width: 100%;
+}
+
+.error {
+	color: red;
 }
 
 #bulletin-post {
@@ -57,21 +92,14 @@ a, a:visited {
 	font-weight: bold;
 }
 
-#buffer {
-	& > div {
-		margin: 0;
-	}
-	
-	.error {
-		color: red;
-	}
-}
-
 /* Classes */
 
-.shell {
+#shell {
 	.user, .host {
 		color: limegreen;
+	}
+	.nobody {
+		color: crimson;
 	}
 	.cwd {
 		color: cornflowerblue;
@@ -81,30 +109,17 @@ a, a:visited {
 	}
 }
 
-#buffer {
-	display: block;
-	border: 1px solid darkgrey;
-	
-	.item {
-		display: block;
-	}
+#current .prompt {
+	position: absolute;
 }
 
-#shellinfo {
+.prompt, .nobody, .user, .host, .cwd, .access {
 	display: inline-block;
-	div {
-		display: inline-block;
-		font-weight: bold;
-	}
-}
-
-#prompt {
-	margin-left: 0.5em;
-	display: inline-block;
+	font-weight: bold;
 }
 
 #cli, #stdin {
-	display: none;
+	border: 1px solid grey;
 }
 .show-cli #cli {
 	display: inline-block;

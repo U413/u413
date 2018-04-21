@@ -5,7 +5,6 @@ const
 	path = require("path"),
 	qs = require("querystring"),
 	express = require("express"),
-	sassMiddleware = require("node-sass-middleware"),
 	cookieParser = require("cookie-parser"),
 	passport = require("passport"),
 	bodyParser = require("body-parser");
@@ -48,18 +47,5 @@ router.use((req, res, next) => {
 	
 	next();
 });
-
-router.use('/etc/styles', sassMiddleware({
-	src: path.dirname(require.main.filename) + "/public/etc/styles",
-	debug: log.level === 'debug',
-	outputStyle: "compressed"
-}));
-
-router.use("/etc/passwd", (req, res, next) => {
-	db.user.list().then(users => {
-		res.setHeader("Content-Type", "application/json");
-		res.end(JSON.stringify(users));
-	})
-})
 
 router.use(requireRoot("./routes/"));

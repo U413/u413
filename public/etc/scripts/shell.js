@@ -1,7 +1,5 @@
 'use strict';
 
-let shell = {cmds: {}};
-
 const path = {
 	normalize(p) {
 		let a = (p[0] === '/');
@@ -31,35 +29,40 @@ const path = {
 	}
 }
 
+/**
+ * Credits to mwgamera for the basic implementation idea for the shell.
+**/
+
+let shell;
 todo.push(() => {
 	let
-		prompt = $id("prompt"),
 		buffer = $id("buffer"),
-		cli = $id("cli"),
+		current = $id("current"),
+		prompt = current.firstChild,
 		stdin = $id("stdin");
 	
-	function get_input() {
-		if(prompt.classList.contains("show-cli")) {
-			return cli;
-		}
-		else if(prompt.classList.contains("show-stdin")) {
-			return stdin;
-		}
-		else {
-			throw new Error("Not showing any prompt?");
-		}
+	function realign() {
+		stdin.style.textIndent = window.getComputedStyle(prompt).width;
+	}
+	
+	function span(txt, k) {
+		let el = document.createElement('span');
+		el.innerText = txt;
+		el.className = k;
+		return el;
 	}
 	
 	shell = {
 		cmds: {
 			// Simple one-liner commands don't need their own files
-			cd(rest) {
+			async cd(rest) {
 				let p = path.normalize(rest);
 				if(!path.isAbsolute(p)) p = path.join(cwd, p);
 				
-				window.location.replace(p);
+				//window.location.replace(p);
+				return await new Promise(() => 0);
 			},
-			help(rest) {
+			async help(rest) {
 				let out = (() => {
 					switch(rest) {
 						case 'cd': return "cd <file>";
@@ -84,40 +87,36 @@ todo.push(() => {
 				
 				shell.log(out);
 			},
-			lsbin() {
+			async lsbin() {
 				shell.log(Object.keys(this).join(" "));
 			},
-			reload() {
-				window.location.reload();
+			async reload() {
+				return await new Promise(() => {
+					window.location.reload();
+				});
 			},
-			clear() {
+			async clear() {
 				buffer.innerHTML = "";
-				
-				for(let child of Array.from(document.body.children)) {
-					if(!child.classList.contains("shell")) {
-						child.remove();
-					}
-				}
 			},
-			pwd() {
+			async pwd() {
 				shell.log(cwd);
 			},
-			echo(rest) {
+			async echo(rest) {
 				shell.log(rest);
 			},
-			bulletin(rest) {
-				fetch('post', '/dev/api/bulletin', rest).then(() => {
+			async bulletin(rest) {
+				return await fetch('post', '/dev/api/bulletin', rest).then(() => {
 					window.location.reload();
 				}).catch(err => {
 					shell.error(err);
 				})
 			},
-			newtopic(title) {
-				shell.read().then(body => {
+			async newtopic(title) {
+				return await shell.read().then(async body => {
 					let m = /^\/var\/([^\/]+)/.exec(cwd);
 					if(m) {
 						let board = m[1];
-						fetch('post', `/dev/api/topic`, JSON.stringify({
+						await fetch('post', `/dev/api/topic`, JSON.stringify({
 							board, title, body
 						})).then(topic => {
 							window.location.replace(`/var/${board}/${topic}`);
@@ -128,21 +127,21 @@ todo.push(() => {
 					}
 				})
 			},
-			reply(body) {
+			async reply(body) {
 				let m = /^\/var\/([^\/]+)\/([^\/]+)/.exec(cwd);
 				if(m) {
 					let [, board, topic] = m;
-					fetch('post', '/dev/api/reply', JSON.stringify({
+					await fetch('post', '/dev/api/reply', JSON.stringify({
 						board, topic, body
 					}), 'application/json').then(topic => {
 						window.location.replace(`/var/${board}/${topic}`);
 					});
 				}
 			},
-			useradd(rest) {
+			async useradd(rest) {
 				let m = /(\S+)\s+(\S+)/.exec(rest);
 				if(m) {
-					fetch("post", "/bin/useradd", `name=${m[1]}&pass=${m[2]}`, "application/x-www-form-urlencoded").
+					await fetch("post", "/bin/useradd", `name=${m[1]}&pass=${m[2]}`, "application/x-www-form-urlencoded").
 						then(res => window.location.replace("/var/bulletin")).
 						catch(err => shell.error(err));
 				}
@@ -150,10 +149,10 @@ todo.push(() => {
 					shell.error("Need both username and password");
 				}
 			},
-			login(rest) {
+			async login(rest) {
 				let m = /(\S+)\s+(\S+)/.exec(rest);
 				if(m) {
-					fetch("post", "/bin/login", `name=${m[1]}&pass=${m[2]}`, "application/x-www-form-urlencoded").
+					await fetch("post", "/bin/login", `name=${m[1]}&pass=${m[2]}`, "application/x-www-form-urlencoded").
 						then(res => window.location.reload()).
 						catch(err => shell.error(err.xhr.response || "Unknown username or password"));
 				}
@@ -161,14 +160,14 @@ todo.push(() => {
 					shell.error("Need both username and password");
 				}
 			},
-			logout() {
-				fetch("post", "/bin/logout").
+			async logout() {
+				await fetch("post", "/bin/logout").
 					then(res => shell.log(res)).
 					catch(err => shell.error(err));
 			},
-			sql(rest) {
+			async sql(rest) {
 				if(user.name === "root") {
-					fetch("post", "/dev/sql", rest).
+					await fetch("post", "/dev/sql", rest).
 						then(res => shell.log(res)).
 						catch(err => shell.error(err));
 				}
@@ -177,48 +176,73 @@ todo.push(() => {
 				}
 			},
 			
-			...shell.cmds
-		},
-		get value() {
-			return get_input().value;
-		},
-		set value(v) {
-			cli.value = cli.placeholder = stdin.value = v;
+			//...shell.cmds
 		},
 		// Utility for focusing on the current input
 		focus() {
-			let inp = get_input(), cvl = inp.value.length;
-			inp.focus();
-			inp.setSelectionRange(cvl, cvl);
+			let cvl = stdin.value.length;
+			stdin.focus();
+			stdin.setSelectionRange(cvl, cvl);
 		},
 		// Do whatever it will with the current input
-		submit() {
+		async submit() {
+			let value = stdin.value;
+			stdin.value = "";
+			
+			let item = document.createElement('div');
+			item.className = "item";
+			prompt.remove();
+			item.appendChild(prompt);
+			item.appendChild(span(value, 'cmd'));
+			buffer.appendChild(item);
+			
+			stdin.disabled = true;
+			
 			if(typeof this.target === 'function') {
-				let value = this.value;
-				this.value = "";
-				this.target(value);
+				await this.target(value);
 				this.target = null;
 			}
 			else {
-				let [, cmd, rest] = /^(\S+)\s*(.*)$/g.exec(this.value);
-				if(cmd in this.cmds) {
-					this.cmds[cmd](rest);
+				let m = /^(\S+)\s*(.*)/g.exec(value);
+				if(m) {
+					let [, cmd, rest] = m;
+					if(cmd in this.cmds) {
+						await this.cmds[cmd](rest);
+					}
+					else {
+						this.error(cmd + ": command not found");
+					}
 				}
-				else {
-					this.error(cmd + ": command not found");
-				}
-				this.value = "";
 			}
+			
+			stdin.disabled = false;
+			
+			prompt = document.createElement("div");
+			prompt.className = "prompt";
+			prompt.appendChild(
+				span(user.name, user.name === 'nobody'? 'nobody' : 'name')
+			);
+			prompt.appendChild(span("@"));
+			prompt.appendChild(span("u413.com", "host"));
+			prompt.appendChild(span(":"));
+			prompt.appendChild(span(cwd, "cwd"));
+			prompt.appendChild(span(user.access || "$", "access"));
+			prompt.appendChild(span("\u00a0")); // nbsp
+			
+			current.appendChild(prompt);
+			
+			realign();
+			stdin.focus();
 		},
 		// Target handler for the current input
 		target: null,
 		
 		// Concatenate raw HTML to the buffer
-		cat(html) {
+		write(html) {
 			buffer.innerHTML += html;
 		},
 		wrap(k, args) {
-			this.cat(args.map(v => `<div class="${k}">${v}</div>`).join(""));
+			this.write(args.map(v => `<div class="${k}">${v}</div>`).join(""));
 		},
 		log(...args) {
 			this.wrap('item', args);
@@ -231,13 +255,13 @@ todo.push(() => {
 		},
 		
 		// Read from stdin and fulfill a promise when it's submitted
-		read() {
+		async read() {
 			prompt.classList.remove("show-cli");
 			prompt.classList.add("show-stdin");
 			stdin.focus();
 			
-			return new Promise((ok, no) => {
-				this.target = function(body) {
+			return await new Promise((ok, no) => {
+				this.target = async function(body) {
 					prompt.classList.remove("show-stdin");
 					prompt.classList.add("show-cli");
 					cli.focus();
@@ -249,9 +273,11 @@ todo.push(() => {
 	};
 	
 	// Submit when ENTER is pressed without SHIFT
-	prompt.addEventListener("keyup", ev => {
+	stdin.addEventListener("keyup", ev => {
 		if(ev.key === "Enter" && !ev.shift) {
+			ev.preventDefault();
 			shell.submit();
+			return false;
 		}
 	});
 	
@@ -266,4 +292,19 @@ todo.push(() => {
 	}
 	
 	document.addEventListener('click', focus);
+	
+	realign();
+	
+	function adjustHeight() {
+		let
+			[, outh] = /(\d+)px/.exec(window.getComputedStyle(stdin).height),
+			diff = outh - stdin.clientHeight;
+		
+		// Prevent the height from biasing the next line
+		stdin.style.height = 0;
+		stdin.style.height = (stdin.scrollHeight + diff) + "px";
+	}
+	
+	stdin.addEventListener('input', adjustHeight);
+	document.addEventListener('resize', adjustHeight);
 });

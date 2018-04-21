@@ -10,18 +10,38 @@ html
 		meta(name="msapplication-TileColor" content="#da532c")
 		meta(name="theme-color" content="#ffffff")
 		
+		title
+			block title
+				= cwd
+		
 		block styles
 			+style("main")
 		block scripts
 			+script("main")
-			script!= `var user = ${JSON.stringify(user || {name: 'guest'})};`
+			+script("shell")
+			script!= `var user = ${JSON.stringify(user || {name: 'nobody'})};`
 	body
-		header
-			ul.horiz
-				li: a(href="/bin/login") /bin/login
-				li: a(href="/bin/useradd") /bin/useradd
-				li: a(href="/var/bulletin") /var/bulletin
-				
-		main
-			block body
-		include shell
+		#shell
+			main#buffer
+				block body
+			#current
+				.prompt
+					- const nobody = {name: "nobody"};
+					- if(!user) {
+					-	user = user || nobody;
+					- }
+					- else if(!user.name) {
+					-	user.name = "nobody";
+					- }
+					if user.name === "nobody"
+						span.nobody nobody
+					else
+						span.user= user.name
+					span @
+					span.host u413.com
+					span :
+					span.cwd= cwd || "./"
+					span.access= user.access || "$"
+					span &nbsp;
+			textarea#stdin(autofocus)
+		footer= `${config.name} v${config.version}`
