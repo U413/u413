@@ -8,6 +8,7 @@ if(require.main === module) {
 const
 	fs = require("fs"),
 	path = require("path"),
+	sass = require("node-sass"),
 	urlparse = require("url").parse,
 	express = require("express"),
 	sassMiddleware = require("node-sass-middleware"),
@@ -63,19 +64,47 @@ router.use('/etc', (req, res, next) => {
 	})
 });
 
-// Temporary snippet
-// TODO: replace sass-middleware with a homebrew method, since the cache for
-//  this is too heavy.
-fs.stat('public/etc/styles/main.css', (err, bla) => {
-	if(!err) {
-		fs.unlink('public/etc/styles/main.css');
+// This seems very... idiomatic. I want a more general version I can reuse
+// TODO: generalize this into a library
+app.cache.styles = {};
+router.use('/etc/styles', (req, res, next) => {
+	const ext = /\.css$/;
+	
+	let file = path.join('public', req.originalUrl);
+	
+	if(ext.test(file)) {
+		file = file.replace(ext, ".scss");
+	}
+	else {
+		fs.readFile(file, (err, data) => {
+			if(err) {
+				next();
+			}
+			else {
+				res.type('scss').end(data);
+			}
+		});
+	}
+	
+	let data = app.cache.styles[file];
+	if(typeof data === 'undefined') {
+		sass.render({
+			file
+		}, (err, data) => {
+			data = data.css;
+			if(err) {
+				next();
+			}
+			else {
+				app.cache.styles[file] = data;
+				res.type('css').end(data);
+			}
+		});
+	}
+	else {
+		res.type('css').end(data);
 	}
 });
-router.use('/etc/styles', sassMiddleware({
-	src: path.dirname(require.main.filename) + "/public/etc/styles",
-	debug: log.level === 'debug',
-	outputStyle: "compressed"
-}));
 
 router.use("/etc/passwd", (req, res, next) => {
 	db.user.list().then(users => {
