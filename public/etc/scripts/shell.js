@@ -220,7 +220,7 @@ todo.push(() => {
 			prompt = document.createElement("div");
 			prompt.className = "prompt";
 			prompt.appendChild(
-				span(user.name, user.name === 'nobody'? 'nobody' : 'name')
+				span(user.name, user.name === 'nobody'? 'nobody' : 'user')
 			);
 			prompt.appendChild(span("@"));
 			prompt.appendChild(span("u413.com", "host"));
