@@ -59,7 +59,7 @@ todo.push(() => {
 				let p = path.normalize(rest);
 				if(!path.isAbsolute(p)) p = path.join(cwd, p);
 				
-				//window.location.replace(p);
+				window.location.replace(p);
 				return await new Promise(() => 0);
 			},
 			async help(rest) {
