@@ -190,7 +190,7 @@ todo.push(() => {
 			item.className = "item";
 			prompt.remove();
 			item.appendChild(prompt);
-			item.appendChild(span(this.value, 'cmd'));
+			item.appendChild(span(stdin.value, 'cmd'));
 			buffer.appendChild(item);
 			
 			stdin.disabled = true;
