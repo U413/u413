@@ -1,34 +1,5 @@
 'use strict';
 
-const path = {
-	normalize(p) {
-		let a = (p[0] === '/');
-		let f = p.split(/[\\\/]/g);
-		for(let i = 0; i < f.length; ++i) {
-			if(f[i] === "" || f[i] === '.') {
-				f.splice(i--, 1);
-			}
-		}
-		
-		return (a? "/" : "") + f.join("/");
-	},
-	isAbsolute(p) {
-		return (p[0] === '/');
-	},
-	join(...args) {
-		let out;
-		for(let arg of args) {
-			if(out === undefined) {
-				out = arg;
-			}
-			else {
-				out += "/" + arg;
-			}
-		}
-		return this.normalize(out);
-	}
-}
-
 /**
  * Credits to mwgamera for the basic implementation idea for the shell.
 **/
@@ -40,6 +11,35 @@ todo.push(() => {
 		current = $id("current"),
 		prompt = current.firstChild,
 		stdin = $id("stdin");
+	
+	const path = {
+		normalize(p) {
+			let a = (p[0] === '/');
+			let f = p.split(/[\\\/]/g);
+			for(let i = 0; i < f.length; ++i) {
+				if(f[i] === "" || f[i] === '.') {
+					f.splice(i--, 1);
+				}
+			}
+			
+			return (a? "/" : "") + f.join("/");
+		},
+		isAbsolute(p) {
+			return (p[0] === '/');
+		},
+		join(...args) {
+			let out;
+			for(let arg of args) {
+				if(out === undefined) {
+					out = arg;
+				}
+				else {
+					out += "/" + arg;
+				}
+			}
+			return this.normalize(out);
+		}
+	};
 	
 	function realign() {
 		stdin.style.textIndent = window.getComputedStyle(prompt).width;

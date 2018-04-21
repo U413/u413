@@ -1,6 +1,9 @@
 'use strict';
 
-const todo = [], cwd = window.location.pathname;
+const
+	todo = [],
+	path = window.location.pathname,
+	[, cwd, file] = /^(.+?)(\/.*)?$/.exec(path);
 
 todo.push(() => {
 	/**
