@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Handle small commits and take care of versioning automatically
+
+if [ $# -eq 0 ]; then
+	echo Error: I need a message;
+	exit;
+fi
+
+python tools/incr-version.py 0 0 1
+git add .
+git commit -m "$1"
+git push origin master
