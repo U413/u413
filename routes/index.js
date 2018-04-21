@@ -68,35 +68,59 @@ router.use('/etc', (req, res, next) => {
 // TODO: generalize this into a library
 app.cache.styles = {};
 router.use('/etc/styles', (req, res, next) => {
-	const ext = /\.css$/;
-	
-	let file = path.join('public', req.originalUrl);
-	
-	if(ext.test(file)) {
-		file = file.replace(ext, ".scss");
-	}
-	else {
-		fs.readFile(file, (err, data) => {
-			if(err) {
-				next();
+	let m = /^((.+?)(\.(s)?css))(\/)?$/.exec(req.originalUrl);
+	let data = app.cache.styles[m[1]];
+	if(m) {
+		// Trailing slash, redirect if it exists
+		if(m[5]) {
+			// Only stat .scss because all .css is virtual
+			fs.stat(`public${m[2]}.scss`, err => {
+				// 404: not found
+				if(err) {
+					next();
+				}
+				else {
+					res.redirect(m[1]);
+				}
+			});
+			return;
+		}
+		// Serve .scss directly
+		else if(m[3] === 's') {
+			if(typeof data === 'undefined') {
+				fs.readFile("public" + m[1], (err, data) => {
+					if(err) {
+						next();
+					}
+					else {
+						res.type('scss').end(data);
+					}
+				});
 			}
 			else {
 				res.type('scss').end(data);
 			}
-		});
+			return;
+		}
+		else {
+			
+		}
+	}
+	else {
+		return next();
 	}
 	
-	let data = app.cache.styles[file];
 	if(typeof data === 'undefined') {
 		sass.render({
-			file
+			// Rewrite .css to .scss
+			file: `public${m[2]}.scss`
 		}, (err, data) => {
-			data = data.css;
-			if(err) {
+			if(err || !data) {
 				next();
 			}
 			else {
-				app.cache.styles[file] = data;
+				data = data.css;
+				app.cache.styles[m[1]] = data;
 				res.type('css').end(data);
 			}
 		});
