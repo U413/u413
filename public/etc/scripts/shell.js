@@ -184,19 +184,40 @@ todo.push(() => {
 			stdin.focus();
 			stdin.setSelectionRange(cvl, cvl);
 		},
-		// Do whatever it will with the current input
-		async submit() {
-			let value = stdin.value;
-			stdin.value = "";
-			
+		// Write the prompt to the buffer
+		echoPrompt() {
 			let item = document.createElement('div');
 			item.className = "item";
 			prompt.remove();
 			item.appendChild(prompt);
-			item.appendChild(span(value, 'cmd'));
+			item.appendChild(span(this.value, 'cmd'));
 			buffer.appendChild(item);
 			
 			stdin.disabled = true;
+		},
+		writePrompt() {
+			prompt = document.createElement("div");
+			prompt.className = "prompt";
+			prompt.appendChild(
+				span(user.name, user.name === 'nobody'? 'nobody' : 'user')
+			);
+			prompt.appendChild(span("@"));
+			prompt.appendChild(span("u413.com", "host"));
+			prompt.appendChild(span(":"));
+			prompt.appendChild(span(cwd, "cwd"));
+			prompt.appendChild(span(user.access || "$", "access"));
+			prompt.appendChild(span("\u00a0")); // nbsp
+			
+			current.appendChild(prompt);
+			
+			realign();
+			stdin.focus();
+		}
+		// Do whatever it will with the current input
+		async submit() {
+			let value = stdin.value;
+			this.echoPrompt();
+			stdin.value = "";
 			
 			if(typeof this.target === 'function') {
 				await this.target(value);
@@ -216,23 +237,7 @@ todo.push(() => {
 			}
 			
 			stdin.disabled = false;
-			
-			prompt = document.createElement("div");
-			prompt.className = "prompt";
-			prompt.appendChild(
-				span(user.name, user.name === 'nobody'? 'nobody' : 'user')
-			);
-			prompt.appendChild(span("@"));
-			prompt.appendChild(span("u413.com", "host"));
-			prompt.appendChild(span(":"));
-			prompt.appendChild(span(cwd, "cwd"));
-			prompt.appendChild(span(user.access || "$", "access"));
-			prompt.appendChild(span("\u00a0")); // nbsp
-			
-			current.appendChild(prompt);
-			
-			realign();
-			stdin.focus();
+			this.writePrompt();
 		},
 		// Target handler for the current input
 		target: null,
