@@ -9,24 +9,18 @@ if(require.main === module) {
 }
 
 const
-	express = require("express"),
-	bodyParser = require("body-parser");
+	express = require("express")
 
 const
 	ls = requireRoot('./ls');
 
 let router = new express.Router();
 
-router.use(bodyParser.json({type: "*/json"}));
-router.use("/api", require("./api"));
-router.use("/sql", require("./sql"));
 router.use("/stdout", require("./stdout"));
 router.use('/', ls.enforceTrailingSlash());
 router.use('/', (req, res, next) => {
 	res.render('ls', {
 		files: [
-			ls.virtualDir({name: 'api/'}),
-			ls.virtualStat({name: 'sql'}),
 			ls.virtualStat({name: 'stdout'}),
 		]
 	});

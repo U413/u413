@@ -30,7 +30,6 @@ router.get(/^\/?$/g, async (req, res) => {
 		ls.virtualDir({name: 'var'})
 	];
 	
-	files.push(...await ls.readdir('public-optimized'));
 	files.push(...await ls.readdir('public'));
 	
 	res.render('ls', {
@@ -40,9 +39,6 @@ router.get(/^\/?$/g, async (req, res) => {
 	});
 });
 
-router.use('/', serveStatic('public-optimized', {
-	extensions: ['txt', 'md']
-}));
 router.use('/', serveStatic('public', {
 	extensions: ['txt', 'md']
 }));
@@ -139,7 +135,7 @@ router.use("/etc/passwd", (req, res, next) => {
 
 router.use('/var/', require("./var"));
 router.use('/dev/', require("./dev/"));
-router.use('/bin/', require("./bin/"));
+router.use('/bin/', require("./bin"));
 
 router.use(require("./404"));
 

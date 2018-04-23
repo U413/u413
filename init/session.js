@@ -34,6 +34,5 @@ router.use(sessions({
 	activeDuration: 1000*60*5 // 5 minutes
 }));
 router.use((req, res, next) => {
-	console.log('session', req.session);
 	next();
 })

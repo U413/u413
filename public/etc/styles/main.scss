@@ -101,7 +101,7 @@ a, a:visited {
 	.nobody {
 		color: crimson;
 	}
-	.cwd {
+	.path {
 		color: cornflowerblue;
 	}
 	.access {
@@ -113,7 +113,7 @@ a, a:visited {
 	position: absolute;
 }
 
-.prompt, .nobody, .user, .host, .cwd, .access {
+.prompt, .nobody, .user, .host, .path, .access {
 	display: inline-block;
 	font-weight: bold;
 }

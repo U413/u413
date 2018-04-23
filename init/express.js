@@ -29,6 +29,7 @@ router.use((req, res, next) => {
 });
 
 router.use(bodyParser.text());
+router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({extended: true}));
 //router.use(bodyParser.json());
 

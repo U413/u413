@@ -1,9 +1,6 @@
 'use strict';
 
-const
-	todo = [],
-	path = window.location.pathname,
-	[, cwd, file] = /^(.+?)(\/.*)?$/.exec(path);
+const todo = []
 
 todo.push(() => {
 	/**
@@ -37,7 +34,7 @@ function $class(k) {
 	return document.getElementsByClassName(k);
 }
 
-function fetch(method, url, body="", type=null) {
+function fetch(method, url, body, type=null) {
 	return new Promise((ok, no) => {
 		let xhr = new XMLHttpRequest();
 		
@@ -78,7 +75,10 @@ function fetch(method, url, body="", type=null) {
 		if(type) {
 			xhr.setRequestHeader("Content-Type", type);
 		}
-		if(body) {
+		if(typeof body === 'undefined') {
+			xhr.send();
+		}
+		else {
 			xhr.send(body);
 		}
 	})

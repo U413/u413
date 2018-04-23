@@ -125,7 +125,7 @@ const db = module.exports = {
 		byId(id) {
 			return queryFirst("topic/byid", [id]);
 		},
-		async replies(id) {
+		replies(id) {
 			return query("topic/replies", [id]).then(replies => {
 				return Promise.all(replies.map(async r => {
 					r.author = await db.user.byId(r.author);
@@ -134,7 +134,7 @@ const db = module.exports = {
 			});
 		},
 		create(board, author, title, body) {
-			return query("topic/create", [board, author, title, body]);
+			return queryFirst("topic/create", [board, author, title, body]);
 		},
 		reply(topic, author, body) {
 			return query("topic/reply", [topic, author, body]);

@@ -15,7 +15,17 @@ const SALTS = 10;
 let router = module.exports = new express.Router();
 
 passport.serializeUser((user, done) => {
-	done(null, user.id);
+	// Passport and client-sessions don't get along perfectly - on
+	//  error, passport sets req.user = null, but client-sessions
+	//  throws if req.user is assigned a "non-object" (including null).
+	//  SO, because this took ages to find and the errors it produces
+	//  are insane, wrap it so we can better debug.
+	try {
+		done(null, user);
+	}
+	catch(e) {
+		log.debug(e);
+	}
 });
 passport.deserializeUser((id, done) => {
 	db.user.byId(id).then(user => done(null, user || false));
@@ -45,12 +55,6 @@ passport.use('local-login', new LocalStrategy({
 	passwordField: "pass"
 }, (name, pass, done) => {
 	db.user.authenticate(name, pass).then(user => done(null, user || false));
-}));
-
-log.info("init passport strategy logout");
-passport.use("logout", new LocalStrategy({}, (name, pass, done) => {
-	// Always fail to authenticate
-	done(null, false);
 }));
 
 router.use(passport.initialize());

@@ -4,6 +4,10 @@
  * Credits to mwgamera for the basic implementation idea for the shell.
 **/
 
+const
+	path = window.location.pathname,
+	[, cwd, file] = /^(.+\/)(.*)?$/.exec(path);
+
 let shell;
 todo.push(() => {
 	let
@@ -12,7 +16,7 @@ todo.push(() => {
 		prompt = current.firstChild,
 		stdin = $id("stdin");
 	
-	const path = {
+	const $path = {
 		normalize(p) {
 			let a = (p[0] === '/');
 			let f = p.split(/[\\\/]/g);
@@ -52,12 +56,19 @@ todo.push(() => {
 		return el;
 	}
 	
+	// Create a promise that will never be fulfilled
+	//  This is used for commands which reload the page so they don't
+	//  exit early and write the prompt beforehand
+	function liar() {
+		return new Promise(() => 0);
+	}
+	
 	shell = {
 		cmds: {
 			// Simple one-liner commands don't need their own files
 			async cd(rest) {
-				let p = path.normalize(rest);
-				if(!path.isAbsolute(p)) p = path.join(cwd, p);
+				let p = $pathnormalize(rest);
+				if(!$pathisAbsolute(p)) p = $pathjoin(cwd, p);
 				
 				window.location.replace(p);
 				return await new Promise(() => 0);
@@ -105,7 +116,7 @@ todo.push(() => {
 				shell.log(rest);
 			},
 			async bulletin(rest) {
-				return await fetch('post', '/dev/api/bulletin', rest).then(() => {
+				return await fetch('post', '/bin/bulletin', rest).then(() => {
 					window.location.reload();
 				}).catch(err => {
 					shell.error(err);
@@ -116,10 +127,11 @@ todo.push(() => {
 					let m = /^\/var\/([^\/]+)/.exec(cwd);
 					if(m) {
 						let board = m[1];
-						await fetch('post', `/dev/api/topic`, JSON.stringify({
+						await fetch('post', `/bin/newtopic`, JSON.stringify({
 							board, title, body
 						})).then(topic => {
 							window.location.replace(`/var/${board}/${topic}`);
+							return liar();
 						});
 					}
 					else {
@@ -128,14 +140,17 @@ todo.push(() => {
 				})
 			},
 			async reply(body) {
-				let m = /^\/var\/([^\/]+)\/([^\/]+)/.exec(cwd);
+				let m = /^\/var\/([^\/]+)\/([^\/]+)/.exec(path);
 				if(m) {
 					let [, board, topic] = m;
-					await fetch('post', '/dev/api/reply', JSON.stringify({
-						board, topic, body
-					}), 'application/json').then(topic => {
+					await fetch('post', '/bin/reply', JSON.stringify({
+						board, topic: parseInt(topic, 16), body
+					}), 'application/json').then(() => {
 						window.location.replace(`/var/${board}/${topic}`);
 					});
+				}
+				else {
+					shell.error("Need a topic (try cd)");
 				}
 			},
 			async useradd(rest) {
@@ -153,7 +168,7 @@ todo.push(() => {
 				let m = /(\S+)\s+(\S+)/.exec(rest);
 				if(m) {
 					await fetch("post", "/bin/login", `name=${m[1]}&pass=${m[2]}`, "application/x-www-form-urlencoded").
-						then(res => window.location.reload()).
+						then(res => user = JSON.parse(res)).
 						catch(err => shell.error(err.xhr.response || "Unknown username or password"));
 				}
 				else {
@@ -161,18 +176,22 @@ todo.push(() => {
 				}
 			},
 			async logout() {
-				await fetch("post", "/bin/logout").
-					then(res => shell.log(res)).
+				await fetch("post", "/bin/logout", "{}").
+					then(res => {
+						user = {name: 'nobody'};
+					}).
 					catch(err => shell.error(err));
 			},
 			async sql(rest) {
 				if(user.name === "root") {
-					await fetch("post", "/dev/sql", rest).
+					await fetch("post", "/bin/sql", rest).
 						then(res => shell.log(res)).
-						catch(err => shell.error(err));
+						catch(err => {
+							shell.error(`${err.status}: ${err.xhr.response}`);
+						});
 				}
 				else {
-					shell.error("/dev/sql is write-protected");
+					shell.error("Permission denied");
 				}
 			},
 			
@@ -204,7 +223,7 @@ todo.push(() => {
 			prompt.appendChild(span("@"));
 			prompt.appendChild(span("u413.com", "host"));
 			prompt.appendChild(span(":"));
-			prompt.appendChild(span(cwd, "cwd"));
+			prompt.appendChild(span(path, "path"));
 			prompt.appendChild(span(user.access || "$", "access"));
 			prompt.appendChild(span("\u00a0")); // nbsp
 			
@@ -261,17 +280,14 @@ todo.push(() => {
 		
 		// Read from stdin and fulfill a promise when it's submitted
 		async read() {
-			prompt.classList.remove("show-cli");
-			prompt.classList.add("show-stdin");
+			stdin.disabled = false;
 			stdin.focus();
 			
 			return await new Promise((ok, no) => {
 				this.target = async function(body) {
-					prompt.classList.remove("show-stdin");
-					prompt.classList.add("show-cli");
-					cli.focus();
-					
+					stdin.focus();
 					ok(body);
+					await liar();
 				}
 			});
 		}
