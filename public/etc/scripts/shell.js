@@ -8,6 +8,55 @@ const
 	path = window.location.pathname,
 	[, cwd, file] = /^(.+\/)(.*)?$/.exec(path);
 
+function clamp(v, hi, lo=0) {
+	if(v > hi) {
+		return hi;
+	}
+	else if(v < lo) {
+		return lo;
+	}
+	else {
+		return v;
+	}
+}
+
+const bash_history = {
+	history: (() => {
+		let h = localStorage.getItem("history");
+		if(h) {
+			return JSON.parse(h);
+		}
+		
+		localStorage.setItem('history', '[]');
+		return [];
+	})(),
+	tmp: null,
+	
+	submit() {
+		this.history.unshift(this.tmp[this.line] = stdin.value);
+		localStorage.setItem("history", JSON.stringify(this.history));
+		this.tmp = this.history.slice();
+		this.tmp.unshift("");
+		this.line = 0;
+	},
+	line: 0,
+	
+	up() {
+		this.tmp[this.line] = stdin.value;
+		this.line = clamp(this.line + 1, this.tmp.length - 1);
+		stdin.value = this.tmp[this.line];
+		console.log("Line:", this.line);
+	},
+	down() {
+		this.tmp[this.line] = stdin.value;
+		this.line = clamp(this.line - 1, this.tmp.length - 1);
+		stdin.value = this.tmp[this.line];
+		console.log("Line:", this.line);
+	}
+};
+bash_history.tmp = bash_history.history.slice();
+bash_history.tmp.unshift("");
+
 let shell;
 todo.push(() => {
 	let
@@ -294,10 +343,24 @@ todo.push(() => {
 	};
 	
 	// Submit when ENTER is pressed without SHIFT
-	stdin.addEventListener("keyup", ev => {
-		if(ev.key === "Enter" && !ev.shift) {
+	stdin.addEventListener("keydown", ev => {
+		if(!ev.shift) {
+			if(ev.key === "Enter") {
+				bash_history.submit();
+				shell.submit();
+			}
+			else if(ev.key === "ArrowUp") {
+				console.log('up');
+				bash_history.up();
+			}
+			else if(ev.key === "ArrowDown") {
+				console.log('down');
+				bash_history.down();
+			}
+			else {
+				return;
+			}
 			ev.preventDefault();
-			shell.submit();
 			return false;
 		}
 	});
