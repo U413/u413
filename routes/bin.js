@@ -103,7 +103,7 @@ router.use("/reply", async (req, res, next) => {
 
 router.post("/bulletin", async (req, res, next) => {
 	if(req.user) {
-		await db.bulletin.add(req.user, req.body);
+		await db.bulletin.add(req.user, req.body.slice(0, 140));
 		res.end("Success");
 	}
 	else {

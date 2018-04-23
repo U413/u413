@@ -20,42 +20,50 @@ function clamp(v, hi, lo=0) {
 	}
 }
 
-const bash_history = {
-	history: (() => {
-		let h = localStorage.getItem(user.name + ".history");
-		if(h) {
-			return JSON.parse(h);
+const $path = {
+	normalize(p) {
+		let a = (p[0] === '/');
+		let f = p.split(/[\\\/]/g);
+		for(let i = 0; i < f.length; ++i) {
+			if(f[i] === "" || f[i] === '.') {
+				f.splice(i--, 1);
+			}
 		}
 		
-		localStorage.setItem(user.name + '.history', '[]');
-		return [];
-	})(),
-	tmp: null,
-	
-	submit() {
-		this.history.unshift(this.tmp[this.line] = stdin.value);
-		localStorage.setItem(user.name + ".history", JSON.stringify(this.history));
-		this.tmp = this.history.slice();
-		this.tmp.unshift("");
-		this.line = 0;
+		return (a? "/" : "") + f.join("/");
 	},
-	line: 0,
-	
-	up() {
-		this.tmp[this.line] = stdin.value;
-		this.line = clamp(this.line + 1, this.tmp.length - 1);
-		stdin.value = this.tmp[this.line];
-		console.log("Line:", this.line);
+	isAbsolute(p) {
+		return (p[0] === '/');
 	},
-	down() {
-		this.tmp[this.line] = stdin.value;
-		this.line = clamp(this.line - 1, this.tmp.length - 1);
-		stdin.value = this.tmp[this.line];
-		console.log("Line:", this.line);
+	join(...args) {
+		let out;
+		for(let arg of args) {
+			if(out === undefined) {
+				out = arg;
+			}
+			else {
+				out += "/" + arg;
+			}
+		}
+		return this.normalize(out);
 	}
 };
-bash_history.tmp = bash_history.history.slice();
-bash_history.tmp.unshift("");
+
+function span(txt, k) {
+	let el = document.createElement('span');
+	el.innerText = txt;
+	el.className = k;
+	return el;
+}
+
+/*
+ * Create a promise that will never be fulfilled
+ *  This is used for commands which reload the page so they don't
+ *  exit early and write the prompt beforehand
+**/
+function liar() {
+	return new Promise(() => 0);
+}
 
 let shell;
 todo.push(() => {
@@ -65,51 +73,8 @@ todo.push(() => {
 		prompt = current.firstChild,
 		stdin = $id("stdin");
 	
-	const $path = {
-		normalize(p) {
-			let a = (p[0] === '/');
-			let f = p.split(/[\\\/]/g);
-			for(let i = 0; i < f.length; ++i) {
-				if(f[i] === "" || f[i] === '.') {
-					f.splice(i--, 1);
-				}
-			}
-			
-			return (a? "/" : "") + f.join("/");
-		},
-		isAbsolute(p) {
-			return (p[0] === '/');
-		},
-		join(...args) {
-			let out;
-			for(let arg of args) {
-				if(out === undefined) {
-					out = arg;
-				}
-				else {
-					out += "/" + arg;
-				}
-			}
-			return this.normalize(out);
-		}
-	};
-	
 	function realign() {
 		stdin.style.textIndent = window.getComputedStyle(prompt).width;
-	}
-	
-	function span(txt, k) {
-		let el = document.createElement('span');
-		el.innerText = txt;
-		el.className = k;
-		return el;
-	}
-	
-	// Create a promise that will never be fulfilled
-	//  This is used for commands which reload the page so they don't
-	//  exit early and write the prompt beforehand
-	function liar() {
-		return new Promise(() => 0);
 	}
 	
 	shell = {
@@ -341,20 +306,56 @@ todo.push(() => {
 			});
 		}
 	};
+
+	const bash_history = {
+		history: (() => {
+			let h = localStorage.getItem(user.name + ".history");
+			if(h) {
+				return JSON.parse(h);
+			}
+			
+			localStorage.setItem(user.name + '.history', '[]');
+			return [];
+		})(),
+		tmp: null,
+		
+		submit() {
+			this.history.unshift(this.tmp[this.line] = stdin.value);
+			localStorage.setItem(user.name + ".history", JSON.stringify(this.history));
+			this.tmp = this.history.slice();
+			this.tmp.unshift("");
+			this.line = 0;
+		},
+		line: 0,
+		
+		up() {
+			this.tmp[this.line] = stdin.value;
+			this.line = clamp(this.line + 1, this.tmp.length - 1);
+			stdin.value = this.tmp[this.line];
+			adjustHeight();
+		},
+		down() {
+			this.tmp[this.line] = stdin.value;
+			this.line = clamp(this.line - 1, this.tmp.length - 1);
+			stdin.value = this.tmp[this.line];
+			adjustHeight();
+		}
+	};
+	bash_history.tmp = bash_history.history.slice();
+	bash_history.tmp.unshift("");
 	
 	// Submit when ENTER is pressed without SHIFT
 	stdin.addEventListener("keydown", ev => {
-		if(!ev.shift) {
+		console.log("Shift", ev.shiftKey);
+		if(!ev.shiftKey) {
 			if(ev.key === "Enter") {
 				bash_history.submit();
 				shell.submit();
 			}
 			else if(ev.key === "ArrowUp") {
-				console.log('up');
 				bash_history.up();
 			}
 			else if(ev.key === "ArrowDown") {
-				console.log('down');
 				bash_history.down();
 			}
 			else {
