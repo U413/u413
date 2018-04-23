@@ -17,9 +17,9 @@ html
 		block styles
 			+style("main")
 		block scripts
+			script!= `var user = ${JSON.stringify(user || {name: 'nobody'})};`
 			+script("main")
 			+script("shell")
-			script!= `var user = ${JSON.stringify(user || {name: 'nobody'})};`
 	body
 		#shell
 			main#buffer

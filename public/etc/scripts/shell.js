@@ -22,19 +22,19 @@ function clamp(v, hi, lo=0) {
 
 const bash_history = {
 	history: (() => {
-		let h = localStorage.getItem("history");
+		let h = localStorage.getItem(user.name + ".history");
 		if(h) {
 			return JSON.parse(h);
 		}
 		
-		localStorage.setItem('history', '[]');
+		localStorage.setItem(user.name + '.history', '[]');
 		return [];
 	})(),
 	tmp: null,
 	
 	submit() {
 		this.history.unshift(this.tmp[this.line] = stdin.value);
-		localStorage.setItem("history", JSON.stringify(this.history));
+		localStorage.setItem(user.name + ".history", JSON.stringify(this.history));
 		this.tmp = this.history.slice();
 		this.tmp.unshift("");
 		this.line = 0;
