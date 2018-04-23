@@ -116,8 +116,8 @@ todo.push(() => {
 		cmds: {
 			// Simple one-liner commands don't need their own files
 			async cd(rest) {
-				let p = $pathnormalize(rest);
-				if(!$pathisAbsolute(p)) p = $pathjoin(cwd, p);
+				let p = $path.normalize(rest);
+				if(!$path.isAbsolute(p)) p = $path.join(cwd, p);
 				
 				window.location.replace(p);
 				return await new Promise(() => 0);
