@@ -6,7 +6,7 @@
 
 const
 	path = window.location.pathname,
-	[, cwd, file] = /^(.+\/)(.*)?$/.exec(path);
+	[, cwd, file] = /^(.*\/)(.*)?$/.exec(path);
 
 function clamp(v, hi, lo=0) {
 	if(v > hi) {
