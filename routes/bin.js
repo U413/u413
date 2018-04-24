@@ -90,7 +90,7 @@ router.use("/newtopic", async (req, res, next) => {
 });
 
 router.use("/reply", async (req, res, next) => {
-	if(req.user) {
+	if(req.user && req.user.id) {
 		await db.topic.reply(req.body.topic, req.user.id, req.body.body);
 		
 		res.status(200).end("Success");

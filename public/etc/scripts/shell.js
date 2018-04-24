@@ -146,6 +146,8 @@ todo.push(() => {
 						})).then(topic => {
 							window.location.replace(`/var/${board}/${topic}`);
 							return liar();
+						}).catch(err => {
+							shell.error(`${err.status}: ${err.xhr.response}`);
 						});
 					}
 					else {
@@ -161,6 +163,8 @@ todo.push(() => {
 						board, topic: parseInt(topic, 16), body
 					}), 'application/json').then(() => {
 						window.location.replace(`/var/${board}/${topic}`);
+					}).catch(err => {
+						shell.error(`${err.status}: ${err.xhr.response}`);
 					});
 				}
 				else {
