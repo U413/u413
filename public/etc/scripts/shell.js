@@ -193,6 +193,7 @@ todo.push(() => {
 				await fetch("post", "/bin/logout", "{}").
 					then(res => {
 						user = {name: 'nobody'};
+						bash_history.clear();
 					}).
 					catch(err => shell.error(err));
 			},
@@ -295,6 +296,7 @@ todo.push(() => {
 		// Read from stdin and fulfill a promise when it's submitted
 		async read() {
 			stdin.disabled = false;
+			stdin.style.textIndent = "0";
 			stdin.focus();
 			
 			return await new Promise((ok, no) => {
@@ -339,6 +341,12 @@ todo.push(() => {
 			this.line = clamp(this.line - 1, this.tmp.length - 1);
 			stdin.value = this.tmp[this.line];
 			adjustHeight();
+		},
+		
+		clear() {
+			this.history = [];
+			this.tmp = [""];
+			localStorage.setItem(user.name + ".history", "[]");
 		}
 	};
 	bash_history.tmp = bash_history.history.slice();
@@ -346,7 +354,6 @@ todo.push(() => {
 	
 	// Submit when ENTER is pressed without SHIFT
 	stdin.addEventListener("keydown", ev => {
-		console.log("Shift", ev.shiftKey);
 		if(!ev.shiftKey) {
 			if(ev.key === "Enter") {
 				bash_history.submit();
