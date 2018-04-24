@@ -6,6 +6,7 @@
 drop table if exists metadata cascade;
 drop table if exists users cascade;
 drop table if exists groups cascade;
+drop table if exists subgroups cascade;
 drop table if exists members cascade;
 drop table if exists boards cascade;
 drop table if exists topics cascade;
