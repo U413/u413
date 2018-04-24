@@ -37,7 +37,6 @@ router.use("/:boardid/:topicid", async (req, res, next) => {
 		return next();
 	}
 	
-	console.log(op.author);
 	op.author = await db.user.byId(op.author);
 	
 	let replies = await db.topic.replies(topicid);

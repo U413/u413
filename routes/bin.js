@@ -57,7 +57,6 @@ router.route('/login').
 	});
 
 router.use('/logout', (req, res, next) => {
-console.log("HELLO??");
 	// client-sessions is incompatible with passport's logout()
 	//req.logout();
 	req.user = {};
@@ -78,8 +77,7 @@ router.use("/newtopic", async (req, res, next) => {
 		let
 			data = JSON.parse(req.body),
 			board = await db.board.byName(data.board);
-			
-		console.log("user", req.user);
+		
 		let topic = await db.topic.create(board.id, req.user.id, data.title, data.body);
 		
 		res.status(200).end(topic.id.toString(16));

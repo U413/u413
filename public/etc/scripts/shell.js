@@ -174,7 +174,10 @@ todo.push(() => {
 			async useradd(rest) {
 				let m = /(\S+)\s+(\S+)/.exec(rest);
 				if(m) {
-					await fetch("post", "/bin/useradd", `name=${m[1]}&pass=${m[2]}`, "application/x-www-form-urlencoded").
+					await fetch("post", "/bin/useradd", JSON.stringify({
+						name: m[1],
+						pass: m[2]
+					}), "application/json").
 						then(res => window.location.replace("/var/bulletin")).
 						catch(err => shell.error(err));
 				}
@@ -185,8 +188,14 @@ todo.push(() => {
 			async login(rest) {
 				let m = /(\S+)\s+(\S+)/.exec(rest);
 				if(m) {
-					await fetch("post", "/bin/login", `name=${m[1]}&pass=${m[2]}`, "application/x-www-form-urlencoded").
-						then(res => user = JSON.parse(res)).
+					await fetch("post", "/bin/login", JSON.stringify({
+						name: m[1],
+						pass: m[2]
+					}), "application/json").
+						then(res => {
+							bash_history.clear();
+							user = JSON.parse(res);
+						}).
 						catch(err => shell.error(err.xhr.response || "Unknown username or password"));
 				}
 				else {
@@ -285,7 +294,13 @@ todo.push(() => {
 			buffer.innerHTML += html;
 		},
 		wrap(k, args) {
-			this.write(args.map(v => `<div class="${k}">${v}</div>`).join(""));
+			this.write(args.map(v =>
+				`<div class="${k}">` +
+					v.
+						replace(/\n/g, '<br/>').
+						replace(/\t| {4}/g, '<span class="tab"></span>')
+				+ "</div>"
+			).join(""));
 		},
 		log(...args) {
 			this.wrap('item', args);
