@@ -68,7 +68,7 @@ function liar() {
 let shell;
 todo.push(() => {
 	let
-		buffer = $id("buffer"),
+		stdout = $id("stdout"),
 		current = $id("current"),
 		prompt = current.firstChild,
 		stdin = $id("stdin");
@@ -77,15 +77,77 @@ todo.push(() => {
 		stdin.style.textIndent = window.getComputedStyle(prompt).width;
 	}
 	
+	var env, history;
+	const storage = {
+		load() {
+			return JSON.parse(localStorage.getItem(user.name));
+		},
+		store() {
+			localStorage.setItem(user.name, JSON.stringify({
+				env, history
+			}));
+		}
+	}
+	
+	let init = storage.load();
+	if(init === null) {
+		init = {
+			env: {},
+			history: []
+		};
+		storage.store();
+	}
+	var {env, history} = init;
+	Object.assign(history, {
+		tmp: Array.from(history),
+		line: 0,
+		submit() {
+			this.unshift(this.tmp[this.line] = stdin.value);
+			storage.store();
+			this.tmp = this.slice();
+			this.tmp.unshift("");
+			this.line = 0;
+		},
+		up() {
+			this.tmp[this.line] = stdin.value;
+			this.line = clamp(this.line + 1, this.tmp.length - 1);
+			stdin.value = this.tmp[this.line];
+			adjustHeight();
+		},
+		down() {
+			this.tmp[this.line] = stdin.value;
+			this.line = clamp(this.line - 1, this.tmp.length - 1);
+			stdin.value = this.tmp[this.line];
+			adjustHeight();
+		},
+		clear() {
+			// In-place clear
+			this.length = 0;
+			this.tmp = [""];
+			storage.store();
+		}
+	});
+	
 	shell = {
+		env, history,
+		set history(v) {
+			throw new Error("Do not overwrite history");
+		},
+		stdout: stdout, stdin,
 		cmds: {
+			async set(rest) {
+				let kv = /^\s*(\S+)\s*(.+)\s*$/g.exec(rest);
+				if(kv) {
+					shell.env[kv[1]] = kv[2];
+				}
+			},
 			// Simple one-liner commands don't need their own files
 			async cd(rest) {
 				let p = $path.normalize(rest);
 				if(!$path.isAbsolute(p)) p = $path.join(cwd, p);
 				
 				window.location.replace(p);
-				return await new Promise(() => 0);
+				return await liar();
 			},
 			async help(rest) {
 				let out = (() => {
@@ -121,7 +183,7 @@ todo.push(() => {
 				});
 			},
 			async clear() {
-				buffer.innerHTML = "";
+				stdout.innerHTML = "";
 			},
 			async pwd() {
 				shell.log(cwd);
@@ -193,7 +255,7 @@ todo.push(() => {
 						pass: m[2]
 					}), "application/json").
 						then(res => {
-							bash_history.clear();
+							bash.clear();
 							user = JSON.parse(res);
 						}).
 						catch(err => shell.error(err.xhr.response || "Unknown username or password"));
@@ -206,7 +268,7 @@ todo.push(() => {
 				await fetch("post", "/bin/logout", "{}").
 					then(res => {
 						user = {name: 'nobody'};
-						bash_history.clear();
+						bash.clear();
 					}).
 					catch(err => shell.error(err));
 			},
@@ -231,14 +293,14 @@ todo.push(() => {
 			stdin.focus();
 			stdin.setSelectionRange(cvl, cvl);
 		},
-		// Write the prompt to the buffer
+		// Write the prompt to the stdout
 		echoPrompt() {
 			let item = document.createElement('div');
 			item.className = "item";
 			prompt.remove();
 			item.appendChild(prompt);
 			item.appendChild(span(stdin.value, 'cmd'));
-			buffer.appendChild(item);
+			stdout.appendChild(item);
 			
 			stdin.disabled = true;
 		},
@@ -262,7 +324,14 @@ todo.push(() => {
 		},
 		// Do whatever it will with the current input
 		async submit() {
-			let value = stdin.value;
+			storage.store();
+			
+			// Replace environment variables
+			let value = stdin.value.replace(
+				/(?!\\)\$(?:(\w+)|\{(\w+)\})/g, ($0, $1, $2) => {
+				let k = $1 || $2;
+				return k in this.env? this.env[k] : "";
+			});
 			this.echoPrompt();
 			stdin.value = "";
 			
@@ -289,9 +358,9 @@ todo.push(() => {
 		// Target handler for the current input
 		target: null,
 		
-		// Concatenate raw HTML to the buffer
+		// Concatenate raw HTML to the stdout
 		write(html) {
-			buffer.innerHTML += html;
+			stdout.innerHTML += html;
 		},
 		wrap(k, args) {
 			this.write(args.map(v =>
@@ -327,62 +396,18 @@ todo.push(() => {
 			});
 		}
 	};
-
-	const bash_history = {
-		history: (() => {
-			let h = localStorage.getItem(user.name + ".history");
-			if(h) {
-				return JSON.parse(h);
-			}
-			
-			localStorage.setItem(user.name + '.history', '[]');
-			return [];
-		})(),
-		tmp: null,
-		
-		submit() {
-			this.history.unshift(this.tmp[this.line] = stdin.value);
-			localStorage.setItem(user.name + ".history", JSON.stringify(this.history));
-			this.tmp = this.history.slice();
-			this.tmp.unshift("");
-			this.line = 0;
-		},
-		line: 0,
-		
-		up() {
-			this.tmp[this.line] = stdin.value;
-			this.line = clamp(this.line + 1, this.tmp.length - 1);
-			stdin.value = this.tmp[this.line];
-			adjustHeight();
-		},
-		down() {
-			this.tmp[this.line] = stdin.value;
-			this.line = clamp(this.line - 1, this.tmp.length - 1);
-			stdin.value = this.tmp[this.line];
-			adjustHeight();
-		},
-		
-		clear() {
-			this.history = [];
-			this.tmp = [""];
-			localStorage.setItem(user.name + ".history", "[]");
-		}
-	};
-	bash_history.tmp = bash_history.history.slice();
-	bash_history.tmp.unshift("");
 	
 	// Submit when ENTER is pressed without SHIFT
 	stdin.addEventListener("keydown", ev => {
 		if(!ev.shiftKey) {
 			if(ev.key === "Enter") {
-				bash_history.submit();
 				shell.submit();
 			}
 			else if(ev.key === "ArrowUp") {
-				bash_history.up();
+				shell.history.up();
 			}
 			else if(ev.key === "ArrowDown") {
-				bash_history.down();
+				shell.history.down();
 			}
 			else {
 				return;
