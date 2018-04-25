@@ -40,7 +40,9 @@ html
 					span @
 					span.host u413.com
 					span :
-					span.path= cwd || "./"
+					- var p = path.parse(cwd)
+					span.dir= p.dir + '/'
+					span.base= `${p.base}${p.ext}`
 					span.access= user.access || "$"
 					span &nbsp;
 			textarea#stdin(autofocus rows=1)

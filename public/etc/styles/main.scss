@@ -105,17 +105,23 @@ a, a:visited {
 /* Classes */
 
 #shell {
-	.user, .host {
+	.user {
 		color: limegreen;
+	}
+	.host {
+		color: grey;
 	}
 	.nobody {
 		color: crimson;
 	}
-	.path {
-		color: cornflowerblue;
-	}
 	.access {
 		color: cyan;
+	}
+	.dir {
+		color: cornflowerblue;
+	}
+	.base {
+		color: gold;
 	}
 }
 
@@ -123,7 +129,7 @@ a, a:visited {
 	position: absolute;
 }
 
-.prompt, .nobody, .user, .host, .path, .access {
+.prompt > * {
 	display: inline-block;
 	font-weight: bold;
 }

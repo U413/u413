@@ -23,6 +23,7 @@ require("./ipc");
 
 app.set('view engine', 'pug');
 app.locals.config = config;
+app.locals.path = require("path");
 app.locals.baseurl = `${config.scheme}://${config.domain}`;
 
 app.use(require("./gitpush"));

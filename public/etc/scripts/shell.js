@@ -332,6 +332,7 @@ todo.push(() => {
 				let k = $1 || $2;
 				return k in this.env? this.env[k] : "";
 			});
+			console.log(value);
 			this.echoPrompt();
 			stdin.value = "";
 			
