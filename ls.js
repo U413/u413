@@ -59,12 +59,22 @@ module.exports = {
 		});
 	},
 	virtualStat(data) {
-		return new VirtualStats(data);
+		if(typeof data === "string") {
+			return new VirtualStats({name: data});
+		}
+		else {
+			return new VirtualStats(data);
+		}
 	},
 	virtualDir(data) {
-		return new VirtualStats({
-			filetype: 'd', ...data
-		});
+		if(typeof data === "string") {
+			return new VirtualStats({filetype: 'd', name: data});
+		}
+		else {
+			return new VirtualStats({
+				filetype: 'd', ...data
+			});
+		}
 	},
 	enforceTrailingSlash() {
 		return function(req, res, next) {
@@ -75,5 +85,18 @@ module.exports = {
 				next();
 			}
 		};
+	},
+	handle(files) {
+		return function(req, res, next) {
+			if(req.accepts('html')) {
+				res.render('ls', {files});
+			}
+			else if(req.accepts('json')) {
+				return JSON.stringify(files);
+			}
+			else {
+				res.status(406).end();
+			}
+		}
 	}
 }

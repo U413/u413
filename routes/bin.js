@@ -12,23 +12,22 @@ const
 const
 	ls = requireRoot("./ls"),
 	log = requireRoot("./log"),
-	db = requireRoot('./db');
+	db = requireRoot('./db'),
+	route = requireRoot("./route");
 
 const router = new express.Router();
 
-router.use(/^\/$/, (req, res) => {
-	res.render('ls', {
-		files: [
-			ls.virtualStat({name: "login"}),
-			ls.virtualStat({name: "logout"}),
-			ls.virtualStat({name: "useradd"}),
-			ls.virtualStat({name: "newtopic"}),
-			ls.virtualStat({name: "reply"}),
-			ls.virtualStat({name: "bulletin"}),
-			ls.virtualStat({name: "sql"}),
-		]
-	})
-});
+router.use(/^\/$/, ls.handle([
+	ls.virtualStat("login"),
+	ls.virtualStat("logout"),
+	ls.virtualStat("useradd"),
+	ls.virtualStat("newtopic"),
+	ls.virtualStat("reply"),
+	ls.virtualStat("bulletin"),
+	ls.virtualStat("sql"),
+]));
+
+router.use(route.leaf((req, res, next) => next()));
 
 router.route('/login').
 	post((req, res, next) => {

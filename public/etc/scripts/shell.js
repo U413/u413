@@ -368,7 +368,7 @@ todo.push(() => {
 				`<div class="${k}">` +
 					v.
 						replace(/\n/g, '<br/>').
-						replace(/\t| {4}/g, '<span class="tab"></span>')
+						replace(/\t| {4}/g, span('tab', '\t'))
 				+ "</div>"
 			).join(""));
 		},
