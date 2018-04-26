@@ -23,7 +23,7 @@ log.info("init routes");
 
 const router = new express.Router();
 
-router.get(/^\/?$/g, async (req, res) => {
+router.get(/^\/?$/, async (req, res) => {
 	let files = [
 		ls.virtualDir({name: 'bin'}),
 		ls.virtualDir({name: 'dev'}),
