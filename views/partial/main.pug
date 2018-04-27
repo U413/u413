@@ -41,7 +41,10 @@ html
 					span.host u413.com
 					span :
 					- var p = path.parse(cwd)
-					span.dir= p.dir + '/'
+					if p.dir === '/'
+						span.dir /
+					else
+						span.dir= p.dir + '/'
 					span.base= `${p.base}${p.ext}`
 					span.access= user.access || "$"
 					span &nbsp;
