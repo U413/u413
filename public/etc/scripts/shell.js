@@ -97,6 +97,12 @@ todo.push(() => {
 	
 	try {
 		var {env, history} = storage.load();
+		if(!env) {
+			env = {};
+		}
+		if(!history) {
+			history = [];
+		}
 	}
 	catch(e) {
 		var env = {}, history = [];
