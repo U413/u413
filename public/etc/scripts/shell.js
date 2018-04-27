@@ -95,15 +95,12 @@ todo.push(() => {
 		}
 	}
 	
-	let init = storage.load();
-	if(init === null) {
-		init = {
-			env: {},
-			history: []
-		};
-		storage.store();
+	try {
+		var {env, history} = storage.load();
 	}
-	var {env, history} = init;
+	catch(e) {
+		var env = {}, history = [];
+	}
 	Object.assign(history, {
 		tmp: Array.from(history),
 		line: 0,
