@@ -80,7 +80,13 @@ todo.push(() => {
 	var env, history;
 	const storage = {
 		load() {
-			return JSON.parse(localStorage.getItem(user.name));
+			let store = localStorage.getItem(user.name);
+			if(store === null) {
+				return {env: {}, history: []};
+			}
+			else {
+				return JSON.parse(store);
+			}
 		},
 		store() {
 			localStorage.setItem(user.name, JSON.stringify({
