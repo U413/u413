@@ -21,14 +21,16 @@ Make sure the postgreSQL server is running.
      permissions!!)
 * tools/genssl generates SSL certificates (*NOTE:* doesn't work yet)
 
+### Working todo
+1. Markdown support
+2. User groups
+3. User profiles
+4. ls command
+5. Autocomplete
+
 ### Todo
 * Shell features
-  - History
   - Tab completion
-  - Shell rewrite
-    * Shell takes up the whole page
-	* Previous commands stay
-	* Use contentEditable instead of input/textarea
   - Proper command parsing and composition
 * Nicer styling
   - User-defined styling
@@ -52,7 +54,6 @@ Make sure the postgreSQL server is running.
   - More commands (examples..?)
 * Markdown support for bulletin and replies
 * Make reply work for bulletin
-* Directory index route for /etc/
 
 ### Long-term goals
 * Access to u413 via ssh and shell emulation
