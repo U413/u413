@@ -3,7 +3,8 @@
 const
 	express = require("express"),
 	path = require("path"),
-	fs = require("fs");
+	fs = require("fs"),
+	hl = require("highlight.js");
 
 const
 	db = requireRoot("./db"),

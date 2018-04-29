@@ -77,18 +77,21 @@ todo.push(() => {
 		stdin.style.textIndent = window.getComputedStyle(prompt).width;
 	}
 	
-	var env, history;
 	const storage = {
 		load() {
 			let store = localStorage.getItem(user.name);
 			if(store === null) {
-				return {env: {}, history: []};
+				console.info("Creating a new localStorage entry");
+				let v = {env: {}, history: []};
+				localStorage(JSON.stringify(v));
+				return v;
 			}
 			else {
 				return JSON.parse(store);
 			}
 		},
 		store() {
+			console.log("Storing", JSON.stringify({env,history}));
 			localStorage.setItem(user.name, JSON.stringify({
 				env, history
 			}));
@@ -96,21 +99,18 @@ todo.push(() => {
 	}
 	
 	try {
-		var {env, history} = storage.load();
-		if(!env) {
-			env = {};
-		}
-		if(!history) {
-			history = [];
-		}
+		var {env = {}, history = []} = storage.load();
 	}
 	catch(e) {
 		var env = {}, history = [];
+		console.error(e);
 	}
 	Object.assign(history, {
-		tmp: Array.from(history),
+		tmp: [""].concat(history),
 		line: 0,
 		submit() {
+			console.log("SUbmit");
+			console.log(this.tmp, this.line);
 			this.unshift(this.tmp[this.line] = stdin.value);
 			storage.store();
 			this.tmp = this.slice();
@@ -139,9 +139,6 @@ todo.push(() => {
 	
 	shell = {
 		env, history,
-		set history(v) {
-			throw new Error("Do not overwrite history");
-		},
 		stdout: stdout, stdin,
 		cmds: {
 			async set(rest) {
@@ -267,7 +264,7 @@ todo.push(() => {
 							bash.clear();
 							user = JSON.parse(res);
 						}).
-						catch(err => shell.error(err.xhr.response || "Unknown username or password"));
+						catch(err => shell.error(err.response || "Unknown username or password"));
 				}
 				else {
 					shell.error("Need both username and password");
@@ -322,7 +319,8 @@ todo.push(() => {
 			prompt.appendChild(span("@"));
 			prompt.appendChild(span("u413.com", "host"));
 			prompt.appendChild(span(":"));
-			prompt.appendChild(span(path, "path"));
+			prompt.appendChild(span(cwd, 'dir'));
+			prompt.appendChild(span(file, 'base'));
 			prompt.appendChild(span(user.access || "$", "access"));
 			prompt.appendChild(span("\u00a0")); // nbsp
 			
@@ -333,7 +331,7 @@ todo.push(() => {
 		},
 		// Do whatever it will with the current input
 		async submit() {
-			storage.store();
+			this.history.submit();
 			
 			// Replace environment variables
 			let value = stdin.value.replace(
@@ -341,7 +339,6 @@ todo.push(() => {
 				let k = $1 || $2;
 				return k in this.env? this.env[k] : "";
 			});
-			console.log(value);
 			this.echoPrompt();
 			stdin.value = "";
 			

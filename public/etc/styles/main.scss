@@ -125,6 +125,10 @@ a, a:visited {
 	}
 }
 
+.prompt {
+	display: inline-block;
+}
+
 #current .prompt {
 	position: absolute;
 }

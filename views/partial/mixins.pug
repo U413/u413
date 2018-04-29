@@ -14,7 +14,7 @@ mixin postinfo(post)
 mixin post(post)
 	.post
 		+postinfo(post)
-		blockquote= post.body
+		blockquote!= md.render(post.body)
 
 mixin size(size)
 	- const KB = 1024, MB = KB*KB, GB = KB*MB
