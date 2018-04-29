@@ -91,7 +91,6 @@ todo.push(() => {
 			}
 		},
 		store() {
-			console.log("Storing", JSON.stringify({env,history}));
 			localStorage.setItem(user.name, JSON.stringify({
 				env, history
 			}));
@@ -109,8 +108,6 @@ todo.push(() => {
 		tmp: [""].concat(history),
 		line: 0,
 		submit() {
-			console.log("SUbmit");
-			console.log(this.tmp, this.line);
 			this.unshift(this.tmp[this.line] = stdin.value);
 			storage.store();
 			this.tmp = this.slice();
@@ -189,7 +186,7 @@ todo.push(() => {
 				});
 			},
 			async clear() {
-				stdout.innerHTML = "";
+				shell.clear();
 			},
 			async pwd() {
 				shell.log(cwd);
@@ -261,10 +258,10 @@ todo.push(() => {
 						pass: m[2]
 					}), "application/json").
 						then(res => {
-							bash.clear();
+							shell.history.clear();
 							user = JSON.parse(res);
 						}).
-						catch(err => shell.error(err.response || "Unknown username or password"));
+						catch(err => shell.error("Unknown username or password"));
 				}
 				else {
 					shell.error("Need both username and password");
@@ -274,7 +271,7 @@ todo.push(() => {
 				await fetch("post", "/bin/logout", "{}").
 					then(res => {
 						user = {name: 'nobody'};
-						bash.clear();
+						shell.history.clear();
 					}).
 					catch(err => shell.error(err));
 			},
@@ -293,6 +290,11 @@ todo.push(() => {
 			
 			//...shell.cmds
 		},
+		
+		clear() {
+			stdout.innerHTML = "";
+		},
+		
 		// Utility for focusing on the current input
 		focus() {
 			let cvl = stdin.value.length;
@@ -382,6 +384,7 @@ todo.push(() => {
 			this.wrap('item', args);
 		},
 		error(...args) {
+			console.log("args", args);
 			if(args[0].xhr) {
 				console.log(args[0].xhr);
 			}
