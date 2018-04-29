@@ -38,14 +38,23 @@ html
 					else
 						span.user= user.name
 					span @
-					span.host u413.com
+					span.host
+						a(href="/") u413.org
 					span :
-					- var p = path.parse(cwd)
-					if p.dir === '/'
-						span.dir /
-					else
-						span.dir= p.dir + '/'
-					span.base= `${p.base}${p.ext}`
+					- var p = path.parse(cwd);
+					nav
+						span.dirs
+							- var d = '/';
+							- var pds = p.dir.split(/\//g).slice(1);
+							for f, x in pds
+								span.dir
+									if x === pds.length - 1
+										a(href=d + f)= '/' + f + '/'
+									else
+										a(href=d + f)= '/' + f
+								- d += f;
+						span.base
+							a(href=cwd)= p.base
 					span.access= user.access || "$"
 					span &nbsp;
 			textarea#stdin(autofocus rows=1)

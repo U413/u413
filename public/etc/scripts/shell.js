@@ -52,7 +52,23 @@ const $path = {
 function span(txt, k) {
 	let el = document.createElement('span');
 	el.innerText = txt;
-	el.className = k;
+	if(k) {
+		el.className = k;
+	}
+	return el;
+}
+
+function tag(name, attrs, ...content) {
+	let el = document.createElement(name);
+	for(let a in attrs) {
+		el.setAttribute(a, attrs[a]);
+	}
+	for(let c of content) {
+		if(typeof c === 'string') {
+			c = document.createTextNode(c);
+		}
+		el.appendChild(c);
+	}
 	return el;
 }
 
@@ -313,20 +329,32 @@ todo.push(() => {
 			stdin.disabled = true;
 		},
 		writePrompt() {
-			prompt = document.createElement("div");
-			prompt.className = "prompt";
-			prompt.appendChild(
-				span(user.name, user.name === 'nobody'? 'nobody' : 'user')
-			);
-			prompt.appendChild(span("@"));
-			prompt.appendChild(span("u413.com", "host"));
-			prompt.appendChild(span(":"));
-			prompt.appendChild(span(cwd, 'dir'));
-			prompt.appendChild(span(file, 'base'));
-			prompt.appendChild(span(user.access || "$", "access"));
-			prompt.appendChild(span("\u00a0")); // nbsp
-			
-			current.appendChild(prompt);
+			var m = /^(.+?)\/([^\/]*)?$/.exec(path);
+			var p = m[1].split(/\//g);
+			current.appendChild(tag('div',
+				{class: 'prompt'},
+				span(user.name, user.name === 'nobody'? 'nobody' : 'user'),
+				span("@"),
+				tag('span', {class: 'host'},
+					tag('a', {href: 'u413.org'}, 'u413.org')
+				),
+				span(":"),
+				tag('nav', {},
+					tag('span', {class: 'dirs'},
+						...p.slice(1).map((v, x) => {
+							return tag('a',
+								{href: p.slice(0, x + 2).join('/') + '/'},
+								x === p.length - 1? '/' + v : `/${v}/`
+							);
+						})
+					),
+					tag('span', {class: 'base'},
+						tag('a', {href: [...p, file].join("/")}, file)
+					)
+				),
+				span(user.access || "$", "access"),
+				span("\u00a0")
+			));
 			
 			realign();
 			stdin.focus();
