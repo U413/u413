@@ -43,7 +43,7 @@ block body
 				tr
 					td.dir
 						a(href=`${cwd}${name}`)= name + "/"
-					td.note!= md.render(note)
+					td.note!= md.render(note || "")
 					td.size
 						+size(size)
 					td.time
@@ -55,7 +55,7 @@ block body
 				tr
 					td.base
 						a(href=`${cwd}${name}`)= name
-					td.note!= md.render(note)
+					td.note!= md.render(note || "")
 					td.size
 						+size(size)
 					td.time
