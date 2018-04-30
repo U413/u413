@@ -13,7 +13,7 @@ module.exports = {
 	**/
 	leaf(handler) {
 		return function(req, res, next) {
-			if(isDir(req.path)) {
+			if(isDir(req.originalUrl)) {
 				res.redirect(req.originalUrl.slice(0, -1));
 			}
 			else {

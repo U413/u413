@@ -25,6 +25,7 @@ router.use("/:boardid/:topicid", route.leaf(async (req, res, next) => {
 		boardname = req.params.boardname,
 		topicid = parseInt(req.params.topicid, 16);
 	
+	console.log("Parsed:", topicid);
 	// NaN
 	if(topicid !== topicid) {
 		return next();
