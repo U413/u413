@@ -163,7 +163,8 @@ todo.push(() => {
 			// Simple one-liner commands don't need their own files
 			async cd(rest) {
 				let p = $path.normalize(rest);
-				if(!$path.isAbsolute(p)) p = $path.join(cwd, p);
+				if(!$path.isAbsolute(p))
+					p = $path.join(path, p);
 				
 				window.location.replace(p);
 				return await liar();

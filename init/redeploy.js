@@ -11,7 +11,7 @@ const
  	crypto = require("crypto");
 
 const
-	log = require("./log");
+	log = requireRoot("./log");
 
 const router = module.exports = new express.Router();
 
