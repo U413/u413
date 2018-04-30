@@ -11,7 +11,6 @@ const
 	sass = require("node-sass"),
 	urlparse = require("url").parse,
 	express = require("express"),
-	sassMiddleware = require("node-sass-middleware"),
 	serveStatic = require("serve-static");
 
 const
