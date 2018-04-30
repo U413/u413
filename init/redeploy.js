@@ -17,9 +17,9 @@ const router = module.exports = new express.Router();
 
 log.info("init git webhook redeploy");
 
-// Catch an IO error if private/gitpush.secret doesn't exist
+// Catch an IO error if private/redeploy.secret doesn't exist
 try {
-	var secret = fs.readFileSync("private/gitpush.secret") + "";
+	var secret = fs.readFileSync("private/redeploy.secret") + "";
 }
 catch(e) {
 	log.info("Failed to init git webhook redeploy, missing file");
@@ -28,7 +28,7 @@ catch(e) {
 
 const auth = crypto.createHmac('sha1', secret);
 
-app.redeploy = function redeploy() {
+app.ipc.redeploy = function redeploy() {
 	// TODO: save session data
 	log.info("Redeploying server...");
 	spawn("/bin/bash", ["tools/redeploy.sh", process.pid], {

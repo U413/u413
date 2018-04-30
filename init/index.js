@@ -26,5 +26,6 @@ db.query('init');
 
 let router = module.exports = new express.Router();
 
+router.use(require("./redeploy"));
 router.use(require("./express"));
 router.use(require("./fs"));

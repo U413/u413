@@ -27,8 +27,6 @@ app.locals.path = require("path");
 app.locals.baseurl = `${config.scheme}://${config.domain}`;
 app.locals.md = require("./markdown");
 
-app.use(require("./gitpush"));
-
 app.use(require("./init/"));
 
 let port = process.env.PORT || 8080;

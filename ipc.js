@@ -11,33 +11,34 @@ const
 
 const
 	log = require("./log");
-	
-app.reload = function reload() {
-	spawn("/bin/bash", ["tools/reload.sh", process.pid], {
-		detached: true,
-		stdio: 'inherit'
-	}).unref();
+
+app.ipc = {
+	reload() {
+		spawn("/bin/bash", ["tools/reload.sh", process.pid], {
+			detached: true,
+			stdio: 'inherit'
+		}).unref();
+	}
 }
 
 const ipcname = 'private/ipc.sock';
 
+// Make sure there isn't a file where we want the socket.
 if(fs.statSync(ipcname)) {
 	fs.unlinkSync(ipcname);
 }
 
 net.createServer(conn => {
 	conn.on('data', data => {
-		data = (data + "").trim();
-		switch(data) {
-			case 'redeploy':
-				if(app.redeploy) {
-					return app.redeploy();
-				}
-				else {
-					return conn.write("git webhooks are not enabled\n");
-				}
-			case "reload":
-				return app.reload();
+		let m = /^\s*(\S+)(.*)\s*$/.exec((data + ""));
+		if(m) {
+			let fn = app.ipc[m[1]];
+			if(typeof fn === 'function') {
+				fn(m[2]);
+			}
+			else {
+				log.error("Received invalid IPC signal:", JSON.stringify(data));
+			}
 		}
 	});
 }).listen(ipcname);
