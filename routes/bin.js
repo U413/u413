@@ -17,17 +17,19 @@ const
 
 const router = new express.Router();
 
-router.use(/^\/$/, ls.enforceTrailingSlash());
-router.use(/^\/$/, ls.handle([
-	ls.virtualStat("login"),
-	ls.virtualStat("logout"),
-	ls.virtualStat("useradd"),
-	ls.virtualStat("newtopic"),
-	ls.virtualStat("reply"),
-	ls.virtualStat("bulletin"),
-	ls.virtualStat("sql"),
-]));
+router.use(/^\/$/, route.dir(
+	ls.handle([
+		ls.virtualStat("login"),
+		ls.virtualStat("logout"),
+		ls.virtualStat("useradd"),
+		ls.virtualStat("newtopic"),
+		ls.virtualStat("reply"),
+		ls.virtualStat("bulletin"),
+		ls.virtualStat("sql"),
+	])
+));
 
+// Everything else in this directory is a leaf
 router.use(route.leaf((req, res, next) => next()));
 
 router.route('/login').

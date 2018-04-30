@@ -8,6 +8,7 @@ class VirtualStats {
 	constructor(data) {
 		this.name = data.name;
 		this.filetype = data.filetype || 'f';
+		this.note = data.note || "";
 	}
 	
 	isDirectory() {
@@ -76,26 +77,27 @@ module.exports = {
 			});
 		}
 	},
-	enforceTrailingSlash() {
-		return function(req, res, next) {
-			if(req.originalUrl[req.originalUrl.length - 1] !== '/') {
-				res.redirect(req.originalUrl + '/');
+	handle(ls) {
+		if(typeof ls !== 'function') {
+			let files = ls;
+			ls = function() { return files; }
+		}
+		
+		return async function(req, res, next) {
+			let files = await ls(req);
+			if(files) {
+				if(req.accepts('html')) {
+					res.render('ls', {files});
+				}
+				else if(req.accepts('json')) {
+					return JSON.stringify(files);
+				}
+				else {
+					res.status(406).end();
+				}
 			}
 			else {
 				next();
-			}
-		};
-	},
-	handle(files) {
-		return function(req, res, next) {
-			if(req.accepts('html')) {
-				res.render('ls', {files});
-			}
-			else if(req.accepts('json')) {
-				return JSON.stringify(files);
-			}
-			else {
-				res.status(406).end();
 			}
 		}
 	}

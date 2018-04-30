@@ -323,7 +323,7 @@ todo.push(() => {
 			item.className = "item";
 			prompt.remove();
 			item.appendChild(prompt);
-			item.appendChild(span(stdin.value, 'cmd'));
+			item.appendChild(tag('kbd', {class: 'cmd'}, stdin.value));
 			stdout.appendChild(item);
 			
 			stdin.disabled = true;
@@ -331,7 +331,7 @@ todo.push(() => {
 		writePrompt() {
 			var m = /^(.+?)\/([^\/]*)?$/.exec(path);
 			var p = m[1].split(/\//g);
-			current.appendChild(tag('div',
+			current.appendChild(prompt = tag('div',
 				{class: 'prompt'},
 				span(user.name, user.name === 'nobody'? 'nobody' : 'user'),
 				span("@"),
@@ -342,9 +342,11 @@ todo.push(() => {
 				tag('nav', {},
 					tag('span', {class: 'dirs'},
 						...p.slice(1).map((v, x) => {
-							return tag('a',
-								{href: p.slice(0, x + 2).join('/') + '/'},
-								x === p.length - 1? '/' + v : `/${v}/`
+							return tag('span', {class: 'dir'},
+								tag('a',
+									{href: p.slice(0, x + 2).join('/') + '/'},
+									x === p.length - 1? '/' + v : `/${v}/`
+								)
 							);
 						})
 					),

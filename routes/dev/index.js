@@ -12,18 +12,16 @@ const
 	express = require("express")
 
 const
+	route = requireRoot("./route"),
 	ls = requireRoot('./ls');
 
 let router = new express.Router();
 
 router.use("/stdout", require("./stdout"));
-router.use('/', ls.enforceTrailingSlash());
-router.use('/', (req, res, next) => {
-	res.render('ls', {
-		files: [
-			ls.virtualStat({name: 'stdout'}),
-		]
-	});
-});
+router.use('/', route.dir(
+	ls.handle([
+		ls.virtualStat("stdout")
+	])
+));
 
 module.exports = router;

@@ -3,6 +3,7 @@
 const MAXBUF = 1024*64;
 
 const
+	route = requireRoot("./route"),
 	log = requireRoot("./log");
 
 log.info("init /dev/stdout");
@@ -16,6 +17,6 @@ process.stdout.write = function(str, enc, fd) {
 }
 
 //let buf = "Not implemented";
-module.exports = function(req, res, next) {
+module.exports = route.leaf((req, res, next) => {
 	res.end(buf);
-}
+});

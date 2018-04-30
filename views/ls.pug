@@ -6,11 +6,13 @@ block body
 		thead
 			tr
 				th Name
+				th Note
 				th Size
 				th Modified
 		tbody
 			tr
 				td.dir: a(href="..") ../
+				td Parent directory
 				td
 				td
 			
@@ -37,10 +39,11 @@ block body
 			- dl.sort((a, b) => a.name.localeCompare(b.name));
 			- fl.sort((a, b) => a.name.localeCompare(b.name));
 			each d in dl
-				- var {mtime, size, name} = d;
+				- var {mtime, size, name, note} = d;
 				tr
 					td.dir
 						a(href=`${cwd}${name}`)= name + "/"
+					td.note!= md.render(note)
 					td.size
 						+size(size)
 					td.time
@@ -48,10 +51,11 @@ block body
 							time= mtime
 
 			each f in fl
-				- var {mtime, size, name} = f;
+				- var {mtime, size, name, note} = f;
 				tr
 					td.base
 						a(href=`${cwd}${name}`)= name
+					td.note!= md.render(note)
 					td.size
 						+size(size)
 					td.time

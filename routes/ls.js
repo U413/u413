@@ -5,7 +5,10 @@ const
 	path = require("path"),
 	fs = require("fs");
 
-const router = new express.Router();
+const
+	ls = requireRoot("./ls");
+
+const router = module.exports = new express.Router();
 
 // Directory listings
 router.use('/', (req, res, next) => {
@@ -15,30 +18,13 @@ router.use('/', (req, res, next) => {
 			next();
 		}
 		else {
-			// Make sure it ends with /
-			res.location(path.normalize(req.path, '/'));
-			fs.readdir(p, (err, files) => {
-				//assert(err === null)
-				res.render('ls', {
-					directory: res.path,
-					fileList: files.map(
-						v => {
-							return {
-								name: v,
-								get stat() {
-									return fs.statSync(path.join(p, v));
-								}
-							};
-						}
-					),
-					user: {
-						id: "TEST",
-						prompt: "$"
-					}
-				});
-			});
+			if(req.path.endsWith('/')) {
+				ls.handle(await ls.readdir(p))(req, res, next);
+			}
+			else {
+				// Make sure it ends with /
+				res.redirect(path.normalize(req.path, '/'));
+			}
 		}
 	});
 });
-
-module.exports = router;

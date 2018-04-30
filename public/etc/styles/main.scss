@@ -35,6 +35,10 @@ time {
 	}
 }
 
+kbd {
+	font-family: inherit;
+}
+
 textarea#stdin {
 	outline: none;
 	border: none;
@@ -72,6 +76,23 @@ input {
 
 table {
 	width: 100%;
+    border: none;
+    border-collapse: collapse;
+	
+	td {
+	    border-left: 1px solid #333;
+	}
+	td:first-child {
+	    border-left: none;
+	}
+	
+	p {
+		margin: 0;
+	}
+}
+
+.bulletin p {
+	margin: 0;
 }
 
 .tab {
