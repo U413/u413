@@ -17,6 +17,7 @@ const
 
 const router = new express.Router();
 
+router.use(/^\/$/, ls.enforceTrailingSlash());
 router.use(/^\/$/, ls.handle([
 	ls.virtualStat("login"),
 	ls.virtualStat("logout"),
