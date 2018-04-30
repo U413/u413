@@ -1,20 +1,24 @@
 /* Base styles */
 
+*::selection {
+	background-color: ghostwhite;
+	color: black;
+}
+
 body {
 	background-color: black;
 	color: ghostwhite;
 	font-family: courier;
 	margin: 0;
-	
-	/*
-	word-wrap: break-word;
-	word-break: break-all;
-	*/
 }
 
 footer {
 	text-align: center;
 	color: dimgrey;
+	
+	a {
+		font-weight: normal;
+	}
 }
 
 time {
@@ -48,11 +52,6 @@ textarea#stdin {
 	margin-left: -2px;
 	resize: none;
 	overflow: auto;
-	
-	&::selection {
-		background-color: ghostwhite;
-		color: black;
-	}
 }
 
 input {
@@ -77,26 +76,6 @@ table {
 
 .tab {
 	display: inline-block;
-	width: 4ch;
-}
-
-.error {
-	color: red;
-}
-
-#bulletin-post {
-	border-bottom: 1px solid darkgrey;
-}
-
-ul.horiz {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	
-	li {
-		display: inline-block;
-		margin-right: 1em;
-	}
 }
 
 a, a:visited {
@@ -105,17 +84,26 @@ a, a:visited {
 	font-weight: bold;
 }
 
-/* Classes */
-
 nav {
 	font-weight: bold;
-	a {
-		text-decoration: none;
+	display: inline-block;
+}
+
+.size .unit {
+	padding-left: 1ch;
+}
+
+.index {
+	.size {
+		text-align: right;
 	}
-	
-	.dirs {
-		color: cornflowerblue;
+	.time {
+		text-align: center;
 	}
+}
+
+.error {
+	color: red;
 }
 
 .dir {
@@ -125,42 +113,26 @@ nav {
 	color: gold;
 }
 
-#shell {
-	.user {
-		color: limegreen;
-	}
-	.host {
-		color: grey;
-	}
-	.nobody {
-		color: crimson;
-	}
-	.access {
-		color: cyan;
-	}
+.user {
+	color: limegreen;
+}
+.host {
+	color: grey;
+}
+.nobody {
+	color: crimson;
+}
+.access {
+	color: cyan;
 }
 
 .prompt {
 	display: inline-block;
+	font-weight: bold;
 }
 
 #current .prompt {
 	position: absolute;
-}
-
-.prompt > * {
-	display: inline-block;
-	font-weight: bold;
-}
-
-#cli, #stdin {
-	border: 1px solid grey;
-}
-.show-cli #cli {
-	display: inline-block;
-}
-.show-stdin #stdin {
-	display: inline-block;
 }
 
 .bulletin {
@@ -185,4 +157,14 @@ nav {
 
 .login input, .useradd input {
 	border-bottom: 1px solid darkgrey;
+}
+
+.size .value {
+	display: inline-block;
+	width: 4ch;
+}
+.size .unit {
+	display: inline-block;
+	width: 2ch;
+	text-align: right;
 }

@@ -74,7 +74,7 @@ router.use('/', async (req, res, next) => {
 		files: [
 			ls.virtualStat({name: "bulletin"})
 		].concat((await db.board.getAll()).map(board => {
-			return ls.virtualStat({name: board.name})
+			return ls.virtualDir(board);
 		}))
 	});
 });

@@ -18,17 +18,22 @@ mixin post(post)
 
 mixin size(size)
 	- const KB = 1024, MB = KB*KB, GB = KB*MB
-	if typeof size === "undefined"
-		
-	else if Number.isNaN(size)
-		|∅
-	else if !Number.isFinite(size)
-		|∞
-	else if size < KB
-		= `${size} B`
-	else if size < MB
-		= `${size} kB`
-	else if size < GB
-		= `${size} MB`
-	else
-		= `${size} GB`
+	span.size
+		if typeof size === "undefined"
+			
+		else if Number.isNaN(size)
+			|∅
+		else if !Number.isFinite(size)
+			|∞
+		else if size < KB
+			span.value= size
+			span.unit &nbsp;B
+		else if size < MB
+			span.value= (size/KB)|0
+			span.unit kB
+		else if size < GB
+			span.value= (size/MB)|0
+			span.unit MB
+		else
+			span.value= (size/GB)|0
+			span.unit GB
