@@ -65,9 +65,11 @@ function tag(name, attrs, ...content) {
 	}
 	for(let c of content) {
 		if(typeof c === 'string') {
-			c = document.createTextNode(c);
+			el.appendChild(document.createTextNode(c));
 		}
-		el.appendChild(c);
+		else if(c) {
+			el.appendChild(c);
+		}
 	}
 	return el;
 }
@@ -170,6 +172,9 @@ todo.push(() => {
 				return await liar();
 			},
 			async help(rest) {
+				if(rest === "") {
+					return await this.lsbin();
+				}
 				let out = (() => {
 					switch(rest) {
 						case 'cd': return "cd <file>";
@@ -330,7 +335,7 @@ todo.push(() => {
 			stdin.disabled = true;
 		},
 		writePrompt() {
-			var m = /^(.+?)\/([^\/]*)?$/.exec(path);
+			var m = /^(.*?)\/([^\/]*)?$/.exec(path);
 			var p = m[1].split(/\//g);
 			current.appendChild(prompt = tag('div',
 				{class: 'prompt'},
