@@ -13,12 +13,6 @@ const
 	log = require("./log");
 
 app.ipc = {
-	reload() {
-		spawn("/bin/bash", ["tools/reload.sh", process.pid], {
-			detached: true,
-			stdio: 'inherit'
-		}).unref();
-	},
 	restart() {
 		spawn("/bin/bash", ["tools/restart.sh", process.pid], {
 			detached: true,

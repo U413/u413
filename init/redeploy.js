@@ -41,8 +41,6 @@ router.use("/!!!gitpush!!!", (req, res, next) => {
 	log.info("Request for !!!gitpush!!!");
 	res.end("Success");
 	
-	console.log(req.headers);
-	
 	let body = "";
 	req.on('data', chunk => {
 		body += chunk;
@@ -50,8 +48,6 @@ router.use("/!!!gitpush!!!", (req, res, next) => {
 	req.on('end', () => {
 		let data = qs.parse(body);
 		auth.update(data.payload);
-		console.log("Data", data);
-		console.log("Digest:", auth.digest('hex'));
-		app.redeploy();
+		app.ipc.redeploy();
 	});
 });
