@@ -40,7 +40,7 @@ fs.readFile("nohup.out", (err, data) => {
 		log.info("Truncating nohup.out");
 		// Truncate to the max length, then remove the first line which is
 		//  probably incomplete now
-		data = data.slice(-MAXLEN).split(/\n/g).slice(1).join("\n");
+		data = (data + "").slice(-MAXLEN).split(/\n/g).slice(1).join("\n");
 		fs.writeFile("nohup.out", data, err => {
 			if(err) {
 				log.error(err);
