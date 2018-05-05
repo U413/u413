@@ -6,6 +6,7 @@ if(require.main === module) {
 }
 
 const
+	fs = require("fs"),
 	express = require("express");
 
 /**
@@ -19,6 +20,11 @@ requireRoot("./routes/dev/stdout");
 const
 	db = requireRoot("./db"),
 	log = requireRoot("./log");
+
+log.info("init pidfile");
+fs.writeFile("private/u413.pid", process.pid + "", err => {
+	log.error(err);
+});
 
 /** DB init **/
 log.info("init db/init.sql");
