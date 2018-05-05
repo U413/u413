@@ -13,4 +13,4 @@ $GIT clean -df
 # Install any new npm packages
 $NPM install
 
-source restart.sh
+source ./restart.sh

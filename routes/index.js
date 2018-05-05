@@ -146,8 +146,7 @@ router.use('/etc/styles', (req, res, next) => {
 
 router.use("/etc/passwd", (req, res, next) => {
 	db.user.list().then(users => {
-		res.setHeader("Content-Type", "application/json");
-		res.end(JSON.stringify(users));
+		res.type('json').end(JSON.stringify(users));
 	})
 })
 

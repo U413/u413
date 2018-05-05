@@ -47,11 +47,19 @@ fs.readFile("nohup.out", (err, data) => {
 			}
 		});
 	}
-})
+});
 
-log.info("init pidfile");
-fs.writeFile("private/u413.pid", process.pid + "", err => {
-	if(err) {
-		log.error(err);
+fs.readFile("private/u413.pid", (err, pid) => {
+	try {
+		process.kill((pid + "")|0, 0);
+		log.info("Killed old u413 instance");
 	}
+	catch(err) {}
+	
+	log.info("init pidfile");
+	fs.writeFile("private/u413.pid", process.pid + "", err => {
+		if(err) {
+			log.error(err);
+		}
+	});
 });

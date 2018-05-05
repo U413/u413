@@ -13,19 +13,18 @@ const
 
 const router = new express.Router();
 
-router.get('/bulletin', route.leaf(async (req, res) => {
+router.get('/bulletin$', route.leaf(async (req, res) => {
 	res.render('bulletin', {
 		bulletin: await db.bulletin.getAll()
 	});
 }));
 
 // Get a topic
-router.use("/:boardid/:topicid", route.leaf(async (req, res, next) => {
+router.use("/:boardid/:topicid$", route.leaf(async (req, res, next) => {
 	let
 		boardname = req.params.boardname,
 		topicid = parseInt(req.params.topicid, 16);
 	
-	console.log("Parsed:", topicid);
 	// NaN
 	if(topicid !== topicid) {
 		return next();
@@ -50,7 +49,7 @@ router.use("/:boardid/:topicid", route.leaf(async (req, res, next) => {
 }));
 
 // List the topics in a board
-router.use("/:board/", route.dir(async (req, res, next) => {
+router.use("/:board/$", route.dir(async (req, res, next) => {
 	let board = await db.board.byName(req.params.board);
 	
 	if(board) {
@@ -72,7 +71,7 @@ router.use("/:board/", route.dir(async (req, res, next) => {
 }));
 
 // List the boards (directory listing)
-router.use('/', route.dir(
+router.use("^/$", route.dir(
 	ls.handle(async () => [
 		ls.virtualStat("bulletin"),
 		...(await db.board.getAll()).map(board => ls.virtualDir(board))

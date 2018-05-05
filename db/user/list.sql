@@ -1,1 +1,1 @@
-select id, name, searchname, pass from users;
+select id, name, searchname from users;
