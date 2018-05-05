@@ -1,6 +1,6 @@
 #!/bin/bash
 
-exec tools/kill
+tools/kill
 
 # Run the server (defer to run)
 nohup tools/run & disown
