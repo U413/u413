@@ -31,7 +31,7 @@ const auth = crypto.createHmac('sha1', secret);
 app.ipc.redeploy = function redeploy() {
 	// TODO: save session data
 	log.info("Redeploying server...");
-	spawn("/bin/bash", ["tools/redeploy.sh", process.pid], {
+	spawn("/bin/bash", ["tools/redeploy", process.pid], {
 		detached: true,
 		stdio: 'inherit'
 	}).unref();

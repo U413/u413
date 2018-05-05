@@ -14,10 +14,21 @@ const
 
 app.ipc = {
 	restart() {
-		spawn("/bin/bash", ["tools/restart.sh", process.pid], {
+		log.info("Restarting server...");
+		spawn("/bin/bash", ["tools/restart", process.pid], {
 			detached: true,
 			stdio: 'inherit'
 		}).unref();
+	},
+	update() {
+		spawn("/bin/bash", ["tools/update", process.pid], {
+			detached: true,
+			stdio: 'inherit'
+		}).unref();
+	},
+	kill() {
+		log.info("Killing server...");
+		process.exit(0);
 	},
 	ls() {
 		console.log(Object.keys(this).join(" "));

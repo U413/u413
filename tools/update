@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Pull the latest version from git
+git fetch origin master
+git reset --hard FETCH_HEAD
+git clean -df
+
+# Install any new npm packages
+npm install

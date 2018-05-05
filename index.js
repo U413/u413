@@ -31,5 +31,15 @@ app.locals.ansicolor = require("ansicolor");
 app.use(require("./init/"));
 
 let port = process.env.PORT || 8080;
-log.info("Listening on port", port);
-app.listen(port);
+process.nextTick(function listen() {
+	try {
+		app.listen(port);
+	}
+	catch(e) {
+		log.error("Failed to listen to port", port, "retrying...");
+		timers.setTimeout(listen, 100);
+		return;
+	}
+	
+	log.info("Listening on port", port);
+});

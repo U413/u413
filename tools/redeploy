@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Apply all available updates to the server, then restart.
+
+exec tools/update
+exec tools/restart
