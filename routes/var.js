@@ -49,7 +49,7 @@ router.use("/:boardid/:topicid$", route.leaf(async (req, res, next) => {
 }));
 
 // List the topics in a board
-router.use("/:board/$", route.dir(async (req, res, next) => {
+router.use("/:board/?$", route.dir(async (req, res, next) => {
 	let board = await db.board.byName(req.params.board);
 	
 	if(board) {

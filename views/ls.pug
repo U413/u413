@@ -42,7 +42,7 @@ block body
 				- var {mtime, size, name, note} = d;
 				tr
 					td.dir
-						a(href=`${cwd}${name}`)= name + "/"
+						a(href=`${cwd}${name}/`)= name + "/"
 					td.note!= md.render(note || "")
 					td.size
 						+size(size)
