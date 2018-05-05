@@ -14,7 +14,7 @@ let
 		os.userInfo().username,
 	database = process.env.PGDATABASE || process.env.DB || "u413";
 	
-log.info("Starting PostgreSQL client with", {user, database});
+log.info("init PostgreSQL client with", {user, database});
 
 const client = new Client({
 	user, database,

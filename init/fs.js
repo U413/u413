@@ -33,3 +33,25 @@ function touch_dir_if_missing(dn) {
 );
 */
 touch_dir_if_missing("private");
+
+fs.readFile("nohup.out", (err, data) => {
+	const MAXLEN = 1024*100
+	if(!err && data.length > MAXLEN) {
+		log.info("Truncating nohup.out");
+		// Truncate to the max length, then remove the first line which is
+		//  probably incomplete now
+		data = data.slice(-MAXLEN).split(/\n/g).slice(1).join("\n");
+		fs.writeFile("nohup.out", data, err => {
+			if(err) {
+				log.error(err);
+			}
+		});
+	}
+})
+
+log.info("init pidfile");
+fs.writeFile("private/u413.pid", process.pid + "", err => {
+	if(err) {
+		log.error(err);
+	}
+});
