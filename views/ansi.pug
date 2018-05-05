@@ -1,0 +1,5 @@
+extends partial/main
+
+block body
+	for el in ansicolor.parse(data).spans
+		span(style=el.css)!= el.text.replace(/\n/g, '<br/>')

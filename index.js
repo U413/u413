@@ -26,6 +26,7 @@ app.locals.config = config;
 app.locals.path = require("path");
 app.locals.baseurl = `${config.scheme}://${config.domain}`;
 app.locals.md = require("./markdown");
+app.locals.ansicolor = require("ansicolor");
 
 app.use(require("./init/"));
 

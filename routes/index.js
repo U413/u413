@@ -38,6 +38,25 @@ router.get(/^\/?$/, async (req, res) => {
 	});
 });
 
+router.get("/nohup.out", (req, res, next) => {
+	if(req.user && req.user.name === "root") {
+		fs.readFile(
+			path.join(path.parse(require.main.filename).dir, "/nohup.out"),
+			(err, nohup) => {
+				if(err) {
+					res.status(500).end(err.stack);
+				}
+				else {
+					res.render("ansi", {data: nohup + ""});
+				}
+			}
+		);
+	}
+	else {
+		res.status(401).end("Permission denied");
+	}
+})
+
 router.use('/', serveStatic('public', {
 	extensions: ['txt', 'md']
 }));

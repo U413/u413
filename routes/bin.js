@@ -101,7 +101,8 @@ router.use("/reply", async (req, res, next) => {
 });
 
 router.post("/bulletin", async (req, res, next) => {
-	if(req.user) {
+	if(req.user && req.user.id) {
+		console.log("USER?", req.user);
 		await db.bulletin.add(req.user, req.body.slice(0, 140));
 		res.end("Success");
 	}

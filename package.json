@@ -7,6 +7,7 @@
 	"main": "index.js",
 	"author": "ConsciousCode",
 	"dependencies": {
+		"ansicolor": "^1.1.72",
 		"bcrypt": "^2.0.0",
 		"body-parser": "^1.18.2",
 		"client-sessions": "^0.8.0",
