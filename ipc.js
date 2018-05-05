@@ -18,6 +18,15 @@ app.ipc = {
 			detached: true,
 			stdio: 'inherit'
 		}).unref();
+	},
+	restart() {
+		spawn("/bin/bash", ["tools/restart.sh", process.pid], {
+			detached: true,
+			stdio: 'inherit'
+		}).unref();
+	},
+	ls() {
+		console.log(Object.keys(this).join(" "));
 	}
 }
 
@@ -30,7 +39,8 @@ if(fs.statSync(ipcname)) {
 
 net.createServer(conn => {
 	conn.on('data', data => {
-		let m = /^\s*(\S+)(.*)\s*$/.exec((data + ""));
+		data += '';
+		let m = /^\s*(\S+)(.*)\s*$/.exec((data));
 		if(m) {
 			let fn = app.ipc[m[1]];
 			if(typeof fn === 'function') {
