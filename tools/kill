@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # Kill the current u413 instance
-kill `cat private/u413.pid`
+kill `cat private/u413.pid` || echo "No current u413 process"
