@@ -1,0 +1,31 @@
+version: '2'
+services:
+  # Build-time only
+  node:
+    container_name: node
+    working_dir: /var/www
+    build: ./
+  
+  # DB server must be run
+  db:
+    container_name: db
+    image: postgres:alpine
+    restart: always
+    user: postgres
+    volumes:
+      - ./docker/initdb:/docker-entrypoint-initdb.d
+  # Main service
+  u413:
+    container_name: u413
+    image: alpine
+    labels:
+      Description: An executable container for u413
+    working_dir: /var/www
+    entrypoint: ./tools/run
+    volumes:
+      - .:/var/www
+    depends_on:
+      - db
+    expose:
+      - 8080/tcp
+      - 5432/tcp

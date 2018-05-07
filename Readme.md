@@ -9,7 +9,9 @@ To connect to the database, u413 uses the following environment variables:
 * PGDATABASE/DB (defaults to "u413")
 * PGPASSWORD/PASS
 
-A typical invocation: `DEBUG=1 USER=postgres PASS=password node .`
+Typically you'd just run `tools/run`, but a docker file has been included to
+ensure portability. To run that, `docker build . -t u413` just once, then
+`docker run -p$HOSTPORT:8080 --name u413 -t u413`.
 
 Make sure the postgreSQL server is running.
 

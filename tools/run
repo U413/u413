@@ -1,3 +1,4 @@
 #!/bin/bash
 
+echo Node: $(which node)
 DEBUG=1 PASS=`cat private/db.pwd` node .
