@@ -102,7 +102,6 @@ try {
 	
 	global.pre404 = function pre404(req, res, next) {
 		let n = naughty[req.ip] = (naughty[req.ip]|0) + 1;
-		console.log("Naughty", req.ip, n);
 		
 		if(passed.has(req.ip)) {
 			if(n > MAX404) {
@@ -130,7 +129,6 @@ catch(e) {
 	log.info("Failed to load private/honeypot.api");
 	global.pre404 = function pre404(req, res, next) {
 		let n = naughty[req.ip] = (naughty[req.ip]|0) + 1;
-		console.log("Naughty", req.ip, n);
 		if(n > MAX404) {
 			log.info("Reached maximum 404:", req.ip);
 			spamTheSpammer(req, res);
@@ -141,8 +139,4 @@ catch(e) {
 	}
 }
 
-router.use((req, res, next) => {
-	console.log("Here", req.url);
-	next();
-})
 router.use(/.*(php|ajax|drupal|jmx).*/i, spamTheSpammer);
