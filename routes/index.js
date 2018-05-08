@@ -154,6 +154,7 @@ router.use('/var/', require("./var"));
 router.use('/dev/', require("./dev/"));
 router.use('/bin/', require("./bin"));
 
+router.use(global.pre404);
 router.use(require("./404"));
 
 module.exports = router;

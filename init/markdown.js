@@ -20,4 +20,4 @@ const md = new MarkdownIt({
 	}
 });
 
-module.exports = md;
+module.exports = global.locals.md = md;

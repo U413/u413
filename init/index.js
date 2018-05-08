@@ -21,12 +21,19 @@ const
 	db = requireRoot("./db"),
 	log = requireRoot("./log");
 
+// Locals for pug rendering
+global.locals = {};
+
 /** DB init **/
 log.info("init database");
 db.query('init');
 
 let router = module.exports = new express.Router();
 
+router.use(require("./spam"));
+
 router.use(require("./redeploy"));
 router.use(require("./express"));
 router.use(require("./fs"));
+
+require("./markdown");

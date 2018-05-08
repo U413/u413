@@ -25,10 +25,10 @@ app.set('view engine', 'pug');
 app.locals.config = config;
 app.locals.path = require("path");
 app.locals.baseurl = `${config.scheme}://${config.domain}`;
-app.locals.md = require("./markdown");
 app.locals.ansicolor = require("ansicolor");
 
 app.use(require("./init/"));
+Object.assign(app.locals, global.locals);
 
 let port = process.env.PORT || 8080;
 process.nextTick(function listen() {
