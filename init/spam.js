@@ -20,9 +20,10 @@ const
 	VARIANCE = 1/8,
 	MAX404 = 10;
 
-function banIP(ip) {
+function banIP(ip, start) {
 	/* TODO */
-	log.info("Banned", ip, "(NotImplemented)");
+	let time = (Date.now() - start)/1000;
+	log.info("Banned", ip, "after", time, "seconds (NotImplemented)");
 }
 
 function randAmount() {
@@ -76,7 +77,7 @@ function spamTheSpammer(req, res) {
 	// Set the status to 200 so they don't try to exit early
 	res.status(200);
 	
-	let honey = byteify(makeHoney(req));
+	let honey = byteify(makeHoney(req)), start = Date.now();
 	
 	let running = true;
 	function spammy() {
@@ -87,7 +88,7 @@ function spamTheSpammer(req, res) {
 	}
 	res.on('close', () => {
 		running = false;
-		banIP(req.ip);
+		banIP(req.ip, start);
 	});
 }
 
