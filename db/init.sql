@@ -25,13 +25,20 @@ if to_regclass('users') is null then
 		0, 'nobody', 'nobody', null
 	);
 end if;
-end $$;
 
-create table if not exists groups (
-	id serial unique primary key not null,
-	name varchar(32) unique not null,
-	made timestamp default now() not null
-);
+if to_regclass('groups') is null then
+	create table groups (
+		id serial unique primary key not null,
+		name varchar(32) unique not null,
+		made timestamp default now() not null
+	);
+	
+	insert into groups (name) values ('root');
+	insert into groups (name) values ('admin');
+	insert into groups (name) values ('mod');
+end if;
+
+end $$;
 
 create table if not exists subgroups (
 	parent int references groups(id) on delete cascade not null,

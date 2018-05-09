@@ -154,6 +154,12 @@ const db = module.exports = {
 				}
 			})
 		},
+		inGroup(uid, gname) {
+			return queryFirst("user/ingroup", [uid, gname]);
+		},
+		groups(uid) {
+			return query("user/groups", [uid]);
+		},
 		byId(id) {
 			return queryFirst("user/byid", [id]);
 		},

@@ -22,7 +22,7 @@ router.use(cookieParser());
 router.use(require("./session"));
 router.use(require("./passport"));
 
-router.use((req, res, next) => {
+router.use(async (req, res, next) => {
 	res.locals.cwd = req.path;
 	res.locals.user = req.user;
 	next();

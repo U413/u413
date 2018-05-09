@@ -74,8 +74,21 @@ router.route('/useradd').
 		res.render('useradd');
 	});
 
+router.route("/groupadd").
+	post(async (req, res, next) => {
+		if(req.user && req.user.id && db.user.inGroup(req.user.id, "admin")) {
+			let data = JSON.parse(req.body);
+			
+			await db.group.create(data.name);
+			res.status(200).end("Success");
+		}
+		else {
+			res.status(401).end("You must be an admin to add a group");
+		}
+	});
+
 router.use("/newtopic", async (req, res, next) => {
-	if(req.user) {
+	if(req.user && req.user.id) {
 		let
 			data = JSON.parse(req.body),
 			board = await db.board.byName(data.board);
@@ -102,7 +115,6 @@ router.use("/reply", async (req, res, next) => {
 
 router.post("/bulletin", async (req, res, next) => {
 	if(req.user && req.user.id) {
-		console.log("USER?", req.user);
 		await db.bulletin.add(req.user, req.body.slice(0, 140));
 		res.end("Success");
 	}
@@ -111,8 +123,8 @@ router.post("/bulletin", async (req, res, next) => {
 	}
 });
 
-router.use("/sql", (req, res, next) => {
-	if(req.user.name === "root") {
+router.use("/sql", async (req, res, next) => {
+	if(await db.user.inGroup(req.user.id, "root")) {
 		db.rawQuery(req.body).then(
 			data => {
 				res.send(JSON.stringify(data));

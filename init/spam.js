@@ -44,9 +44,9 @@ function* htmlHoney() {
 	}
 }
 
-function makeHoney(req) {
+function makeHoney(req, res) {
 	if(req.accepts("html")) {
-		req.type("html");
+		res.type("html");
 		return htmlHoney();
 	}
 }
@@ -79,7 +79,7 @@ function spamTheSpammer(req, res) {
 	// Pretend we're PHP too!
 	res.setHeader("X-Powered-By", "PHP/5.4.0");
 	
-	let honey = byteify(makeHoney(req)), start = Date.now();
+	let honey = byteify(makeHoney(req, res)), start = Date.now();
 	
 	let running = true;
 	function spammy() {

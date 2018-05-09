@@ -14,6 +14,11 @@ const SALTS = 10;
 
 let router = module.exports = new express.Router();
 
+async function addAccess(user) {
+	user.access =
+		await db.user.inGroup(user.id, "root")? "#" : "$";
+}
+
 passport.serializeUser((user, done) => {
 	// Passport and client-sessions don't get along perfectly - on
 	//  error, passport sets req.user = null, but client-sessions
@@ -27,8 +32,15 @@ passport.serializeUser((user, done) => {
 		log.debug(e);
 	}
 });
-passport.deserializeUser((id, done) => {
-	db.user.byId(id).then(user => done(null, user || false));
+passport.deserializeUser(async (id, done) => {
+	try {
+		let user = await db.user.byId(id);
+		await addAccess(user);
+		done(null, user || false);
+	}
+	catch(e) {
+		done(e, null);
+	}
 })
 
 log.info("init passport strategy local-useradd");
@@ -44,8 +56,14 @@ passport.use('local-useradd', new LocalStrategy({
 	else {
 		let hash = await bcrypt.hash(pass, SALTS);
 		user = await db.user.add(name, hash);
-		log.debug("/bin/useradd:", user);
-		done(null, user);
+		if(user) {
+			await addAccess(user);
+			log.debug("/bin/useradd:", user);
+			done(null, user);
+		}
+		else {
+			done(null, false);
+		}
 	}
 }));
 
@@ -53,8 +71,20 @@ log.info("init passport strategy local-login");
 passport.use('local-login', new LocalStrategy({
 	usernameField: "name",
 	passwordField: "pass"
-}, (name, pass, done) => {
-	db.user.authenticate(name, pass).then(user => done(null, user || false));
+}, async (name, pass, done) => {
+	try {
+		let user = await db.user.authenticate(name, pass);
+		if(user) {
+			await addAccess(user);
+			done(null, user);
+		}
+		else {
+			done(null, false);
+		}
+	}
+	catch(err) {
+		done(err, null);
+	}
 }));
 
 router.use(passport.initialize());
