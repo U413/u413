@@ -17,7 +17,7 @@ const router = module.exports = express.Router();
 const
 	MAXTIMEOUT = 5000,
 	MAXBUFLEN = 8,
-	VARIANCE = 1/8,
+	VARIANCE = 1,
 	MAX404 = 10;
 
 function banIP(ip, start) {
@@ -69,6 +69,7 @@ function nextBytes(it, n) {
 		}
 		s += value;
 	}
+	return s;
 }
 
 // Middleware for handling spam
@@ -82,10 +83,11 @@ function spamTheSpammer(req, res) {
 	let running = true;
 	function spammy() {
 		setTimeout(() => {
-			res.write(nextBytes(honey, randAmount()*MAXBYTELEN));
+			res.write(nextBytes(honey, randAmount()*MAXBUFLEN));
 			if(running) spammy();
 		}, randAmount()*MAXTIMEOUT);
 	}
+	spammy();
 	res.on('close', () => {
 		running = false;
 		banIP(req.ip, start);
@@ -140,4 +142,11 @@ catch(e) {
 	}
 }
 
-router.use(/.*(php|ajax|drupal|jmx).*/i, spamTheSpammer);
+router.use((req, res, next) => {
+	if(/[?%=]|form|php|ajax|drupal|jmx/i.test(req.originalUrl)) {
+		spamTheSpammer(req, res);
+	}
+	else {
+		next();
+	}
+});
