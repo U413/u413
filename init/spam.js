@@ -6,8 +6,7 @@
 
 const
 	fs = require("fs"),
-	express = require("express"),
-	honeypot = require("honeypot");
+	express = require("express");
 
 const
 	log = requireRoot("./log");
@@ -34,15 +33,14 @@ function* htmlHoney() {
 	yield "<!DOCTYPE html><html><head><title>Admin panel</title></head><body>";
 	let depth = 0;
 	while(true) {
-		if(depth) {
-			if(Math.random() < 0.5) {
-				--depth;
-				yield "</div>";
-				continue;
-			}
+		if(depth && Math.random() < 0.5) {
+			--depth;
+			yield "</div>";
 		}
-		++depth;
-		yield "<div>";
+		else {
+			++depth;
+			yield "<div>";
+		}
 	}
 }
 
@@ -97,48 +95,14 @@ function spamTheSpammer(req, res) {
 global.pre404 = null;
 
 const naughty = {};
-try {
-	log.info("init honeypot");
-	const
-		pot = new honeypot(fs.readFileSync("private/honeypot.api") + ""),
-		passed = new Set();
-	
-	global.pre404 = function pre404(req, res, next) {
-		let n = naughty[req.ip] = (naughty[req.ip]|0) + 1;
-		
-		if(passed.has(req.ip)) {
-			if(n > MAX404) {
-				log.info("Reached maximum 404:", req.ip);
-				spamTheSpammer(req, res);
-			}
-			else {
-				next();
-			}
-		}
-		else {
-			pot.query(req.ip, (err, res) => {
-				if(!res) {
-					passed.add(req.ip);
-					next();
-				}
-				else {
-					spamTheSpammer();
-				}
-			});
-		}
+global.pre404 = function pre404(req, res, next) {
+	let n = naughty[req.ip] = (naughty[req.ip]|0) + 1;
+	if(n > MAX404) {
+		log.info("Reached maximum 404:", req.ip);
+		spamTheSpammer(req, res);
 	}
-}
-catch(e) {
-	log.info("Failed to load private/honeypot.api");
-	global.pre404 = function pre404(req, res, next) {
-		let n = naughty[req.ip] = (naughty[req.ip]|0) + 1;
-		if(n > MAX404) {
-			log.info("Reached maximum 404:", req.ip);
-			spamTheSpammer(req, res);
-		}
-		else {
-			next();
-		}
+	else {
+		next();
 	}
 }
 
