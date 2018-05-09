@@ -74,7 +74,7 @@ function nextBytes(it, n) {
 
 // Middleware for handling spam
 function spamTheSpammer(req, res) {
-	log.info("Spamming", req.ip, "for the crime of spamming");
+	log.info("Spamming", req.ip, "for accessing", req.originalUrl);
 	// Set the status to 200 so they don't try to exit early
 	res.status(200);
 	
@@ -82,8 +82,8 @@ function spamTheSpammer(req, res) {
 	
 	let running = true;
 	function spammy() {
+		res.write(nextBytes(honey, randAmount()*MAXBUFLEN));
 		setTimeout(() => {
-			res.write(nextBytes(honey, randAmount()*MAXBUFLEN));
 			if(running) spammy();
 		}, randAmount()*MAXTIMEOUT);
 	}
