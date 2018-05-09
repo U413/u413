@@ -46,6 +46,7 @@ function* htmlHoney() {
 
 function makeHoney(req) {
 	if(req.accepts("html")) {
+		req.type("html");
 		return htmlHoney();
 	}
 }
@@ -75,6 +76,8 @@ function spamTheSpammer(req, res) {
 	log.info("Spamming", req.ip, "for accessing", req.originalUrl);
 	// Set the status to 200 so they don't try to exit early
 	res.status(200);
+	// Pretend we're PHP too!
+	req.setHeader("X-Powered-By", "PHP/5.4.0");
 	
 	let honey = byteify(makeHoney(req)), start = Date.now();
 	
