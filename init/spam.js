@@ -77,7 +77,7 @@ function spamTheSpammer(req, res) {
 	// Set the status to 200 so they don't try to exit early
 	res.status(200);
 	// Pretend we're PHP too!
-	req.setHeader("X-Powered-By", "PHP/5.4.0");
+	res.setHeader("X-Powered-By", "PHP/5.4.0");
 	
 	let honey = byteify(makeHoney(req)), start = Date.now();
 	
