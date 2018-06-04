@@ -3,6 +3,25 @@
 class ShellError extends Error {}
 ShellError.prototype.name = "ShellError";
 
+async function invokeBin(cmd, args) {
+	let res = await fetch(cmd, {
+		method: "POST",
+		body: JSON.stringify(args),
+		credentials: "same-origin",
+		headers: {
+			"Accept": "application/json",
+			"Content-Type": "application/json"
+		}
+	});
+
+	if(res.ok) {
+		return res.json();
+	}
+	else {
+		throw new ShellError(res.status + ": " + await res.text());
+	}
+}
+
 class shReturn /* extends Error */ {
 	constructor(value) {
 		this.value = value;
@@ -14,6 +33,81 @@ const WHITELIST = [
 	"PATH", "USER", "PWD", "HOME", "path", "user"
 ];
 
+class Cache {
+	constructor(expire) {
+		this.expire = expire;
+		this.cache = {};
+	}
+
+	async generate(name, ...args) {
+		throw new Error("Not implemented Cache.generate");
+	}
+
+	async update(name, ...args) {
+		let data = await this.generate(name, ...args);
+		this.cache[name] = {data, expire: Date.now() + this.expire};
+		return data;
+	}
+
+	async get(name, ...args) {
+		if(name in this.cache) {
+			let c = this.cache[name];
+			if(c.expire < Date.now()) {
+				delete this.cache[name];
+			}
+			else {
+				return c.data;
+			}
+		}
+
+		return this.update(name, ...args);
+	}
+}
+
+class FetchCache extends Cache {
+	constructor() {
+		super(1000*60*60);
+	}
+
+	async generate(name, opt) {
+		if(name in fetchStatic.cache) {
+			let c = fetchStatic.cache[name];
+			if(Date.now() > c.expire) {
+				delete fetchStatic.cache[name];
+			}
+			else {
+				return c.data;
+			}
+		}
+
+		let res = await fetch(name, opt);
+		if(res.ok) {
+			let data = await res.text();
+			fetchStatic.cache[name] = {data, expire: Date.now() + 1000*60*60};
+
+			return data;
+		}
+		else {
+			throw new ShellError(res.status + ": " + await res.text());
+		}
+	}
+}
+
+class LsCache extends Cache {
+	constructor() {
+		super(1000*60);
+	}
+
+	async generate(target) {
+		return await invokeBin("/bin/ls", ["/bin/ls", {target}]);
+	}
+}
+
+async function fetchStatic(name, opt) {
+	return fetchStatic.cache.get(name, opt);
+}
+fetchStatic.cache = new FetchCache();
+
 class Shell {
 	constructor(parent, stdout, whitelist=WHITELIST) {
 		this.parent = parent;
@@ -21,6 +115,8 @@ class Shell {
 		this.interpreter = new InterpreterVisitor(this);
 		this.env = {};
 		this.whitelist = whitelist;
+
+		this.lsCache = new LsCache();
 	}
 
 	// Probably override this
@@ -43,13 +139,12 @@ class Shell {
 	async getExecutable(cmd) {
 		if(cmd.startsWith("/")) {
 			return async (shell, args)=> {
-				return await shell.invokeBin(cmd, args);
+				return await invokeBin(cmd, args);
 			}
 		}
 		else {
 			for(let d of this.getEnv("PATH")) {
-				let ls = await this.invokeBin("/bin/ls", ["/bin/ls", {target: d}]);
-				for(let f of ls) {
+				for(let f of await this.lsCache.get(d)) {
 					// Strip the extension
 					let fn = /(.+?)(?:\.(?:u413sh|js))?$/.exec(f.name)[1];
 					if(cmd !== fn) {
@@ -58,24 +153,23 @@ class Shell {
 
 					try {
 						if(f.mime === "text/x-script.u413sh") {
-							let res = await fetch(
+							let src = await fetchStatic(
 								d + "/" + f.name, {
 									credentials: "same-origin"
 								}
 							);
-							let ast = new ShellParser(await res.text()).parse();
+							let ast = new ShellParser(src).parse();
 
 							return async (shell, args) => {
 								return await shell.interpret(d + "/" + f.name, ast, args);
 							}
 						}
 						else if(f.mime === "application/javascript") {
-							let res = await fetch(
+							let src = await fetchStatic(
 								d + "/" + f.name, {
 									credentials: "same-origin"
 								}
 							);
-							let src = await res.text();
               let jsfun = (new Function(
       					"'use strict';" +
 								`return async function ${clobber(fn)}(subshell, argv){` +
@@ -89,12 +183,11 @@ class Shell {
             // Relative path to static executable
 						else {
 							return async (shell, args) => {
-								return await shell.invokeBin(d + "/" + f.name, args);
+								return await invokeBin(cwd + d + "/" + f.name, args);
 							}
 						}
 					}
 					catch(e) {
-						console.log("interpret error", e);
 						if(e instanceof shReturn) {
 							return e.value;
 						}
@@ -105,24 +198,6 @@ class Shell {
 				}
 			}
 			throw new ShellError(cmd + ": command not found");
-		}
-	}
-
-	async invokeBin(cmd, args, type) {
-		let res = await fetch(cmd, {
-			method: "POST",
-			body: JSON.stringify(args),
-			credentials: "same-origin",
-			headers: {
-				"Accept": "application/json",
-				"Content-Type": "application/json"
-			}
-		});
-		if(res.ok) {
-			return await res.json();
-		}
-		else {
-			throw new ShellError(res.status + ": " + await res.text());
 		}
 	}
 
