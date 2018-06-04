@@ -16,55 +16,24 @@ html
 		
 		block styles
 			+style("main")
+			if config.debug
+				+style("debug")
 		block scripts
 			script!= `var user = ${JSON.stringify(user || {name: 'nobody'})};`
 			+script("main")
+			+script("parse")
+			+script("interpret")
 			+script("shell")
+			+script("prompt.tpl")
 	body
 		#shell
 			main#stdout
 				block body
 			#current
-				.prompt
-					- const nobody = {name: "nobody"};
-					- if(!user) {
-					-	user = nobody;
-					- }
-					- else if(!user.name) {
-					-	user.name = "nobody";
-					- }
-					if user.name === "nobody"
-						span.nobody nobody
-					else
-						span.user= user.name
-					span @
-					span.host
-						a(href="/") u413.org
-					span :
-					- var pm = cwd.split(/^(.*?\/)([^\/]*?)$/g);
-					- var p = {dir: pm[1], base: pm[2]};
-					nav
-						span.dirs
-							if p.dir === '/'
-								span.dir: a(href="/") /
-							else
-								- var pds = p.dir.slice(1, -1).split(/\//g);
-								- var d = '/';
-								for f, x in pds
-									span.dir
-										- d += f + '/'
-										a(href=d)
-											if x === pds.length - 1
-												= `/${f}/`
-											else 
-												= `/${f}`
-						span.base
-							if p.base
-								a(href=cwd)= p.base
-					span.access= user.access || "$"
-					span &nbsp;
-			textarea#stdin(autofocus rows=1)
+				include prompt
+			#input
+				textarea#stdin(autofocus rows=1)
+				input#stdpass(type="password")
 		footer
 			a(href="https://github.com/U413/u413")
 				= `${config.name} v${config.version}`
-		<a href="http://www.rmaddendesign.com/advanced.php?php=48131"><!-- chested-hemipteran --></a>

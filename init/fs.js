@@ -1,7 +1,8 @@
 'use strict';
 
 const
-	fs = require("fs");
+	fs = require("fs"),
+	pug = require("pug");
 
 const
 	log = requireRoot("./log");
@@ -33,6 +34,10 @@ function touch_dir_if_missing(dn) {
 );
 */
 touch_dir_if_missing("private");
+touch_dir_if_missing("public-optimized");
+touch_dir_if_missing("public-optimized/etc");
+touch_dir_if_missing("public-optimized/etc/scripts");
+touch_dir_if_missing("public-optimized/etc/styles");
 
 fs.readFile("nohup.out", (err, data) => {
 	const MAXLEN = 1024*100

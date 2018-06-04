@@ -1,136 +1,99 @@
 'use strict';
 
-/**
- * Credits to mwgamera for the basic implementation idea for the shell.
-**/
-
 const
 	path = window.location.pathname,
 	[, cwd, file] = /^(.*\/)(.*)?$/.exec(path);
 
-function clamp(v, hi, lo=0) {
-	if(v > hi) {
-		return hi;
-	}
-	else if(v < lo) {
-		return lo;
-	}
-	else {
-		return v;
-	}
-}
+const MainShell = (function() {
+	/*** localStorage handling ***/
 
-const $path = {
-	normalize(p) {
-		let a = (p[0] === '/');
-		let f = p.split(/[\\\/]/g);
-		for(let i = 0; i < f.length; ++i) {
-			if(f[i] === "" || f[i] === '.') {
-				f.splice(i--, 1);
-			}
-		}
-		
-		return (a? "/" : "") + f.join("/");
-	},
-	isAbsolute(p) {
-		return (p[0] === '/');
-	},
-	join(...args) {
-		let out;
-		for(let arg of args) {
-			if(out === undefined) {
-				out = arg;
-			}
-			else {
-				out += "/" + arg;
-			}
-		}
-		return this.normalize(out);
-	}
-};
-
-function span(txt, k) {
-	let el = document.createElement('span');
-	el.innerText = txt;
-	if(k) {
-		el.className = k;
-	}
-	return el;
-}
-
-function tag(name, attrs, ...content) {
-	let el = document.createElement(name);
-	for(let a in attrs) {
-		el.setAttribute(a, attrs[a]);
-	}
-	for(let c of content) {
-		if(typeof c === 'string') {
-			el.appendChild(document.createTextNode(c));
-		}
-		else if(c) {
-			el.appendChild(c);
-		}
-	}
-	return el;
-}
-
-/*
- * Create a promise that will never be fulfilled
- *  This is used for commands which reload the page so they don't
- *  exit early and write the prompt beforehand
-**/
-function liar() {
-	return new Promise(() => 0);
-}
-
-let shell;
-todo.push(() => {
-	let
-		stdout = $id("stdout"),
-		current = $id("current"),
-		prompt = current.firstChild,
-		stdin = $id("stdin");
-	
-	function realign() {
-		stdin.style.textIndent = window.getComputedStyle(prompt).width;
-	}
-	
 	const storage = {
+		default: {
+			env: {
+				PATH: ["/usr/bin", "/bin"],
+				USER: user.name,
+				PWD: cwd,
+				HOME: "/home/" + user.name,
+
+				path, user
+			},
+			history: [],
+			version: 1
+		},
+
+		reset() {
+			console.info("Creating a new localStorage entry");
+			localStorage.setItem(user.name, JSON.stringify(this.default));
+			return this.default;
+		},
+
 		load() {
 			let store = localStorage.getItem(user.name);
 			if(store === null) {
-				console.info("Creating a new localStorage entry");
-				let v = {env: {}, history: []};
-				localStorage(JSON.stringify(v));
-				return v;
+				return this.reset();
 			}
 			else {
-				return JSON.parse(store);
+				store = JSON.parse(store);
+
+				if(!store.version || store.version < this.default.version) {
+					return this.reset();
+				}
+
+				return {
+					env: Object.assign(store.env, this.default.env),
+					history: store.history || def.history
+				};
 			}
 		},
 		store() {
 			localStorage.setItem(user.name, JSON.stringify({
-				env, history
+				env, history, version: this.default.version
 			}));
 		}
+	};
+
+	function clamp(v, hi, lo=0) {
+		if(v > hi) {
+			return hi;
+		}
+		else if(v < lo) {
+			return lo;
+		}
+		else {
+			return v;
+		}
 	}
-	
-	try {
-		var {env = {}, history = []} = storage.load();
+
+	// Adjust the height of stdin so it fits all its contents
+
+	function adjustHeight() {
+		const stdin = shell.stdin;
+
+		let
+			outh = /(\d+)px/.exec(window.getComputedStyle(stdin).height)[1],
+			diff = outh - stdin.clientHeight;
+
+		// Prevent the height from biasing the next line
+		stdin.style.height = 0;
+		stdin.style.height = (stdin.scrollHeight + diff) + "px";
 	}
-	catch(e) {
-		var env = {}, history = [];
-		console.error(e);
-	}
+
+	/*** History management ***/
+
+	var {env, history} = storage.load();
 	Object.assign(history, {
 		tmp: [""].concat(history),
 		line: 0,
 		submit() {
-			this.unshift(this.tmp[this.line] = stdin.value);
-			storage.store();
-			this.tmp = this.slice();
-			this.tmp.unshift("");
-			this.line = 0;
+			let value = shell.stdin.value;
+			// Don't commit empty or repeated lines.
+			if(value && value !== this[0]) {
+				this.unshift(this.tmp[this.line] = value);
+				storage.store();
+				this.tmp = this.slice();
+				this.tmp.unshift("");
+				this.line = 0;
+			}
 		},
 		up() {
 			this.tmp[this.line] = stdin.value;
@@ -151,342 +114,268 @@ todo.push(() => {
 			storage.store();
 		}
 	});
-	
-	shell = {
-		env, history,
-		stdout: stdout, stdin,
-		cmds: {
-			async set(rest) {
-				let kv = /^\s*(\S+)\s*(.+)\s*$/g.exec(rest);
-				if(kv) {
-					shell.env[kv[1]] = kv[2];
+
+	/*** Deferred event registration for when the window loads ***/
+
+	todo.push(() => {
+		shell.stdout = $id("stdout");
+		shell.current = $id("current");
+		shell.prompt = current.firstChild;
+		shell.input = $id("input");
+		shell.stdin = $id("stdin");
+		shell.stdpass = $id("stdpass");
+
+		// Submit when ENTER is pressed without SHIFT
+		shell.stdin.addEventListener("keydown", ev => {
+			if(!ev.shiftKey) {
+				if(ev.key === "Enter") {
+					shell.submit();
 				}
-			},
-			// Simple one-liner commands don't need their own files
-			async cd(rest) {
-				let p = $path.normalize(rest);
-				if(!$path.isAbsolute(p))
-					p = $path.join(path, p);
-				
-				window.location.replace(p);
-				return await liar();
-			},
-			async help(rest) {
-				if(rest === "") {
-					return await this.lsbin();
+				else if(ev.key === "ArrowUp") {
+					shell.history.up();
 				}
-				let out = (() => {
-					switch(rest) {
-						case 'cd': return "cd <file>";
-						case "help": return "help [cmd]";
-						case 'lsbin': return "lsbin - list all commands";
-						case 'reload': return 'reload - reload the page';
-						case 'clear': return 'clear - clear the page';
-						case 'pwd': return 'pwd - Print Working Directory';
-						case 'echo': return 'echo <stuff>';
-						case 'bulletin': return 'bulletin <response>';
-						case 'newtopic': return 'newtopic <title> ENTER <body>';
-						case 'reply':
-							return 'reply <body> (you must cd into the topic)';
-						case 'useradd': return 'useradd <name> <pass>';
-						case 'login': return 'login <name> <pass>';
-						case 'logout': return 'logout';
-						case 'sql': return 'sql <SQL command> (must be root)';
-						
-						default: return "Unknown command";
-					}
-				})();
-				
-				shell.log(out);
-			},
-			async lsbin() {
-				shell.log(Object.keys(this).join(" "));
-			},
-			async reload() {
-				return await new Promise(() => {
-					window.location.reload();
-				});
-			},
-			async clear() {
-				shell.clear();
-			},
-			async pwd() {
-				shell.log(cwd);
-			},
-			async echo(rest) {
-				shell.log(rest);
-			},
-			async bulletin(rest) {
-				return await fetch('post', '/bin/bulletin', rest).then(() => {
-					window.location.reload();
-				}).catch(err => {
-					shell.error(err);
-				})
-			},
-			async newtopic(title) {
-				return await shell.read().then(async body => {
-					let m = /^\/var\/([^\/]+)/.exec(cwd);
-					if(m) {
-						let board = m[1];
-						await fetch('post', `/bin/newtopic`, JSON.stringify({
-							board, title, body
-						})).then(topic => {
-							window.location.replace(`/var/${board}/${topic}`);
-							return liar();
-						}).catch(err => {
-							shell.error(`${err.status}: ${err.xhr.response}`);
-						});
-					}
-					else {
-						shell.error("Need a board (try cd)");
-					}
-				})
-			},
-			async reply(body) {
-				let m = /^\/var\/([^\/]+)\/([^\/]+)/.exec(path);
-				if(m) {
-					let [, board, topic] = m;
-					await fetch('post', '/bin/reply', JSON.stringify({
-						board, topic: parseInt(topic, 16), body
-					}), 'application/json').then(() => {
-						window.location.replace(`/var/${board}/${topic}`);
-					}).catch(err => {
-						shell.error(`${err.status}: ${err.xhr.response}`);
-					});
+				else if(ev.key === "ArrowDown") {
+					shell.history.down();
 				}
 				else {
-					shell.error("Need a topic (try cd)");
+					return;
 				}
-			},
-			async useradd(rest) {
-				let m = /(\S+)\s+(\S+)/.exec(rest);
-				if(m) {
-					await fetch("post", "/bin/useradd", JSON.stringify({
-						name: m[1],
-						pass: m[2]
-					}), "application/json").
-						then(res => window.location.replace("/var/bulletin")).
-						catch(err => shell.error(err));
+				ev.preventDefault();
+				return false;
+			}
+		});
+		shell.stdpass.addEventListener("keydown", ev => {
+			if(!ev.shiftKey) {
+				if(ev.key === "Enter") {
+					shell.submit();
 				}
 				else {
-					shell.error("Need both username and password");
+					return;
 				}
-			},
-			async login(rest) {
-				let m = /(\S+)\s+(\S+)/.exec(rest);
-				if(m) {
-					await fetch("post", "/bin/login", JSON.stringify({
-						name: m[1],
-						pass: m[2]
-					}), "application/json").
-						then(res => {
-							shell.history.clear();
-							user = JSON.parse(res);
-						}).
-						catch(err => shell.error("Unknown username or password"));
-				}
-				else {
-					shell.error("Need both username and password");
-				}
-			},
-			async logout() {
-				await fetch("post", "/bin/logout", "{}").
-					then(res => {
-						user = {name: 'nobody'};
-						shell.history.clear();
-					}).
-					catch(err => shell.error(err));
-			},
-			async sql(rest) {
-				if(user.name === "root") {
-					await fetch("post", "/bin/sql", rest).
-						then(res => shell.log(res)).
-						catch(err => {
-							shell.error(`${err.status}: ${err.xhr.response}`);
-						});
-				}
-				else {
-					shell.error("Permission denied");
-				}
-			},
-			
-			//...shell.cmds
-		},
-		
+				ev.preventDefault();
+				return false;
+			}
+		})
+
+		// Automatically focus on the prompt on a click
+
+		function focus() {
+			let sel = document.getSelection();
+
+			if(sel.type !== "Range" &&
+				document.activeElement === document.body
+			) {
+				shell.focus();
+			}
+		}
+
+		document.addEventListener('click', focus);
+
+		shell.realign();
+
+		shell.stdin.addEventListener('input', adjustHeight);
+		document.addEventListener('resize', adjustHeight);
+
+		window.addEventListener('unhandledrejection', ev => {
+			ev.preventDefault();
+			shell.error("Unhandled rejection:", ev.reason.stack);
+		});
+	});
+
+	/*** Main shell implementation ***/
+
+	return class MainShell extends Shell {
+		constructor() {
+			super(null, []);
+
+			this.env = env;
+			this.history = history;
+
+			// Handler for the current input
+			this.reader = null;
+
+			// Elements, filled in when the window load todo runs
+			this.stdout = null;
+			this.current = null;
+			this.prompt = null;
+			this.input = null;
+			this.stdin = null;
+			this.stdpass = null;
+		}
+
+		echo(...args) {
+			this.log(...args);
+		}
+
 		clear() {
-			stdout.innerHTML = "";
-		},
-		
+			//this.stdout.innerHTML = "";
+			// Faster?
+			let div = this.stdout;
+			while(div.firstChild) {
+				div.removeChild(div.firstChild);
+			}
+		}
+
 		// Utility for focusing on the current input
 		focus() {
-			let cvl = stdin.value.length;
-			stdin.focus();
-			stdin.setSelectionRange(cvl, cvl);
-		},
-		// Write the prompt to the stdout
-		echoPrompt() {
-			let item = document.createElement('div');
-			item.className = "item";
-			prompt.remove();
-			item.appendChild(prompt);
-			item.appendChild(tag('kbd', {class: 'cmd'}, stdin.value));
-			stdout.appendChild(item);
-			
-			stdin.disabled = true;
-		},
-		writePrompt() {
-			var m = /^(.*?)\/([^\/]*)?$/.exec(path);
-			var p = m[1].split(/\//g);
-			current.appendChild(prompt = tag('div',
-				{class: 'prompt'},
-				span(user.name, user.name === 'nobody'? 'nobody' : 'user'),
-				span("@"),
-				tag('span', {class: 'host'},
-					tag('a', {href: 'u413.org'}, 'u413.org')
-				),
-				span(":"),
-				tag('nav', {},
-					tag('span', {class: 'dirs'},
-						...p.slice(1).map((v, x) => {
-							return tag('span', {class: 'dir'},
-								tag('a',
-									{href: p.slice(0, x + 2).join('/') + '/'},
-									x === p.length - 1? '/' + v : `/${v}/`
-								)
-							);
-						})
-					),
-					tag('span', {class: 'base'},
-						tag('a', {href: [...p, file].join("/")}, file)
-					)
-				),
-				span(user.access || "$", "access"),
-				span("\u00a0")
-			));
-			
-			realign();
-			stdin.focus();
-		},
+			let std = (this.input.className === "pass"? this.stdpass : this.stdin);
+
+			let cvl = std.value.length;
+			std.focus();
+			std.setSelectionRange(cvl, cvl);
+		}
+		realign() {
+			if(this.input.className === "pass") {
+			  shell.stdpass.style.marginLeft =
+			    window.getComputedStyle(shell.prompt).width;
+			}
+			else {
+				this.stdin.style.textIndent =
+					window.getComputedStyle(this.prompt).width;
+			}
+		}
+
+		commitPrompt(value) {
+			// Move the prompt to stdout
+			this.prompt.remove();
+			this.stdout.appendChild(
+				tag('div', {class: "item"},
+					this.prompt, value? tag('kbd', {class: 'cmd'}, value) : null
+				)
+			);
+		}
+		async submitInput(value) {
+			try {
+				await this.reader(value);
+			}
+			catch(e) {
+				if(e instanceof ShellError) {
+					this.error(e.message);
+				}
+				else {
+					this.error(e.stack);
+				}
+			}
+			this.reader = null;
+		}
 		// Do whatever it will with the current input
 		async submit() {
-			this.history.submit();
-			
-			// Replace environment variables
-			let value = stdin.value.replace(
-				/(?!\\)\$(?:(\w+)|\{(\w+)\})/g, ($0, $1, $2) => {
-				let k = $1 || $2;
-				return k in this.env? this.env[k] : "";
-			});
-			this.echoPrompt();
-			stdin.value = "";
-			
-			if(typeof this.target === 'function') {
-				await this.target(value);
-				this.target = null;
-			}
-			else {
-				let m = /^(\S+)\s*(.*)/g.exec(value);
-				if(m) {
-					let [, cmd, rest] = m;
-					if(cmd in this.cmds) {
-						await this.cmds[cmd](rest);
-					}
-					else {
-						this.error(cmd + ": command not found");
-					}
+			let value = stdin.value || stdpass.value;
+
+			// Submit was called during a read, just handle returning the input
+			if(typeof this.reader === 'function') {
+				this.submitInput(value);
+
+				if(this.input.className === "pass") {
+					this.commitPrompt();
 				}
-			}
-			
-			stdin.disabled = false;
-			this.writePrompt();
-		},
-		// Target handler for the current input
-		target: null,
-		
-		// Concatenate raw HTML to the stdout
-		write(html) {
-			stdout.innerHTML += html;
-		},
-		wrap(k, args) {
-			this.write(args.map(v =>
-				`<div class="${k}">` +
-					v.
-						replace(/\n/g, '<br/>').
-						replace(/\t| {4}/g, span('tab', '\t'))
-				+ "</div>"
-			).join(""));
-		},
-		log(...args) {
-			this.wrap('item', args);
-		},
-		error(...args) {
-			console.log("args", args);
-			if(args[0].xhr) {
-				console.log(args[0].xhr);
-			}
-			this.wrap('error', args);
-		},
-		
-		// Read from stdin and fulfill a promise when it's submitted
-		async read() {
-			stdin.disabled = false;
-			stdin.style.textIndent = "0";
-			stdin.focus();
-			
-			return await new Promise((ok, no) => {
-				this.target = async function(body) {
-					stdin.focus();
-					ok(body);
-					await liar();
+				else {
+					this.commitPrompt(value);
 				}
-			});
-		}
-	};
-	
-	// Submit when ENTER is pressed without SHIFT
-	stdin.addEventListener("keydown", ev => {
-		if(!ev.shiftKey) {
-			if(ev.key === "Enter") {
-				shell.submit();
-			}
-			else if(ev.key === "ArrowUp") {
-				shell.history.up();
-			}
-			else if(ev.key === "ArrowDown") {
-				shell.history.down();
-			}
-			else {
+
+				// Clear stdin so the command can run
+				this.stdin.disabled = true;
+				this.stdin.value = "";
+				this.stdpass.value = "";
+
 				return;
 			}
-			ev.preventDefault();
-			return false;
+
+			this.history.submit();
+
+			// Clear stdin so the command can run
+			this.stdin.disabled = true;
+			this.stdin.value = "";
+			this.stdpass.value = "";
+
+			this.commitPrompt(value);
+
+			// Actually execute the command (was deferred for stdout)
+			if(typeof this.reader === 'function') {
+				this.submitInput();
+				this.reader = null;
+			}
+			else {
+				try {
+					let interp = new InterpreterVisitor(this);
+					let res = await new ShellParser(value).parse().visit(interp);
+
+					if(typeof res !== 'undefined' && res !== Symbol.for("void")) {
+						this.log(res);
+					}
+				}
+				catch(e) {
+					if(e instanceof ShellError) {
+						this.error(e.message);
+					}
+					else {
+						this.error(e.stack);
+					}
+				}
+			}
+
+			// Reenable stdin
+			this.stdin.disabled = false;
+
+			let c = this.current, n = tag(
+				'div', {id: 'current'}
+			);
+			n.innerHTML = renderPrompt({user, cwd: path});
+			c.parentNode.replaceChild(this.current = n, c);
+			this.prompt = n.firstChild;
+
+			// Cleanup
+			this.realign();
+			this.stdin.focus();
 		}
-	});
-	
-	// Automatically focus on the prompt on a click
-	
-	function focus() {
-		let sel = document.getSelection();
-		
-		if(sel.type !== "Range" && document.activeElement === document.body) {
-			shell.focus();
+
+		wrap(k, args) {
+			let item = document.createElement("div");
+			item.className = "item";
+
+			for(let a of args) {
+				if(a === Symbol.for("void") || typeof a === 'undefined') {
+					continue;
+				}
+
+				if(typeof a !== 'string') {
+					a = JSON.stringify(a);
+				}
+
+				const RE = /(\n)|(\t)|( +)/g;
+				let content = [], p = 0, m;
+				while(m = RE.exec(a)) {
+					if(p !== m.index) {
+						content.push(a.slice(p, m.index));
+					}
+					p = RE.lastIndex;
+
+					if(m[1]) {
+						content.push(tag("br"));
+					}
+					else if(m[2]) {
+						content.push(tag("span", {class: "tab"}, '\t'));
+					}
+					else {
+						content.push("\u00a0".repeat(m[3].length));
+					}
+				}
+				if(p !== a.length) {
+					content.push(a.slice(p));
+				}
+
+				let t = tag('samp', {class: k}, ...content);
+				item.appendChild(t);
+			}
+			this.stdout.appendChild(item);
 		}
-	}
-	
-	document.addEventListener('click', focus);
-	
-	realign();
-	
-	function adjustHeight() {
-		let
-			[, outh] = /(\d+)px/.exec(window.getComputedStyle(stdin).height),
-			diff = outh - stdin.clientHeight;
-		
-		// Prevent the height from biasing the next line
-		stdin.style.height = 0;
-		stdin.style.height = (stdin.scrollHeight + diff) + "px";
-	}
-	
-	stdin.addEventListener('input', adjustHeight);
-	document.addEventListener('resize', adjustHeight);
-});
+		log(...args) {
+			this.wrap('item', args);
+		}
+		error(...args) {
+			this.wrap('error', args);
+		}
+	};
+})();
+
+const shell = new MainShell();

@@ -1,0 +1,162 @@
+/* Base styles */
+*::selection {
+  background-color: ghostwhite;
+  color: black; }
+
+body {
+  background-color: black;
+  color: ghostwhite;
+  font-family: courier;
+  margin: 0; }
+
+footer {
+  text-align: center;
+  color: dimgrey; }
+  footer a {
+    font-weight: normal; }
+
+time {
+  color: darkgrey;
+  display: inline-block;
+  font-size: 0.8em; }
+  time::before {
+    content: '['; }
+  time::after {
+    content: ']'; }
+
+kbd {
+  font-family: inherit; }
+
+.topic img {
+  max-width: 100%;
+  max-height: 16em;
+  /* 16 lines? */
+  vertical-align: top; }
+
+.bulletin img {
+  max-width: 100%;
+  vertical-align: top; }
+
+textarea#stdin {
+  outline: none;
+  border: none;
+  font-family: courier;
+  font-size: inherit;
+  background-color: black;
+  color: ghostwhite;
+  box-sizing: border-box;
+  line-height: 1.2em;
+  width: 100%;
+  margin-top: -1px;
+  margin-left: -1px;
+  resize: none;
+  overflow: auto; }
+
+#input.pass #stdin {
+  display: none; }
+
+input#stdpass {
+  display: none; }
+
+#input.pass input#stdpass {
+  display: inline-block; }
+
+input {
+  outline: none;
+  border: none;
+  font-family: courier;
+  font-size: inherit;
+  background-color: black;
+  color: ghostwhite;
+  width: 100%; }
+  input::selection {
+    background-color: ghostwhite;
+    color: black; }
+
+table {
+  width: 100%;
+  border: none;
+  border-collapse: collapse; }
+  table td {
+    border-left: 1px solid #333; }
+  table td:first-child {
+    border-left: none; }
+  table p {
+    margin: 0; }
+
+.bulletin p {
+  margin: 0; }
+
+.tab {
+  display: inline-block;
+  width: 4ch; }
+
+a, a:visited {
+  color: inherit;
+  text-decoration: none;
+  font-weight: bold; }
+
+nav {
+  font-weight: bold;
+  display: inline-block; }
+
+.size .unit {
+  padding-left: 1ch; }
+
+.index .size {
+  text-align: right; }
+
+.index .time {
+  text-align: center; }
+
+.error {
+  color: red; }
+
+.dir {
+  color: cornflowerblue; }
+
+.base {
+  color: gold; }
+
+.user {
+  color: limegreen; }
+
+.host {
+  color: grey; }
+
+.nobody {
+  color: crimson; }
+
+.access {
+  color: cyan; }
+
+.prompt {
+  display: inline-block;
+  font-weight: bold; }
+
+#current .prompt {
+  position: absolute; }
+
+.bulletin .user {
+  display: inline-block; }
+  .bulletin .user::before {
+    content: '<';
+    color: darkgrey; }
+  .bulletin .user::after {
+    content: '>';
+    color: darkgrey; }
+
+.bulletin .body {
+  display: inline-block; }
+
+.login input, .useradd input {
+  border-bottom: 1px solid darkgrey; }
+
+.size .value {
+  display: inline-block;
+  width: 4ch; }
+
+.size .unit {
+  display: inline-block;
+  width: 2ch;
+  text-align: right; }

@@ -1,0 +1,29 @@
+if(eval "$1 === '--help'" $1) {
+	echo "Usage: ls [target]";
+	echo "List the files in the target directory. Target defaults to cwd.";
+	return;
+}
+
+if(exists $1) {}
+else {
+	set 1 $path;
+}
+
+if(eval "$1.endsWith('/')" $1) {}
+else {
+	echo $1;
+	return;
+}
+
+if(eval "$1.startsWith('/')" $1) {
+  set target $1;
+}
+else {
+  set target $PWD/$1;
+}
+
+for f in (/bin/ls {target: $1}) {
+  echo $f.name
+}
+
+void;

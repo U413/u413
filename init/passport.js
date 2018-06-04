@@ -49,7 +49,7 @@ passport.use('local-useradd', new LocalStrategy({
 	passwordField: 'pass'
 }, async (name, pass, done) => {
 	let user = await db.user.byName(name);
-	
+
 	if(user) {
 		done(null, false);
 	}

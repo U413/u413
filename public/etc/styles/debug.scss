@@ -1,0 +1,35 @@
+* {
+	outline: 1px solid rgba(255, 0, 255, 0.2);
+	
+	& > * {
+		outline: 1px solid rgba(255, 255, 0, 0.2);
+		
+		& > * {
+			outline: 1px solid rgba(0, 255, 255, 0.2);
+			
+			& > * {
+				outline: 1px solid rgba(255, 0, 255, 0.2);
+				
+				& > * {
+					outline: 1px solid rgba(255, 255, 0, 0.2);
+					
+					& > * {
+						outline: 1px solid rgba(0, 255, 255, 0.2);
+						
+						& > * {
+							outline: 1px solid rgba(255, 0, 255, 0.2);
+							
+							& > * {
+								outline: 1px solid rgba(255, 255, 0, 0.2);
+								
+								& > * {
+									outline: 1px solid rgba(0, 255, 255, 0.2);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

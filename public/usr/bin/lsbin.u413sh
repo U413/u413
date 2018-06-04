@@ -1,0 +1,15 @@
+if(eval "$1 === '--help'" $1) {
+	echo "Usage: lsbin";
+	echo "List all executable files in the system.";
+	return;
+}
+
+for p in $PATH {
+	for f in (/bin/ls {cwd: $PWD, target: $p}) {
+		if(eval "$1 === 'text/x-script.u413sh' || $1 === 'application/javascript' || $1 === null" $f.mime) {
+			echo $p/$f.name;
+		}
+	}
+};
+
+void;

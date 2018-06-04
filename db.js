@@ -13,7 +13,7 @@ let
 	user = process.env.PGUSERNAME || process.env.USER ||
 		os.userInfo().username,
 	database = process.env.PGDATABASE || process.env.DB || "u413";
-	
+
 log.info("init PostgreSQL client with", {user, database});
 
 const client = new Client({
@@ -101,7 +101,14 @@ const db = module.exports = {
 	query,
 	bulletin: {
 		getAll() {
-			return query("bulletin/all");
+			return query("bulletin/all").then(
+				all => {
+					for(let post of all) {
+						post.created = post.created.getTime();
+					}
+					return all;
+				}
+			);
 		},
 		add(user, text) {
 			return query("bulletin/new", [user.id, text]);
@@ -126,9 +133,10 @@ const db = module.exports = {
 			return queryFirst("topic/byid", [id]);
 		},
 		replies(id) {
-			return query("topic/replies", [id]).then(replies => {
-				return Promise.all(replies.map(async r => {
+			return query("topic/replies", [id]).then(async replies => {
+				return await Promise.all(replies.map(async r => {
 					r.author = await db.user.byId(r.author);
+					r.created = r.created.getTime();
 					return r;
 				}));
 			});
@@ -137,7 +145,12 @@ const db = module.exports = {
 			return queryFirst("topic/create", [board, author, title, body]);
 		},
 		reply(topic, author, body) {
-			return query("topic/reply", [topic, author, body]);
+			return queryFirst("topic/reply", [topic, author, body]).then(
+				async reply => {
+					reply.board = (await queryFirst("topic/board", [reply.topic])).name;
+					return reply;
+				}
+			)
 		}
 	},
 	user: {

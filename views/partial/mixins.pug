@@ -8,7 +8,7 @@ mixin postinfo(post)
 	.info
 		//-a.user(href=`/home/${post.author.name}`)= post.author.name
 		.user= post.author.name
-		time= post.created.toGMTString()
+		time= post.created
 		block extra
 
 mixin post(post)

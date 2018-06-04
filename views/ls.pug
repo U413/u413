@@ -16,28 +16,6 @@ block body
 				td
 				td
 			
-			//- Get rid of duplicates caused by overlaying multiple
-			//-  route handlers for the same routes
-			
-			- var seen = [];
-			- files = files.filter(v => {
-			-	if(seen.indexOf(v.name) === -1) {
-			-		seen.push(v.name);
-			-		return true;
-			-	}
-			-	else {
-			-		return false;
-			-	}
-			- });
-			
-			//- Separate dirs and files to be listed separately
-			- var dl = [], fl = [];
-			- for(let f of files) {
-			-	if(f.isDirectory()) dl.push(f);
-			-	else fl.push(f);
-			- }
-			- dl.sort((a, b) => a.name.localeCompare(b.name));
-			- fl.sort((a, b) => a.name.localeCompare(b.name));
 			each d in dl
 				- var {mtime, size, name, note} = d;
 				tr

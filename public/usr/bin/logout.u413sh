@@ -1,0 +1,6 @@
+if(eval "$1 === '--help'" $1) {
+	echo "Usage: logout";
+	return;
+}
+
+/bin/logout; reload;

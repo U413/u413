@@ -1,0 +1,20 @@
+if(exists $2) {
+	set name $1;
+	set pass $2;
+}
+else {
+	if(exists $1) {
+		set name $1;
+	}
+	else {
+		set name (read -p "Username: ")
+	}
+	set pass (read -s -p "Password: ")
+}
+
+/bin/login {
+	name: $name,
+	pass: $pass
+};
+
+reload;

@@ -1,0 +1,14 @@
+if(eval "$1 === '--help'" $1) {
+	echo "Usage: groupadd [name]";
+	echo "Create a new group."
+	return;
+}
+
+if(exists $1) {
+	set name $1;
+}
+else {
+	set name (read -p "Username: ");
+}
+
+/bin/groupadd {name: $name};

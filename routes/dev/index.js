@@ -12,16 +12,11 @@ const
 	express = require("express")
 
 const
-	route = requireRoot("./route"),
-	ls = requireRoot('./ls');
+	route = requireRoot("./route");
 
 let router = new express.Router();
 
 router.use("/stdout", require("./stdout"));
-router.use('/', route.dir(
-	ls.handle([
-		ls.virtualStat("stdout")
-	])
-));
+router.use('/', route.dir('/dev/', ['stdout']));
 
 module.exports = router;

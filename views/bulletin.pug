@@ -6,4 +6,4 @@ block body
 		each post in bulletin
 			li
 				|#[.user= post.username] #[.body!= md.render(post.body)]
-				| #[time= post.created.toGMTString()]
+				| #[time= post.created]

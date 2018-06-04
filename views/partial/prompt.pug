@@ -1,0 +1,32 @@
+.prompt
+	- const nobody = {name: "nobody"};
+	- if(!user) {
+	-	user = nobody;
+	- }
+	- else if(!user.name) {
+	-	user.name = "nobody";
+	- }
+	if user.name === "nobody"
+		span.nobody nobody
+	else
+		span.user= user.name
+	span @
+	span.host
+		a(href="/") u413.org
+	span :
+	- var pm = cwd.split('/').slice(1);
+	- var base = pm[pm.length - 1];
+	- var p = pm.slice(0, -1);
+	nav
+		span.dirs
+			span.dir: a(href="/") /
+			- var dp = '/';
+			for d in p
+				span.dir
+					- dp += d + '/'
+					a(href=dp)= d + '/'
+		span.base
+			if base
+				a(href=cwd)= base
+	span.access= user.access || "$"
+	span &nbsp;

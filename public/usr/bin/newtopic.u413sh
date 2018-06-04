@@ -1,0 +1,38 @@
+if(eval "$1 === '--help'" $1) {
+	echo "Usage: newtopic [board] [title] [body]";
+	echo "Create a new topic. If you're cd'd into a board, that will be the default.";
+	return;
+}
+
+if(exists $3) {
+  set board $1;
+  set title $2;
+  set body $3;
+}
+else {
+  set m (eval "/^\\/var\\/(.+?)\\/.*?$/.exec($1)" $PWD);
+
+  if(id $m) {
+    set board $m.1;
+  }
+  else {
+    set board (read -p "Board: ");
+  }
+
+  if(exists $2) {
+    set title $1;
+    set body $2;
+  }
+  else {
+    if(exists $1) {
+      set title $1;
+    }
+    else {
+      set title (read -p "Title: ");
+    }
+
+    set body (read -p "Body: ");
+  }
+}
+
+cd /var/$board/(/bin/newtopic {board: $board, title: $title, body: $body});

@@ -15,7 +15,7 @@ body {
 footer {
 	text-align: center;
 	color: dimgrey;
-	
+
 	a {
 		font-weight: normal;
 	}
@@ -25,11 +25,11 @@ time {
 	color: darkgrey;
 	display: inline-block;
 	font-size: 0.8em;
-	
+
 	&::before {
 		content: '[';
 	}
-	
+
 	&::after {
 		content: ']';
 	}
@@ -58,15 +58,25 @@ textarea#stdin {
 	background-color: black;
 	color: ghostwhite;
 	box-sizing: border-box;
-	
+
 	line-height: 1.2em;
-	
+
 	width: 100%;
-	
-	margin-top: -2px;
-	margin-left: -2px;
+
+	margin-top: -1px;
+	margin-left: -1px;
 	resize: none;
 	overflow: auto;
+}
+#input.pass #stdin {
+	display: none;
+}
+
+input#stdpass {
+	display: none;
+}
+#input.pass input#stdpass {
+	display: inline-block;
 }
 
 input {
@@ -76,9 +86,9 @@ input {
 	font-size: inherit;
 	background-color: black;
 	color: ghostwhite;
-	
+
 	width: 100%;
-	
+
 	&::selection {
 		background-color: ghostwhite;
 		color: black;
@@ -89,14 +99,14 @@ table {
 	width: 100%;
     border: none;
     border-collapse: collapse;
-	
+
 	td {
 	    border-left: 1px solid #333;
 	}
 	td:first-child {
 	    border-left: none;
 	}
-	
+
 	p {
 		margin: 0;
 	}
@@ -108,6 +118,7 @@ table {
 
 .tab {
 	display: inline-block;
+	width: 4ch;
 }
 
 a, a:visited {
@@ -170,18 +181,18 @@ nav {
 .bulletin {
 	.user {
 		display: inline-block;
-		
+
 		&::before {
 			content: '<';
 			color: darkgrey;
 		}
-		
+
 		&::after {
 			content: '>';
 			color: darkgrey;
 		}
 	}
-	
+
 	.body {
 		display: inline-block;
 	}

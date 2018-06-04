@@ -1,1 +1,1 @@
-insert into replies (topic, author, body) values ($1, $2, $3);
+insert into replies (topic, author, body) values ($1, $2, $3) returning *;

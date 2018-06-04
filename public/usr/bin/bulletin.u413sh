@@ -1,0 +1,15 @@
+if(eval "$1 === '--help'" $1) {
+	echo "Usage: bulletin [post]";
+	echo "Post to the global bulletin."
+	return;
+}
+
+if(exists $1) {
+  set post $1;
+}
+else {
+  set post (read -p "Body: ");
+}
+
+/bin/bulletin $post;
+cd /var/bulletin;

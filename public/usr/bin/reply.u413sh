@@ -1,0 +1,36 @@
+if(eval "$1 === '--help'" $1) {
+	echo "Usage: reply [topic] [body]";
+	echo "Reply to a topic. If you're cd'd into a topic, that will be the default.";
+	return;
+}
+
+if(exists $2) {
+  set topic $1;
+  set body $2;
+}
+else {
+  set m (eval "/^\\/var\\/.+?\\/(.+?)$/.exec($1)" $path);
+
+  if(id $m) {
+    set topic $m.1;
+  }
+  else {
+    set topic (read -p "Topic: ");
+  }
+
+  if(exists $1) {
+    set body $1;
+  }
+  else {
+    set body (read -p "Body: ");
+  }
+}
+
+set topic (eval "parseInt($1, 16)|0" $topic);
+if(eval "!$1" $topic) {
+	throw "Invalid topic id";
+}
+
+set reply (/bin/reply {topic: $topic, body: $body});
+
+cd /var/$reply.board/$topic;

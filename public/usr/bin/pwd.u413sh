@@ -1,0 +1,7 @@
+if(eval "$1 === '--help'" $1) {
+	echo "Usage: pwd";
+  echo "Print the Working Directory.";
+	return;
+}
+
+id $PWD

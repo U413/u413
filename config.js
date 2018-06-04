@@ -19,7 +19,8 @@ const defaults = {
 	"port": 8080,
 	"version": null,
 	"webroot": "",
-	"loglevel": "info"
+	"loglevel": "info",
+	"debug": !!process.env.DEBUG
 };
 
 try {

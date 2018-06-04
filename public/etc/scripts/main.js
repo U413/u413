@@ -7,8 +7,8 @@ todo.push(() => {
 	 * Replace all time tags with local equivalents
 	**/
 	for(let el of document.getElementsByTagName("time")) {
-		let d = new Date(el.textContent);
-		
+		let d = new Date(parseInt(el.textContent));
+
 		el.textContent =
 			(d.getHours() + "").padStart(2, "0") + ":" +
 			(d.getMinutes() + "").padStart(2, "0") + ":" +
@@ -34,52 +34,40 @@ function $class(k) {
 	return document.getElementsByClassName(k);
 }
 
-function fetch(method, url, body, type=null) {
-	return new Promise((ok, no) => {
-		let xhr = new XMLHttpRequest();
-		
-		Object.assign(xhr, {
-			onreadystatechange() {
-				if(this.readyState === 4) {
-					// 200
-					if(((this.status/100)|0) === 2) {
-						ok(this.response);
-					}
-					else {
-						let err = new Error(
-							`HTTP request rejected (${this.status})`
-						);
-						err.status = this.status;
-						err.xhr = this;
-						
-						no(err);
-					}
-				}
-			},
-			onabort() {
-				let err = new Error("Connection aborted");
-				err.xhr = this;
-				no(err);
-			},
-			onerror(err) {
-				err.xhr = this;
-				no(err);
-			},
-			ontimeout() {
-				let err = new Error("Connection timed out");
-				err.xhr = this;
-				no(err);
-			}
-		});
-		xhr.open(method, url);
-		if(type) {
-			xhr.setRequestHeader("Content-Type", type);
+/*
+ * Create a promise that will never be fulfilled
+ *  This is used for commands which reload the page so they don't
+ *  exit early and write the prompt beforehand
+**/
+function liar() {
+	return new Promise(() => 0);
+}
+
+function span(txt, k) {
+	let el = document.createElement('span');
+	el.innerText = txt;
+	if(k) {
+		el.className = k;
+	}
+	return el;
+}
+
+function tag(name, attrs, ...content) {
+	let el = document.createElement(name);
+	for(let a in attrs) {
+		el.setAttribute(a, attrs[a]);
+	}
+	for(let c of content) {
+		if(typeof c === 'string') {
+			el.appendChild(document.createTextNode(c));
 		}
-		if(typeof body === 'undefined') {
-			xhr.send();
+		else if(c) {
+			el.appendChild(c);
 		}
-		else {
-			xhr.send(body);
-		}
-	})
+	}
+	return el;
+}
+
+function clobber(name) {
+	return "$" + name.replace(/[^$_a-z\d]/i, "_");
 }

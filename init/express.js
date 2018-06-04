@@ -7,15 +7,39 @@ const
 	express = require("express"),
 	cookieParser = require("cookie-parser"),
 	passport = require("passport"),
-	bodyParser = require("body-parser");
+	bodyParser = require("body-parser"),
+	serveStatic = require("serve-static");
 
 const
 	log = requireRoot("./log"),
-	db = requireRoot("./db");
+	db = requireRoot("./db"),
+	config = requireRoot("./config");
 
 let router = module.exports = new express.Router();
 
 log.info("init express");
+
+if(config.debug) {
+	router.use(log.requestLogger());
+}
+
+if(config.debug) {
+	// Monkeypatch response methods to see what we're doing.
+
+	const
+		res = require("express/lib/response"),
+		oldRender = res.render,
+		oldRedirect = res.redirect;
+
+	res.render = function(view, ...args) {
+		log.debug("Rendering view", view);
+		return oldRender.call(this, view, ...args);
+	}
+	res.redirect = function(loc) {
+		log.debug("Redirecting from", this.req.originalUrl, "to", loc);
+		return oldRedirect.call(this, loc);
+	}
+}
 
 router.use(cookieParser());
 
@@ -29,24 +53,9 @@ router.use(async (req, res, next) => {
 });
 
 router.use(bodyParser.text());
-router.use(bodyParser.json());
+router.use(bodyParser.json({strict: false}));
 router.use(bodyParser.urlencoded({extended: true}));
-//router.use(bodyParser.json());
 
-router.use((req, res, next) => {
-	// Overwrite res.render with a proxy that echoes what it's rendering
-	if(log.level === 'debug') {
-		log.debug(req.method, JSON.stringify(req.originalUrl));
-		
-		const old = res.render;
-		res.render = function(view, ...args) {
-			log.debug("Rendering view", view);
-			return old.call(this, view, ...args);
-		}
-	}
-	log.silly(req);
-	
-	next();
-});
+serveStatic.mime.define({'text/x-script.u413sh': ['u413sh']});
 
 router.use(requireRoot("./routes/"));

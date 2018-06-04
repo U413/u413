@@ -29,24 +29,87 @@ const logger = new winston.Logger({
 
 logger.log('info', "Using logging level", level);
 
-module.exports = {
-	level,
-	error(...args) {
-		logger.log('error', ...args);
-	},
-	warn(...args) {
-		logger.log("warn", ...args);
-	},
-	info(...args) {
-		logger.log('info', ...args);
-	},
-	verbose(...args) {
-		logger.log('verbose', ...args);
-	},
-	debug(...args) {
-		logger.log('debug', ...args);
-	},
-	silly(...args) {
-		logger.log('silly', ...args);
+function requestLogger() {
+	if(level === 'silly') {
+		const expressWinston = require("express-winston");
+
+		expressWinston.requestWhitelist.push('body');
+		expressWinston.requestWhitelist.push('headers');
+
+		expressWinston.responseWhitelist.push('body');
+		expressWinston.responseWhitelist.push('headers');
+
+		console.log("Silly logger");
+		return expressWinston.logger({
+			winstonInstance: logger,
+			level: 'silly',
+			meta: true,
+			expressFormat: true,
+			colorize: true
+		});
+	}
+	else if(level === 'debug') {
+		return function(req, res, next) {
+				module.exports.debug(
+					req.method, JSON.stringify(req.originalUrl)
+				);
+				next();
+		}
+	}
+	else {
+		return null;
+	}
+}
+
+if(level === 'silly') {
+	module.exports = {
+		level, requestLogger,
+		error(...args) {
+			logger.log('error', ...args);
+			console.trace();
+		},
+		warn(...args) {
+			logger.log("warn", ...args);
+			console.trace();
+		},
+		info(...args) {
+			logger.log('info', ...args);
+			console.trace();
+		},
+		verbose(...args) {
+			logger.log('verbose', ...args);
+			console.trace();
+		},
+		debug(...args) {
+			logger.log('debug', ...args);
+			console.trace();
+		},
+		silly(...args) {
+			logger.log('silly', ...args);
+			console.trace();
+		}
+	}
+}
+else {
+	module.exports = {
+		level, requestLogger,
+		error(...args) {
+			logger.log('error', ...args);
+		},
+		warn(...args) {
+			logger.log("warn", ...args);
+		},
+		info(...args) {
+			logger.log('info', ...args);
+		},
+		verbose(...args) {
+			logger.log('verbose', ...args);
+		},
+		debug(...args) {
+			logger.log('debug', ...args);
+		},
+		silly(...args) {
+			logger.log('silly', ...args);
+		}
 	}
 }

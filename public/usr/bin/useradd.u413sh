@@ -1,0 +1,28 @@
+if(eval "$1 === '--help'" $1) {
+	echo "Usage: useradd [name [password]]";
+	echo "Create a new user. This has an extra prompt checking the password."
+	return;
+}
+
+if(exists $2) {
+	set name $1;
+	set pass $2;
+}
+else {
+	if(exists $1) {
+		set name $1;
+	}
+	else {
+		set name (read -p "Username: ")
+	}
+	set pass (read -s -p "Password: ")
+}
+
+if(eval "$1 !== $2" $(read -s -p "Confirm password: ") $pass) {
+	throw "Passwords don't match";
+}
+
+/bin/useradd {
+	name: $name,
+	pass: $pass
+};
