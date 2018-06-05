@@ -201,6 +201,9 @@ const MainShell = (function() {
 			this.input = null;
 			this.stdin = null;
 			this.stdpass = null;
+
+			this.fetchCache = fetchStatic.cache;
+			this.lsCache = lsCache;
 		}
 
 		echo(...args) {
@@ -339,8 +342,11 @@ const MainShell = (function() {
 					continue;
 				}
 
-				if(typeof a !== 'string') {
+				if(typeof a === 'object') {
 					a = JSON.stringify(a);
+				}
+				else {
+					a += "";
 				}
 
 				// string -> array of (tag|string))

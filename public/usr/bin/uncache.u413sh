@@ -1,0 +1,30 @@
+if(eval "$1 === '--help'" $1) {
+	echo "Usage: uncache [fetch|ls|all]";
+	echo "Update a cache. If no cache is specified, all will be updated.";
+	return;
+}
+
+if(exists $1) {
+  set cache $1;
+}
+else {
+  set cache all;
+}
+
+if(eval "$1 === 'fetch'" $cache) {
+  eval "shell.fetchCache.clear()";
+}
+else {
+  if(eval "$1 === 'ls'" $cache) {
+    eval "shell.lsCache.clear()";
+  }
+  else {
+    if(eval "$1 === 'all'" $cache) {
+      eval "shell.fetchCache.clear()";
+      eval "shell.lsCache.clear()";
+    }
+    else {
+      throw Unknown cache $cache;
+    }
+  }
+}

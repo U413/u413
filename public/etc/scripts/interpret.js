@@ -43,10 +43,16 @@ class Cache {
 			this.cache = JSON.parse(local);
 		}
 		else {
-			console.log("Creating", this.name);
+			console.info("Creating", this.name);
 			this.cache = {};
 			localStorage.setItem(this.name, "{}");
 		}
+	}
+
+	clear() {
+		console.info("Clearing", this.name);
+		localStorage.setItem(this.name, "{}");
+		this.cache = {};
 	}
 
 	async generate(name, ...args) {
@@ -147,48 +153,48 @@ class Shell {
 						continue;
 					}
 
-					try {
-						if(f.mime === "text/x-script.u413sh") {
-							let src = await fetchStatic(
-								d + "/" + f.name, {
-									credentials: "same-origin"
-								}
-							);
-							let ast = new ShellParser(src).parse();
+					if(f.mime === "text/x-script.u413sh") {
+						let src = await fetchStatic(
+							d + "/" + f.name, {
+								credentials: "same-origin"
+							}
+						);
+						let ast = new ShellParser(src).parse();
 
-							return async (shell, args) => {
+						return async (shell, args) => {
+							try {
 								return await shell.interpret(d + "/" + f.name, ast, args);
 							}
-						}
-						else if(f.mime === "application/javascript") {
-							let src = await fetchStatic(
-								d + "/" + f.name, {
-									credentials: "same-origin"
+							catch(e) {
+								if(e instanceof shReturn) {
+									return e.value;
 								}
-							);
-              let jsfun = (new Function(
-      					"'use strict';" +
-								`return async function ${clobber(fn)}(subshell, argv){` +
-									src + "}"
-      				))();
-
-              return async (shell, args) => {
-                return await jsfun.call(window, shell, args);
-              }
-						}
-            // Relative path to static executable
-						else {
-							return async (shell, args) => {
-								return await invokeBin(d + f.name, args);
+								else {
+									throw e;
+								}
 							}
 						}
 					}
-					catch(e) {
-						if(e instanceof shReturn) {
-							return e.value;
-						}
-						else {
-							throw e;
+					else if(f.mime === "application/javascript") {
+						let src = await fetchStatic(
+							d + "/" + f.name, {
+								credentials: "same-origin"
+							}
+						);
+            let jsfun = (new Function(
+    					"'use strict';" +
+							`return async function ${clobber(fn)}(subshell, argv){` +
+								src + "}"
+    				))();
+
+            return async (shell, args) => {
+              return await jsfun.call(window, shell, args);
+            }
+					}
+          // Relative path to static executable
+					else {
+						return async (shell, args) => {
+							return await invokeBin(d + f.name, args);
 						}
 					}
 				}

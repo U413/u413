@@ -1,0 +1,15 @@
+if(eval "!$1 || $1 === '--help'" $1) {
+	echo "Usage: which exe";
+	echo "Return the resolved path of the given exe.";
+	return;
+}
+
+for d in $PATH {
+  for p in (ls $d) {
+    # Strip the extension
+    set x (eval $"/(.+?)(?:\.(?:u413sh|js))?$/.exec($1)[1]" $p);
+    if(eval "$1 === $2" $x $1) {
+      return $d/$p;
+    }
+  }
+}

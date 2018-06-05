@@ -94,27 +94,6 @@ class shTemplate extends shNode {
 class shValue extends shNode {
 	constructor(value) {
 		super();
-
-		// Strings need some processing
-		if(typeof value === 'string') {
-			value = value.
-				replace(/\\(\d{1,3})|\\x(..)|\\u(....)/g, (m, $1, $2, $3) => {
-					return String.fromCharCode(($1 || $2 || $3).parseInt($1? 8 : 16));
-				}).
-				replace(/\\(.)/g, (m, $1) => {
-					switch($1) {
-						case 'a': return '\a';
-						case 'b': return '\b';
-						case 't': return '\t';
-						case 'n': return '\n';
-						case 'v': return '\v';
-						case 'f': return '\f';
-						case 'r': return '\r';
-
-						default: return $1;
-					}
-				});
-		}
 		this.value = value;
 	}
 
@@ -168,6 +147,7 @@ const ShellParser = (function() {
 			SQ, DQ, UNQ
 		].join("|"), 'gm'),
 		UNQRE = new RegExp(UNQ, 'gm'),
+		STRING = new RegExp(SQ + "|" + DQ, 'g'),
 		PRIMITIVE = new RegExp([
 			SQ, DQ, "(null)", "(true)", "(false)",
 			"(undefined)", "(Infinity)", "(NaN)",
@@ -179,16 +159,32 @@ const ShellParser = (function() {
 			'mg'
 		),
 		WORD = new RegExp(UNQ, 'g'),
+		VAR = /([^\s()\[\]{}<>'"`,;:$&|#%^~/]+)/g,
 		SPACE = /\s+/gm,
-		COLON = /\s*:\s*/gm,
-		SEMI = /\s*;\s*/gm,
-		INKWRE = /\s*in\s*/gm,
-		OPENPAREN = /\s*\(\s*/g, CLOSEPAREN = /\s*\)\s*/gm,
-		OPENBRACE = /\s*\{\s*/g, CLOSEBRACE = /\s*\}\s*/gm,
 		SEPARATOR = /\s*,\s*|\s*;\s*|\s+/gm,
 		COMMENT = /(#)(\{)?/g,
-		COMLINE = /.*?$/gm,
+		COMLINE = /.*?\n/gm,
 		MULTI= /(#\{)|(\}#)/g;
+
+	function escapeString(value) {
+		return value.
+			replace(/\\(\d{1,3})|\\x(..)|\\u(....)/g, (m, $1, $2, $3) => {
+				return String.fromCharCode(($1 || $2 || $3).parseInt($1? 8 : 16));
+			}).
+			replace(/\\(.)/g, (m, $1) => {
+				switch($1) {
+					case 'a': return '\a';
+					case 'b': return '\b';
+					case 't': return '\t';
+					case 'n': return '\n';
+					case 'v': return '\v';
+					case 'f': return '\f';
+					case 'r': return '\r';
+
+					default: return $1;
+				}
+			});
+	}
 
 	return class ShellParser {
 		constructor(src) {
@@ -308,6 +304,12 @@ const ShellParser = (function() {
 			while(this.skipSpace() || this.skipComment()) {}
 		}
 
+		expectSpaced(pat, msg) {
+			this.space();
+			this.expect(pat, msg);
+			this.space();
+		}
+
 		parseObject() {
 			if(!this.maybe("{")) {
 				return null;
@@ -316,13 +318,12 @@ const ShellParser = (function() {
 			let keys = [], vals = [], m;
 			while(m = this.maybe(KEY)) {
 				keys.push(new shValue(m[1] || m[2] || m[3]));
-				this.expect(COLON);
+				this.expectSpaced(":");
 				vals.push(this.parseValue());
 
 				this.maybe(SEPARATOR);
 			}
-			this.space();
-			this.expect("}", 'closing brace');
+			this.expectSpaced("}");
 			return new shObject(keys, vals);
 		}
 
@@ -337,8 +338,7 @@ const ShellParser = (function() {
 				vals.push(v);
 				this.maybe(SEPARATOR);
 			}
-			this.space();
-			this.expect(']', 'closing bracket');
+			this.expectSpaced(']');
 			return new shArray(vals);
 		}
 
@@ -347,8 +347,9 @@ const ShellParser = (function() {
 				return null;
 			}
 
+			//this.space()
 			let code = this.parseProgram();
-			this.expect(")");
+			this.expectSpaced(")");
 			return code;
 		}
 
@@ -356,6 +357,8 @@ const ShellParser = (function() {
 			if(!this.maybe("$")) {
 				return null;
 			}
+
+			let m;
 
 			if(this.maybe("{")) {
 				/*
@@ -381,8 +384,11 @@ const ShellParser = (function() {
 				this.expect(")", 'close paren');
 				return cmd;
 			}
+			else if(m = this.maybe(STRING)) {
+				return new shValue(m[1] || m[2]);
+			}
 			else {
-				let w = this.expect(WORD);
+				let w = this.expect(VAR);
 				return new shEnv(new shValue(w[1]));
 			}
 		}
@@ -391,7 +397,7 @@ const ShellParser = (function() {
 			function getValue(m) {
 				// Single/double quote
 				if(m[1] || m[2]) {
-					return m[1] || m[2];
+					return escapeString(m[1] || m[2]);
 				}
 				// Integer
 				else if(m[9]) {
@@ -412,14 +418,14 @@ const ShellParser = (function() {
         }
 			}
 
-			let m = this.maybe(PRIMITIVE, 'value');
+			let m = this.maybe(PRIMITIVE);
 			return m? new shValue(getValue(m)) : null;
 		}
 
 		parseUnquoted() {
 			let m = this.maybe(UNQRE);
 			if(m) {
-				return new shValue(m[1]);
+				return new shValue(escapeString(m[1]));
 			}
 			else {
 				return null;
@@ -438,11 +444,6 @@ const ShellParser = (function() {
 				this.parseWord() ||
 				null
 			);
-		}
-
-		parseText() {
-			let m = this.maybe(WORD);
-			return m? new shValue(m[0]) : null;
 		}
 
 		/**
@@ -474,18 +475,18 @@ const ShellParser = (function() {
 				return null;
 			}
 
-			this.expect(OPENPAREN, "(");
+			this.expectSpaced("(");
 			let cond = this.parseProgram();
-			this.expect(CLOSEPAREN, ")");
+			this.expectSpaced(")");
 
-			this.expect(OPENBRACE, "{");
+			this.expectSpaced("{");
 			let body = this.parseProgram();
-			this.expect(CLOSEBRACE, "}");
+			this.expectSpaced("}");
 
 			if(this.maybe("else")) {
-				this.expect(OPENBRACE, "{");
+				this.expectSpaced("{");
 				var alt = this.parseProgram();
-				this.expect(CLOSEBRACE, "}");
+				this.expectSpaced("}");
 			}
 			else {
 				var alt = null;
@@ -501,12 +502,12 @@ const ShellParser = (function() {
 
 			this.space();
 			let iter = this.parseWord();
-			this.expect(INKWRE, 'in');
+			this.expectSpaced('in');
 			let able = this.parseValue();
 			this.space();
-			this.expect(OPENBRACE, "{");
+			this.expectSpaced("{");
 			let body = this.parseProgram();
-			this.expect(CLOSEBRACE, "}");
+			this.expectSpaced("}");
 
 			return new shFor(iter, able, body);
 		}
@@ -516,13 +517,13 @@ const ShellParser = (function() {
 				return null;
 			}
 
-			this.expect(OPENPAREN, "(");
+			this.expectSpaced("(");
 			let cond = this.parseProgram();
-			this.expect(CLOSEPAREN, ")");
+			this.expectSpaced(")");
 
-			this.expect(OPENBRACE, "{");
+			this.expectSpaced("{");
 			let body = this.parseProgram();
-			this.expect(CLOSEBRACE, "}");
+			this.expectSpaced("}");
 
 			return new shWhile(cond, body);
 		}
@@ -535,11 +536,11 @@ const ShellParser = (function() {
 
 				while(v = this.parseValue()) {
 					args.push(v);
-					if(this.maybe(SEMI)) {
-						break;
-					}
-					else {
+
+					this.space();
+					if(this.maybe(';')) {
 						this.space();
+						break;
 					}
 				}
 
@@ -551,12 +552,13 @@ const ShellParser = (function() {
 		}
 
 		parseSub() {
-			if(!this.maybe(OPENPAREN, "(")) {
+			if(!this.maybe("(")) {
 				return null;
 			}
 
+			//this.space();
 			let sub = this.parseProgram();
-			this.expect(CLOSEPAREN, ")");
+			this.expectSpaced(")");
 			return sub;
 		}
 
@@ -577,7 +579,9 @@ const ShellParser = (function() {
 			let cmds = [], cmd;
 			while(cmd = this.parseOperation()) {
 				cmds.push(cmd);
-				this.maybe(SEMI);
+				this.space();
+				this.maybe(';');
+				this.space();
 			}
 
 			if(cmds.length === 1) {

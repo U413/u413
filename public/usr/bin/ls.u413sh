@@ -11,16 +11,10 @@ else {
 	set dir $path;
 }
 
-# ls'ing a file
-if(eval "!$1.endsWith('/')" $dir) {
-	echo $dir;
-	return;
-}
-
 # Relative paths
 if(eval "!$1.startsWith('/')" $dir) {
   set dir $PWD$1;
 }
 
 # Use lsCache instead of /ls/bin directly
-eval "shell.lsCache.get($1).map(v => v.name)" $dir;
+eval "(await shell.lsCache.get($1)).map(v => v.name)" $dir;
