@@ -1,29 +1,26 @@
 if(eval "$1 === '--help'" $1) {
-	echo "Usage: ls [target]";
-	echo "List the files in the target directory. Target defaults to cwd.";
+	echo "Usage: ls [dir]";
+	echo "List the files in the directory. dir defaults to cwd.";
 	return;
 }
 
-if(exists $1) {}
+if(exists $1) {
+	set dir $1;
+}
 else {
-	set 1 $path;
+	set dir $path;
 }
 
-if(eval "$1.endsWith('/')" $1) {}
-else {
-	echo $1;
+# ls'ing a file
+if(eval "!$1.endsWith('/')" $dir) {
+	echo $dir;
 	return;
 }
 
-if(eval "$1.startsWith('/')" $1) {
-  set target $1;
-}
-else {
-  set target $PWD/$1;
+# Relative paths
+if(eval "!$1.startsWith('/')" $dir) {
+  set dir $PWD$1;
 }
 
-for f in (/bin/ls {target: $1}) {
-  echo $f.name
-}
-
-void;
+# Use lsCache instead of /ls/bin directly
+eval "shell.lsCache.get($1).map(v => v.name)" $dir;

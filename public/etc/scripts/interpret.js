@@ -179,7 +179,7 @@ class Shell {
             // Relative path to static executable
 						else {
 							return async (shell, args) => {
-								return await invokeBin(cwd + d + "/" + f.name, args);
+								return await invokeBin(d + f.name, args);
 							}
 						}
 					}
