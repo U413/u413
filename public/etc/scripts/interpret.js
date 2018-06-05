@@ -36,7 +36,17 @@ const WHITELIST = [
 class Cache {
 	constructor(expire) {
 		this.expire = expire;
-		this.cache = {};
+		this.name = this.constructor.name;
+
+		let local = localStorage.getItem(this.name);
+		if(local) {
+			this.cache = JSON.parse(local);
+		}
+		else {
+			console.log("Creating", this.name);
+			this.cache = {};
+			localStorage.setItem(this.name, "{}");
+		}
 	}
 
 	async generate(name, ...args) {
@@ -44,23 +54,23 @@ class Cache {
 	}
 
 	async update(name, ...args) {
+		console.info(this.name + ": ", name);
 		let data = await this.generate(name, ...args);
 		this.cache[name] = {data, expire: Date.now() + this.expire};
+		localStorage.setItem(this.name, JSON.stringify(this.cache));
+
 		return data;
 	}
 
 	async get(name, ...args) {
 		if(name in this.cache) {
 			let c = this.cache[name];
-			if(c.expire < Date.now()) {
-				delete this.cache[name];
-			}
-			else {
+			if(c.expire > Date.now()) {
 				return c.data;
 			}
 		}
 
-		return this.update(name, ...args);
+		return await this.update(name, ...args);
 	}
 }
 
@@ -70,22 +80,9 @@ class FetchCache extends Cache {
 	}
 
 	async generate(name, opt) {
-		if(name in fetchStatic.cache) {
-			let c = fetchStatic.cache[name];
-			if(Date.now() > c.expire) {
-				delete fetchStatic.cache[name];
-			}
-			else {
-				return c.data;
-			}
-		}
-
 		let res = await fetch(name, opt);
 		if(res.ok) {
-			let data = await res.text();
-			fetchStatic.cache[name] = {data, expire: Date.now() + 1000*60*60};
-
-			return data;
+			return await res.text();
 		}
 		else {
 			throw new ShellError(res.status + ": " + await res.text());
@@ -104,9 +101,10 @@ class LsCache extends Cache {
 }
 
 async function fetchStatic(name, opt) {
-	return fetchStatic.cache.get(name, opt);
+	return await fetchStatic.cache.get(name, opt);
 }
 fetchStatic.cache = new FetchCache();
+const lsCache = new LsCache();
 
 class Shell {
 	constructor(parent, stdout, whitelist=WHITELIST) {
@@ -115,8 +113,6 @@ class Shell {
 		this.interpreter = new InterpreterVisitor(this);
 		this.env = {};
 		this.whitelist = whitelist;
-
-		this.lsCache = new LsCache();
 	}
 
 	// Probably override this
@@ -144,7 +140,7 @@ class Shell {
 		}
 		else {
 			for(let d of this.getEnv("PATH")) {
-				for(let f of await this.lsCache.get(d)) {
+				for(let f of await lsCache.get(d)) {
 					// Strip the extension
 					let fn = /(.+?)(?:\.(?:u413sh|js))?$/.exec(f.name)[1];
 					if(cmd !== fn) {

@@ -1,11 +1,12 @@
 extends partial/main
 
 block body
-	ul.topic
-		li.op
-			h3= topic.op.title
-			+post(topic.op)
-		
-		each post in topic.replies
-			li
-				+post(post)
+	article
+		ul.topic
+			li.op
+				h3= topic.op.title
+				+post(topic.op)
+			
+			each post in topic.replies
+				li
+					+post(post)

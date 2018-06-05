@@ -225,13 +225,14 @@ const MainShell = (function() {
 			std.setSelectionRange(cvl, cvl);
 		}
 		realign() {
+			// getComputedStyle returns subpixel accuracy, we want to floor it.
+			let w = parseInt(window.getComputedStyle(this.prompt).width) + "px";
+
 			if(this.input.className === "pass") {
-			  shell.stdpass.style.marginLeft =
-			    window.getComputedStyle(shell.prompt).width;
+			  this.stdpass.style.marginLeft = w;
 			}
 			else {
-				this.stdin.style.textIndent =
-					window.getComputedStyle(this.prompt).width;
+				this.stdin.style.textIndent = w;
 			}
 		}
 
@@ -342,7 +343,8 @@ const MainShell = (function() {
 					a = JSON.stringify(a);
 				}
 
-				const RE = /(\n)|(\t)|( +)/g;
+				// string -> array of (tag|string))
+				const RE = /(\n)|(\t)|( {1,})/g;
 				let content = [], p = 0, m;
 				while(m = RE.exec(a)) {
 					if(p !== m.index) {
@@ -360,6 +362,7 @@ const MainShell = (function() {
 						content.push("\u00a0".repeat(m[3].length));
 					}
 				}
+				// Append the rest of the string
 				if(p !== a.length) {
 					content.push(a.slice(p));
 				}

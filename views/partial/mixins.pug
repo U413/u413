@@ -5,14 +5,14 @@ mixin style(name)
 	link(rel="stylesheet" href=`/etc/styles/${name}.css`)
 
 mixin postinfo(post)
-	.info
+	section.info
 		//-a.user(href=`/home/${post.author.name}`)= post.author.name
 		.user= post.author.name
 		time= post.created
 		block extra
 
 mixin post(post)
-	.post
+	section.post
 		+postinfo(post)
 		blockquote!= md.render(post.body)
 

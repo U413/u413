@@ -1,23 +1,24 @@
-.prompt
-	- const nobody = {name: "nobody"};
-	- if(!user) {
-	-	user = nobody;
-	- }
-	- else if(!user.name) {
-	-	user.name = "nobody";
-	- }
-	if user.name === "nobody"
-		span.nobody nobody
-	else
-		span.user= user.name
-	span @
-	span.host
-		a(href="/") u413.org
+nav.prompt
+	section.authority
+		- const nobody = {name: "nobody"};
+		- if(!user) {
+		-	user = nobody;
+		- }
+		- else if(!user.name) {
+		-	user.name = "nobody";
+		- }
+		if user.name === "nobody"
+			span.nobody nobody
+		else
+			span.user= user.name
+		span @
+		span.host
+			a(href="/")= config.host
 	span :
 	- var pm = cwd.split('/').slice(1);
 	- var base = pm[pm.length - 1];
 	- var p = pm.slice(0, -1);
-	nav
+	section.path
 		span.dirs
 			span.dir: a(href="/") /
 			- var dp = '/';

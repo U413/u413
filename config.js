@@ -17,6 +17,7 @@ const defaults = {
 	"scheme": "http",
 	"name": "u413",
 	"port": 8080,
+	"host": "u413.org",
 	"version": null,
 	"webroot": "",
 	"loglevel": "info",
@@ -32,7 +33,7 @@ catch(e) {}
 
 module.exports = {
 	...defaults,
-	
+
 	user: ENV.PGUSERNAME || ENV.USER || defaults.user || os.userInfo().username,
 	database: process.env.PGDATABASE || process.env.DB || defaults.database,
 	version: defaults.version || (fs.readFileSync("VERSION") + "").trim()

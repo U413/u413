@@ -39,6 +39,11 @@ kbd {
 	font-family: inherit;
 }
 
+a[href^="irc://"] {
+	color: green;
+	font-style: italic;
+}
+
 .topic img {
 	max-width: 100%;
 	max-height: 16em; /* 16 lines? */
@@ -63,7 +68,7 @@ textarea#stdin {
 
 	width: 100%;
 
-	margin-top: -1px;
+	margin-top: -1.5px;
 	margin-left: -1px;
 	resize: none;
 	overflow: auto;
@@ -172,6 +177,10 @@ nav {
 .prompt {
 	display: inline-block;
 	font-weight: bold;
+
+	* {
+		display: inline-block;
+	}
 }
 
 #current .prompt {
