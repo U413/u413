@@ -343,7 +343,7 @@ const MainShell = (function() {
 				}
 
 				if(typeof a === 'object') {
-					a = JSON.stringify(a);
+					a = JSON.stringify(a, null, 2);
 				}
 				else {
 					a += "";
