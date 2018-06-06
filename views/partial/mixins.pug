@@ -1,8 +1,8 @@
-mixin script(name, async=true)
-	script(async=async src=`/etc/scripts/${name}.js`)
+mixin script(name)
+	script(async=true src=`/etc/scripts/${name}.js`)
 
 mixin style(name)
-	link(async rel="stylesheet" href=`/etc/styles/${name}.css`)
+	link(async=true rel="stylesheet" href=`/etc/styles/${name}.css`)
 
 mixin postinfo(post)
 	section.info

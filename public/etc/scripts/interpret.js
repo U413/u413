@@ -181,11 +181,11 @@ class Shell {
 								credentials: "same-origin"
 							}
 						);
-						
+
             let jsfun = (new Function(
     					"'use strict';" +
 							"return async function $" + fn.replace(/[^$_a-z\d]/i, "_") +
-							"}(subshell, argv){" +
+							"(subshell, argv){" +
 								src + "}"
     				))();
 
