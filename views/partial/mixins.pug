@@ -1,8 +1,8 @@
-mixin script(name)
-	script(src=`/etc/scripts/${name}.js`)
+mixin script(name, async=true)
+	script(async=async src=`/etc/scripts/${name}.js`)
 
 mixin style(name)
-	link(rel="stylesheet" href=`/etc/styles/${name}.css`)
+	link(async rel="stylesheet" href=`/etc/styles/${name}.css`)
 
 mixin postinfo(post)
 	section.info
@@ -22,18 +22,14 @@ mixin size(size)
 		if typeof size === "undefined"
 			
 		else if Number.isNaN(size)
-			|∅
+			| ∅
 		else if !Number.isFinite(size)
-			|∞
+			| ∞
 		else if size < KB
-			span.value= size
-			span.unit &nbsp;B
+			| #[span.value= size] #[span.unit= "\u00a0B"]
 		else if size < MB
-			span.value= (size/KB)|0
-			span.unit kB
+			| #[span.value= (size/KB)|0] #[span.unit kB]
 		else if size < GB
-			span.value= (size/MB)|0
-			span.unit MB
+			| #[span.value= (size/GB)|0] #[span.unit MB]
 		else
-			span.value= (size/GB)|0
-			span.unit GB
+			| #[span.value= (size/GB)|0] #[span.unit GB]

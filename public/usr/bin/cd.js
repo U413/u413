@@ -11,7 +11,7 @@ if(p.startsWith('/')) {
   window.location.replace(p);
 }
 else {
-  p = (cwd + p).split('/');
+  p = (cwd + '/' + p).split('/');
 
   let v = [];
   // Start at 1 to skip leading slash
@@ -20,7 +20,7 @@ else {
       continue;
     }
     else if(p[i] === '..') {
-      ++i;
+      v.pop();
     }
     else {
       v.push(p[i]);

@@ -15,13 +15,18 @@ html
 				= cwd
 		
 		block styles
+			//- Inline styles for the most basic stuff (colors/fonts)
+			style body{background:black;color:ghostwhite;font-family:courier}
 			+style("main")
 			if config.debug
 				+style("debug")
 		block scripts
-			script!= `var user = ${JSON.stringify(user || {name: 'nobody'})};`
-			+script("main")
+			script
+				| 'use strict';
+				| var user = !{JSON.stringify(user || {name: 'nobody'})};
+				include ../../public/etc/scripts/main.js
 			+script("parse")
+			+script("time")
 			+script("interpret")
 			+script("shell")
 			+script("prompt.tpl")

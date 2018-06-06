@@ -64,20 +64,6 @@ const MainShell = (function() {
 		}
 	}
 
-	// Adjust the height of stdin so it fits all its contents
-
-	function adjustHeight() {
-		const stdin = shell.stdin;
-
-		let
-			outh = /(\d+)px/.exec(window.getComputedStyle(stdin).height)[1],
-			diff = outh - stdin.clientHeight;
-
-		// Prevent the height from biasing the next line
-		stdin.style.height = 0;
-		stdin.style.height = (stdin.scrollHeight + diff) + "px";
-	}
-
 	/*** History management ***/
 
 	var {env, history} = storage.load();
@@ -99,13 +85,13 @@ const MainShell = (function() {
 			this.tmp[this.line] = stdin.value;
 			this.line = clamp(this.line + 1, this.tmp.length - 1);
 			stdin.value = this.tmp[this.line];
-			adjustHeight();
+			shell.adjustHeight();
 		},
 		down() {
 			this.tmp[this.line] = stdin.value;
 			this.line = clamp(this.line - 1, this.tmp.length - 1);
 			stdin.value = this.tmp[this.line];
-			adjustHeight();
+			shell.adjustHeight();
 		},
 		clear() {
 			// In-place clear
@@ -113,73 +99,6 @@ const MainShell = (function() {
 			this.tmp = [""];
 			storage.store();
 		}
-	});
-
-	/*** Deferred event registration for when the window loads ***/
-
-	todo.push(() => {
-		shell.stdout = $id("stdout");
-		shell.current = $id("current");
-		shell.prompt = current.firstChild;
-		shell.input = $id("input");
-		shell.stdin = $id("stdin");
-		shell.stdpass = $id("stdpass");
-
-		// Submit when ENTER is pressed without SHIFT
-		shell.stdin.addEventListener("keydown", ev => {
-			if(!ev.shiftKey) {
-				if(ev.key === "Enter") {
-					shell.submit();
-				}
-				else if(ev.key === "ArrowUp") {
-					shell.history.up();
-				}
-				else if(ev.key === "ArrowDown") {
-					shell.history.down();
-				}
-				else {
-					return;
-				}
-				ev.preventDefault();
-				return false;
-			}
-		});
-		shell.stdpass.addEventListener("keydown", ev => {
-			if(!ev.shiftKey) {
-				if(ev.key === "Enter") {
-					shell.submit();
-				}
-				else {
-					return;
-				}
-				ev.preventDefault();
-				return false;
-			}
-		})
-
-		// Automatically focus on the prompt on a click
-
-		function focus() {
-			let sel = document.getSelection();
-
-			if(sel.type !== "Range" &&
-				document.activeElement === document.body
-			) {
-				shell.focus();
-			}
-		}
-
-		document.addEventListener('click', focus);
-
-		shell.realign();
-
-		shell.stdin.addEventListener('input', adjustHeight);
-		document.addEventListener('resize', adjustHeight);
-
-		window.addEventListener('unhandledrejection', ev => {
-			ev.preventDefault();
-			shell.error("Unhandled rejection:", ev.reason.stack);
-		});
 	});
 
 	/*** Main shell implementation ***/
@@ -237,6 +156,15 @@ const MainShell = (function() {
 			else {
 				this.stdin.style.textIndent = w;
 			}
+		}
+		adjustHeight() {
+			let
+				outh = /(\d+)px/.exec(window.getComputedStyle(stdin).height)[1],
+				diff = outh - this.stdin.clientHeight;
+
+			// Prevent the height from biasing the next line
+			this.stdin.style.height = 0;
+			this.stdin.style.height = (this.stdin.scrollHeight + diff) + "px";
 		}
 
 		commitPrompt(value) {
@@ -388,3 +316,70 @@ const MainShell = (function() {
 })();
 
 const shell = new MainShell();
+
+/*** Deferred event registration for when the window loads ***/
+
+todo(() => {
+	shell.stdout = byId("stdout");
+	shell.current = byId("current");
+	shell.prompt = current.firstChild;
+	shell.input = byId("input");
+	shell.stdin = byId("stdin");
+	shell.stdpass = byId("stdpass");
+
+	// Submit when ENTER is pressed without SHIFT
+	shell.stdin.addEventListener("keydown", ev => {
+		if(!ev.shiftKey) {
+			if(ev.key === "Enter") {
+				shell.submit();
+			}
+			else if(ev.key === "ArrowUp") {
+				shell.history.up();
+			}
+			else if(ev.key === "ArrowDown") {
+				shell.history.down();
+			}
+			else {
+				return;
+			}
+			ev.preventDefault();
+			return false;
+		}
+	});
+	shell.stdpass.addEventListener("keydown", ev => {
+		if(!ev.shiftKey) {
+			if(ev.key === "Enter") {
+				shell.submit();
+			}
+			else {
+				return;
+			}
+			ev.preventDefault();
+			return false;
+		}
+	})
+
+	// Automatically focus on the prompt on a click
+
+	function focus() {
+		let sel = document.getSelection();
+
+		if(sel.type !== "Range" &&
+			document.activeElement === document.body
+		) {
+			shell.focus();
+		}
+	}
+
+	document.addEventListener('click', focus);
+
+	shell.realign();
+
+	shell.stdin.addEventListener('input', () => shell.adjustHeight());
+	document.addEventListener('resize', () => shell.adjustHeight())
+
+	window.addEventListener('unhandledrejection', ev => {
+		ev.preventDefault();
+		shell.error("Unhandled rejection:", ev.reason.stack);
+	});
+});
