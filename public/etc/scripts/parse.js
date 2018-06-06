@@ -597,3 +597,5 @@ const ShellParser = (function() {
 		}
 	}
 })();
+
+document.head.appendChild(tag("script", {src: "/etc/scripts/interpret.js"}));

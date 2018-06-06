@@ -314,3 +314,5 @@ class InterpreterVisitor {
 		return last;
 	}
 }
+
+document.head.appendChild(tag("script", {src: "/etc/scripts/shell.js"}));
