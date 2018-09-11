@@ -13,6 +13,8 @@ const
 	log = requireRoot("./log");
 
 const router = module.exports = express.Router();
+
+global.pre404 = (a,b,c) => c();
 /*
 const MAX404 = 10;
 
