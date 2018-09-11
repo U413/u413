@@ -4,6 +4,7 @@
  * Implement services that reduce spam.
 **/
 
+/*
 const
 	fs = require("fs"),
 	express = require("express");
@@ -16,7 +17,7 @@ const router = module.exports = express.Router();
 const MAX404 = 10;
 
 function banIP(ip, start) {
-/* TODO */
+/// TODO
 let time = (Date.now() - start)/1000;
 log.info("Banned", ip, "after", time, "seconds (NotImplemented)");
 }
@@ -52,3 +53,4 @@ router.use((req, res, next) => {
 		next();
 	}
 });
+*/
