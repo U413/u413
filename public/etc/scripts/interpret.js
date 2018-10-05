@@ -147,10 +147,11 @@ class Shell {
 		else {
 			for(let d of this.getEnv("PATH")) {
 				for(let f of await lsCache.get(d)) {
+					let fn = /(.+?)(?:\.(?:u413sh|js))?$/.exec(f.name)[1];
+					
 					// Exact match?
 					if(cmd !== f.name) {
 						// Strip the extension
-						let fn = /(.+?)(?:\.(?:u413sh|js))?$/.exec(f.name)[1];
 						if(cmd !== fn) {
 							continue;
 						}
