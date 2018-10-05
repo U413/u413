@@ -147,10 +147,13 @@ class Shell {
 		else {
 			for(let d of this.getEnv("PATH")) {
 				for(let f of await lsCache.get(d)) {
-					// Strip the extension
-					let fn = /(.+?)(?:\.(?:u413sh|js))?$/.exec(f.name)[1];
-					if(cmd !== fn) {
-						continue;
+					// Exact match?
+					if(cmd !== f.name) {
+						// Strip the extension
+						let fn = /(.+?)(?:\.(?:u413sh|js))?$/.exec(f.name)[1];
+						if(cmd !== fn) {
+							continue;
+						}
 					}
 
 					if(f.mime === "text/x-script.u413sh") {
@@ -196,7 +199,7 @@ class Shell {
           // Relative path to static executable
 					else {
 						return async (shell, args) => {
-							return await invokeBin(d + f.name, args);
+							return await invokeBin(d + "/" + f.name, args);
 						}
 					}
 				}

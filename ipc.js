@@ -31,7 +31,7 @@ app.ipc = {
 		process.exit(0);
 	},
 	ls() {
-		console.log(Object.keys(this).join(" "));
+		console.log(Object.keys(app.ipc).join(" "));
 	}
 }
 

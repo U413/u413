@@ -168,7 +168,8 @@ const db = module.exports = {
 			})
 		},
 		inGroup(uid, gname) {
-			return queryFirst("user/ingroup", [uid, gname]);
+			// count(*) returns a string for some reason, + will coerce it.
+			return !!+queryFirst("user/ingroup", [uid, gname]).count;
 		},
 		groups(uid) {
 			return query("user/groups", [uid]);
