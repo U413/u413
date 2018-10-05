@@ -38,9 +38,12 @@ app.ipc = {
 const ipcname = 'private/ipc.sock';
 
 // Make sure there isn't a file where we want the socket.
-if(fs.statSync(ipcname)) {
-	fs.unlinkSync(ipcname);
+try {
+	if(fs.statSync(ipcname)) {
+		fs.unlinkSync(ipcname);
+	}
 }
+catch(e) {}
 
 net.createServer(conn => {
 	conn.on('data', data => {
