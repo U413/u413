@@ -5,11 +5,13 @@ if(eval "!$1 || $1 === '--help'" $1) {
 }
 
 for d in $PATH {
-  for p in (ls $d) {
+  for p in (ls $d) {=
     # Strip the extension
-    set x (eval $"/(.+?)(?:\.(?:u413sh|js))?$/.exec($1)[1]" $p);
+    set x (eval $"/^(.+?)(?:\.(?:u413sh|js))?$/.exec($1)[1]" $p);
     if(eval "$1 === $2" $x $1) {
       return $d/$p;
     }
   }
 }
+
+return;
