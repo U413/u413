@@ -159,7 +159,7 @@ const ShellParser = (function() {
 			'mg'
 		),
 		WORD = new RegExp(UNQ, 'g'),
-		VAR = /([^\s()\[\]{}<>'"`,;:$&|#%^~/]+)/g,
+		VAR = /([^\s()\[\]{}<>'"`,;:$&|#%^~@/]+)/g,
 		SPACE = /\s+/gm,
 		SEPARATOR = /\s*,\s*|\s*;\s*|\s+/gm,
 		COMMENT = /(#)(\{)?/g,

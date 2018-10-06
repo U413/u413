@@ -2,13 +2,34 @@
 
 const
 	path = require("path"),
-	fs = require("mz/fs"),
+	fs = require("fs"),
 	mime = require("mime"),
 	pathToRe = require("path-to-regexp"),
 	serveStatic = require("serve-static");
 
 const
 	log = requireRoot("./log");
+
+function fspromise(f) {
+	return function(...args) {
+		return new Promise((ok, no) =>
+			f.call(fs, ...args, (err, val) => err? no(err) : ok(val))
+		);
+	}
+}
+
+/**
+ * TODO: At the time of writing, fs.promises is "experimental"
+**/
+const
+	fsreaddir = fspromise(fs.readdir),
+	fsstat = fspromise(fs.stat),
+	fsreadFile = fspromise(fs.readFile),
+	fswriteFile = fspromise(fs.writeFile);
+
+function fsexists(f) {
+	return new Promise((ok, no) => fs.access(f, err => ok(!err)))
+}
 
 class VirtualStats {
 	constructor(data) {
@@ -58,14 +79,14 @@ async function collateReaddir(d) {
 		pd = path.join("public", d);
 
 	let [opt, pub] = await Promise.all([
-		fs.readdir(od).catch(() => []), fs.readdir(pd).catch(() => [])
+		fsreaddir(od).catch(() => []), fsreaddir(pd).catch(() => [])
 	]);
 
 	let dir = Array.from(new Set([...opt, ...pub]));
 	for(let i = 0; i < dir.length; ++i) {
 		let di = dir[i];
 		// Prioritize public-optimized
-		dir[i] = fs.stat(path.join(
+		dir[i] = fsstat(path.join(
 			opt.indexOf(di) === -1? pd : od, di
 		)).then(v => {
 			v.name = di;
@@ -76,19 +97,6 @@ async function collateReaddir(d) {
 	}
 
 	return await Promise.all(dir)
-}
-
-// For some reason fs.exists is deprecated??
-async function fsexists(f) {
-	try {
-		// As far as I can tell, this returns nothing and works by
-		//  throwing if false?????
-		await fs.access(f);
-		return true;
-	}
-	catch(e) {
-		return false;
-	}
 }
 
 let dirs = [], handlers = [];
@@ -238,10 +246,10 @@ module.exports = {
 			let inp = inp_or_dirty;
 			var dirty = async update => {
 				return !await fsexists(origout) ||
-					(await fs.stat(inp)).mtime > update;
+					(await fsstat(inp)).mtime > update;
 			}
 			var generate = async function(req) {
-				return await gen(req, await fs.readFile(inp));
+				return await gen(req, await fsreadFile(inp));
 			}
 		}
 		else {
@@ -258,22 +266,23 @@ module.exports = {
 				return res.redirect(req.originalUrl.slice(0, -1));
 			}
 
-			let nt = Date.now();
+			let nt = Date.now(), first = false;
 			if(req.originalUrl in updates) {
 				var update = updates[req.originalUrl];
 			}
 			else {
 				var update = updates[req.originalUrl] = start;
+				first = true;
 			}
 
 			// Only even consider checking if the cache is dirty
 			//  when it's been longer than 10 secs
-			if(nt - update > 10000) {
+			if(first || nt - update > 10000) {
 				if(await dirty(req, update)) {
 					log.info("Caching", req.originalUrl);
 					updates[req.originalUrl] = nt;
 					let data = await generate(req), outf = out(req);
-					await fs.writeFile(outf, data);
+					await fswriteFile(outf, data);
 					// We already have the data loaded, so send it
 					//  directly rather than using sendFile
 					return res.type(path.extname(outf)).send(data);

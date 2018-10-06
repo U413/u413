@@ -6,4 +6,4 @@ if(argv[1] === '--help') {
   return;
 }
 
-throw new ShellError(argv[1]);
+throw new ShellError(argv.slice(1).join(" "));

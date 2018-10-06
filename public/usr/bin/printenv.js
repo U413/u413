@@ -15,7 +15,7 @@ function format(x) {
   }
 }
 
-let s = subshell;
+let s = shell;
 while(s) {
   for(let v in s.env) {
     shell.echo(v + "=" + format(s.env[v]));

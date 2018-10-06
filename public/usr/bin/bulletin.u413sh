@@ -5,7 +5,7 @@ if(eval "$1 === '--help'" $1) {
 }
 
 if(exists $1) {
-  set post $1;
+  set post (eval 'shell.env["@"].slice(1).join(" ")');
 }
 else {
   set post (read -p "Body: ");

@@ -6,13 +6,9 @@ if(require.main === module) {
 }
 
 const
-	express = require("express"),
-	passport = require("passport"),
-	serveStatic = require("serve-static");
+	express = require("express");
 
 const
-	log = requireRoot("./log"),
-	db = requireRoot('./db'),
 	route = requireRoot("./route");
 
 const router = module.exports = new express.Router();

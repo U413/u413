@@ -6,4 +6,4 @@ if(argv[1] === '--help') {
   return;
 }
 
-subshell.env[argv[1]] = argv[2];
+shell.env[argv[1]] = argv[2];

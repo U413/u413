@@ -148,7 +148,7 @@ class Shell {
 			for(let d of this.getEnv("PATH")) {
 				for(let f of await lsCache.get(d)) {
 					let fn = /(.+?)(?:\.(?:u413sh|js))?$/.exec(f.name)[1];
-					
+
 					// Exact match?
 					if(cmd !== f.name) {
 						// Strip the extension
@@ -189,7 +189,7 @@ class Shell {
             let jsfun = (new Function(
     					"'use strict';" +
 							"return async function $" + fn.replace(/[^$_a-z\d]/i, "_") +
-							"(subshell, argv){" +
+							"(shell, argv){" +
 								src + "}"
     				))();
 
@@ -216,6 +216,7 @@ class Shell {
 		let shargs = await Promise.all(args.map(v => this.eval(v)));
 		shargs.unshift(cmd);
 
+		console.log(cmd);
 		return await (await this.getExecutable(cmd))(this, shargs);
 	}
 
@@ -229,6 +230,7 @@ class Shell {
 		for(let i = 0; i < args.length; ++i) {
 			subshell.setEnv(i, args[i]);
 		}
+		subshell.setEnv("@", args);
 		return ast.visit(subshell.interpreter);
 	}
 }

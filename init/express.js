@@ -1,14 +1,10 @@
 'use strict';
 
 const
-	crypto = require("crypto"),
-	path = require("path"),
-	qs = require("querystring"),
 	express = require("express"),
+	serveStatic = require("serve-static"),
 	cookieParser = require("cookie-parser"),
-	passport = require("passport"),
-	bodyParser = require("body-parser"),
-	serveStatic = require("serve-static");
+	bodyParser = require("body-parser");
 
 const
 	log = requireRoot("./log"),
@@ -41,16 +37,15 @@ if(config.debug) {
 	}
 }
 
+router.use((req, res, next) => {
+	res.locals.cwd = req.path;
+	return next();
+});
+
 router.use(cookieParser());
 
 router.use(require("./session"));
-router.use(require("./passport"));
-
-router.use(async (req, res, next) => {
-	res.locals.cwd = req.path;
-	res.locals.user = req.user;
-	next();
-});
+//router.use(require("./passport"));
 
 router.use(bodyParser.text());
 router.use(bodyParser.json({strict: false}));

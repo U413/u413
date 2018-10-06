@@ -7,7 +7,7 @@ if(require.main === module) {
 
 const
 	express = require("express"),
-	passport = require("passport")
+	bcrypt = require("bcrypt");
 
 const
 	log = requireRoot("./log"),
@@ -26,69 +26,87 @@ router.use("^/$", route.dir("/bin/", [
 // Everything else in this directory is a leaf
 router.use(route.leaf((req, res, next) => next()));
 
-router.use('/login', (req, res, next) => {
-	if(Array.isArray(req.body)) {
-		req.body = req.body[1];
-	}
-	if(!req.body) {
-		return res.status(400).end("Missing arguments");
-	}
-
-	next();
-});
 router.route('/login').
-	post((req, res, next) => {
-		passport.authenticate('local-login', (err, user, info) => {
-			if(err) {
-				res.status(500).end(err.stack + "");
-			}
-			else if(user) {
-				req.login(user, err => {
-					if(err) {
-						res.status(500).end(err.stack + "");
-					}
-					else {
-						log.debug("/bin/login:", user.name);
-						res.status(200).end(JSON.stringify({name: user.name}));
-					}
-				});
-			}
-			else {
-				res.status(400).end(info && info.message);
-			}
-		})(req, res, next);
+	post(async (req, res, next) => {
+		let body = req.body;
+		if(!body) {
+			return res.status(400).end("Missing arguments");
+		}
+
+		if(Array.isArray(body)) {
+			body = body[1];
+		}
+
+		let {name, pass} = body;
+
+		let user = await db.user.authenticate(name, pass);
+		if(user) {
+			let userobj = {
+				name,
+				access: (await db.user.inGroup(user.id, "root"))? "#" : "$"
+			};
+			req.session.userid = user.id;
+			req.session.user = userobj;
+			res.locals.user = userobj;
+			console.log(userobj);
+
+			log.debug("/bin/login:", name);
+			return res.json(userobj);
+		}
+		else {
+			return res.status(403).end("Invalid credentials");
+		}
 	}).
 	get((req, res, next) => {
-		res.render('login');
+		return res.render('login');
 	});
 
 router.use('/logout', (req, res, next) => {
-	// client-sessions is incompatible with passport's logout()
-	//req.logout();
-	req.user = {};
-	res.json(true);
+	if(req.session.userid) {
+		return res.json(false);
+	}
+	else {
+		let userobj = {name: "nobody", access: "$"};
+		req.session.userid = 0;
+		req.session.user = userobj;
+		res.locals.user = userobj;
+		return res.json(true);
+	}
 });
 
-// Lazy workaround because LocalStrategy doesn't support custom parameters
-//  (you can change the names, but not how you get them. POST body only.)
-router.use('/useradd', (req, res, next) => {
-	if(Array.isArray(req.body)) {
-		req.body = req.body[0];
-	}
-	next();
-});
+const SALTS = 10;
 router.route('/useradd').
-	post(passport.authenticate('local-useradd', {
-		successRedirect: '/var/bulletin',
-		failureRedirect: '/bin/useradd'
-	})).
+	post(async (req, res, next) => {
+		let body = req.body;
+
+		if(Array.isArray(body)) {
+			body = body[1];
+		}
+
+		let {name, pass} = body;
+		let user = await db.user.byName(name);
+
+		if(user) {
+			return res.status(401).end("User already exists");
+		}
+		else {
+			let userobj = {name, access: "$"};
+			user = await db.user.add(name, await bcrypt.hash(pass, SALTS));
+			req.session.userid = user.id;
+			req.session.user = userobj;
+			res.locals.user = userobj;
+
+			log.debug("/bin/useradd:", name);
+			return res.json(userobj);
+		}
+	}).
 	get((req, res, next) => {
-		res.render('useradd');
+		return res.render('useradd');
 	});
 
 router.route("/groupadd").
 	post(async (req, res, next) => {
-		if(req.user && req.user.id && db.user.inGroup(req.user.id, "admin")) {
+		if(await db.user.inGroup(req.session.userid, "admin")) {
 			if(!Array.isArray(req.body)) {
 				return res.status(400).end("Missing arguments");
 			}
@@ -98,15 +116,15 @@ router.route("/groupadd").
 			}
 
 			await db.group.create(opt.name);
-			res.status(200).json(true);
+			return res.status(200).json(true);
 		}
 		else {
-			res.status(401).end("You must be an admin to add a group");
+			return res.status(401).end("You must be an admin to add a group");
 		}
 	});
 
 router.use("/newtopic", async (req, res, next) => {
-	if(req.user && req.user.id) {
+	if(req.session.userid) {
 		if(!Array.isArray(req.body)) {
 			return res.status(400).end("Missing arguments");
 		}
@@ -118,17 +136,17 @@ router.use("/newtopic", async (req, res, next) => {
 
 		let
 			board = await db.board.byName(opt.board),
-			topic = await db.topic.create(board.id, req.user.id, opt.title, opt.body);
+			topic = await db.topic.create(board.id, req.session.userid, opt.title, opt.body);
 
-		res.status(200).json(topic.id.toString(16));
+		return res.status(200).json(topic.id.toString(16));
 	}
 	else {
-		res.status(401).end("You must be logged in");
+		return res.status(401).end("You must be logged in");
 	}
 });
 
 router.use("/reply", async (req, res, next) => {
-	if(req.user && req.user.id) {
+	if(req.session.userid) {
 		if(!Array.isArray(req.body)) {
 			return res.status(400).end("Missing arguments");
 		}
@@ -138,38 +156,38 @@ router.use("/reply", async (req, res, next) => {
 			return res.status(400).end("Topic id must be a number");
 		}
 
-		let reply = await db.topic.reply(opt.topic, req.user.id, opt.body);
-		console.log(reply);
-		res.status(200).json(reply);
+		return res.status(200).json(
+			await db.topic.reply(opt.topic, req.session.userid, opt.body)
+		);
 	}
 	else {
-		res.status(401).end("You must be logged in");
+		return res.status(401).end("You are not logged in");
 	}
 });
 
 router.post("/bulletin", async (req, res, next) => {
-	if(req.user && req.user.id) {
+	if(req.session.userid) {
 		let body = req.body;
 
 		if(Array.isArray(body)) {
 			body = body.slice(1).join(" ");
 		}
 
-		await db.bulletin.add(req.user, body);
-		res.json(true);
+		await db.bulletin.add(req.session.userid, body);
+		return res.json(true);
 	}
 	else {
-		res.status(401).end("You are not logged in");
+		return res.status(401).end("You are not logged in");
 	}
 });
 
 router.use("/sql", async (req, res, next) => {
-	if(await db.user.inGroup(req.user.id, "root")) {
+	if(await db.user.inGroup(req.session.userid, "root")) {
 		if(!Array.isArray(req.body)) {
 			return res.status(400).end("Missing arguments");
 		}
 
-		db.rawQuery(req.body.slice(1).join(" ")).then(
+		return db.rawQuery(req.body.slice(1).join(" ")).then(
 			data => {
 				res.json(data);
 			},
@@ -179,7 +197,7 @@ router.use("/sql", async (req, res, next) => {
 		);
 	}
 	else {
-		res.status(403).end("You are not root!");
+		return res.status(403).end("You are not root!");
 	}
 });
 
@@ -194,7 +212,7 @@ async function checkDynamicDirs(target) {
 }
 router.use("/ls", async (req, res, next) => {
 	if(!req.body) {
-		next();
+		return next();
 	}
 
 	let args = req.body;
@@ -213,9 +231,9 @@ router.use("/ls", async (req, res, next) => {
 
 	let j = await (route.readdir(target))(target, req);
 	if(j === null) {
-		res.status(404).end("Not Found");
+		return res.status(404).end("Not Found");
 	}
 	else {
-		res.json(j);
+		return res.json(j);
 	}
 });

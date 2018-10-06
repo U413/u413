@@ -270,15 +270,12 @@ const MainShell = (function() {
 					continue;
 				}
 
-				if(typeof a === 'object') {
-					a = JSON.stringify(a, null, 2);
-				}
-				else {
-					a += "";
-				}
+				a = smartStringify(a, {
+					limit: 4
+				});
 
 				// string -> array of (tag|string))
-				const RE = /(\n)|(\t)|( {1,})/g;
+				const RE = /(\n)|(\t)|( {2,})/g;
 				let content = [], p = 0, m;
 				while(m = RE.exec(a)) {
 					if(p !== m.index) {

@@ -6,11 +6,4 @@ if(argv[1] === '--help') {
   return;
 }
 
-shell.echo(argv.slice(1).map(v => {
-  if(typeof v === 'string') {
-    return v;
-  }
-  else {
-    return JSON.stringify(v);
-  }
-}).join(" "));
+shell.echo(...argv.slice(1));

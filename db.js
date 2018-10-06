@@ -2,7 +2,7 @@ const
 	fs = require("fs"),
 	os = require("os"),
 	bcrypt = require("bcrypt"),
-	{Client} = require("pg");
+	{Pool} = require("pg");
 
 const
 	log = require("./log");
@@ -16,14 +16,13 @@ let
 
 log.info("init PostgreSQL client with", {user, database});
 
-const client = new Client({
+const pool = new Pool({
 	user, database,
 	password: process.env.PGPASSWORD || process.env.PASS
 });
-client.connect();
 
 function rawQuery(q, args) {
-	return client.query(q, args).then(res => res.rows);
+	return pool.query(q, args).then(res => res.rows);
 }
 
 function query(q, args) {
@@ -97,6 +96,7 @@ function blacklistName(name) {
 }
 
 const db = module.exports = {
+	pool,
 	rawQuery,
 	query,
 	bulletin: {
@@ -110,8 +110,8 @@ const db = module.exports = {
 				}
 			);
 		},
-		add(user, text) {
-			return query("bulletin/new", [user.id, text]);
+		add(userid, text) {
+			return query("bulletin/new", [userid, text]);
 		}
 	},
 	board: {
@@ -167,9 +167,9 @@ const db = module.exports = {
 				}
 			})
 		},
-		inGroup(uid, gname) {
+		async inGroup(uid, gname) {
 			// count(*) returns a string for some reason, + will coerce it.
-			return !!+queryFirst("user/ingroup", [uid, gname]).count;
+			return !!+(await queryFirst("user/ingroup", [uid, gname])).count;
 		},
 		groups(uid) {
 			return query("user/groups", [uid]);

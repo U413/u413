@@ -6,7 +6,7 @@ if(require.main === module) {
 }
 
 const
-	fs = require("mz/fs"),
+	fs = require("fs"),
 	path = require("path"),
 	pug = require("pug"),
 	sass = require("node-sass"),
@@ -28,11 +28,15 @@ router.get("^/$", route.dir("^/$", [
 ]));
 
 router.get("/nohup.out", route.leaf(async (req, res, next) => {
-	if(req.user && req.user.name === "root") {
-		let nohup = await fs.readFile(
-			path.join(path.parse(require.main.filename).dir, 'nohup.out')
-		);
-		res.render("ansi", {data: nohup + ""});
+	if(await db.user.inGroup(req.session.userid, "root")) {
+		fs.readFile(__rootname + "/nohup.out", (error, nohup) => {
+			if(error) {
+				return res.render("error/404")
+			}
+			else {
+				return res.render("ansi", {data: nohup + ""});
+			}
+		});
 	}
 	else {
 		res.status(401).render("error/401");
@@ -45,7 +49,13 @@ router.use('^/etc/scripts/$', route.dir('^/etc/scripts/$', []));
 
 router.use('/etc/scripts/prompt.tpl.js', route.cache(
 	'public-optimized/etc/scripts/prompt.tpl.js',
-	async (req, tpl) => pug.compileClient(tpl, {name: "renderPrompt"}),
+	async (req, tpl) => {
+		return `function renderPrompt(locals) {
+			const config=${JSON.stringify(app.locals.config)};
+			${pug.compileClient(tpl, {name: "renderPrompt"})};
+			return renderPrompt(locals);
+		}`;
+	},
 	'views/partial/prompt.pug'
 ));
 
@@ -66,13 +76,12 @@ router.use('/etc/styles/:name\.css', route.cache(
 			}
 		});
 	}),
-	async (req, update) => {
-		try {
-			return (await fs.stat(`public${req.originalUrl}`)).mtime > update;
-		}
-		catch(e) {
-			return true;
-		}
+	/* async */ (req, update) => {
+		return new Promise((ok, no) => {
+			fs.stat(`public${req.originalUrl}`, (err, stat) => {
+				ok(!!err || stat.mtime > update);
+			});
+		})
 	}
 ));
 //router.use('/etc/styles/', route.static("public/etc/styles/"));

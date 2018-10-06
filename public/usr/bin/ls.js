@@ -4,11 +4,16 @@ if(argv[1] === '--help') {
 	return;
 }
 
-let dir = argv[1] || subshell.getEnv("path");
+let dir = argv[1] || shell.getEnv("path");
 
 if(!dir.startsWith("/")) {
-	dir = subshell.getEnv("PWD") + dir;
+	dir = shell.getEnv("PWD") + dir;
+}
+
+var rootshell = shell;
+while(rootshell.parent) {
+	rootshell = rootshell.parent;
 }
 
 // Use lsCache instead of /ls/bin directly
-return (await shell.lsCache.get(dir)).map(v => v.name);
+return (await rootshell.lsCache.get(dir)).map(v => v.name);

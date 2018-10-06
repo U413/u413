@@ -1,14 +1,7 @@
 'use strict';
 
 const
-	crypto = require("crypto"),
-	fs = require("fs"),
-	qs = require("querystring"),
-	express = require("express"),
-	expressSession = require("express-session"),
-	cookieParser = require("cookie-parser"),
-	passport = require("passport"),
-	bodyParser = require("body-parser");
+	express = require("express");
 
 const
 	log = require("./log"),

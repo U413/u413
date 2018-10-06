@@ -6,12 +6,13 @@
 
 const
 	fs = require("fs"),
+	session = require("express-session"),
 	express = require("express"),
-	sessions = require("client-sessions"),
 	crypto = require("crypto");
 
 const
-	log = requireRoot("./log");
+	log = requireRoot("./log"),
+	db = requireRoot("./db");
 
 const router = module.exports = new express.Router();
 
@@ -27,12 +28,30 @@ catch(e) {
 	log.info("Generated session.secret");
 }
 
-router.use(sessions({
+fs.readFile(__rootname + "/node_modules/connect-pg-simple/table.sql", (err, table) => {
+	db.rawQuery(table + "").catch(e => 0);
+});
+
+const SessionStore = require("connect-pg-simple")(session);
+
+const T_24H_MS = 24*60*60*1000;
+router.use(session({
+	cookie: {
+		expires: T_24H_MS
+	},
 	secret,
-	cookieName: 'user',
-	duration: 24*60*60*1000, // 24 hours
-	activeDuration: 1000*60*5 // 5 minutes
+	store: new SessionStore({pool: db.pool}),
+	resave: false,
+	saveUninitialized: false
 }));
+
 router.use((req, res, next) => {
-	next();
-})
+	if(typeof req.session.userid === "undefined") {
+		req.session.userid = 0;
+		req.session.user = {name: "nobody", access: "$"};
+	}
+
+	res.locals.user = req.session.user;
+
+	return next();
+});

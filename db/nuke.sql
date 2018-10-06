@@ -12,3 +12,5 @@ drop table if exists boards cascade;
 drop table if exists topics cascade;
 drop table if exists replies cascade;
 drop table if exists bulletin cascade;
+
+drop table if exists session;
