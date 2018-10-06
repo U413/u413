@@ -62,7 +62,7 @@ router.route('/login').
 	});
 
 router.use('/logout', (req, res, next) => {
-	if(req.session.userid) {
+	if(!req.session.userid) {
 		return res.json(false);
 	}
 	else {
