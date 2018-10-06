@@ -11,19 +11,18 @@ else {
   set cache all;
 }
 
-set rootshell (eval "(() => {var s=shell; while(s.parent) { s = s.parent }; return s; })()");
-
-if(eval "$1 === 'fetch'" $cache) {
-  eval "shell.env.rootshell.fetchCache.clear()";
+if(eval "$1 === 'all' || $1 === 'fetch'" $cache) {
+  eval "shell.fetchCache.clear()";
 }
-else {
+
+if(eval "$1 === 'all' || $1 === 'ls'" $cache){
   if(eval "$1 === 'ls'" $cache) {
-    eval "shell.env.rootshell.lsCache.clear()";
+    eval "shell.lsCache.clear()";
   }
   else {
     if(eval "$1 === 'all'" $cache) {
-      eval "shell.env.rootshell.fetchCache.clear()";
-      eval "shell.env.rootshell.lsCache.clear()";
+      eval "shell.fetchCache.clear()";
+      eval "shell.lsCache.clear()";
     }
     else {
       throw Unknown cache $cache;

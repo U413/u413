@@ -15,10 +15,17 @@ function format(x) {
   }
 }
 
-let s = shell;
+let shells = [], s = shell;
 while(s) {
-  for(let v in s.env) {
-    shell.echo(v + "=" + format(s.env[v]));
-  }
+	shells.push(s);
+	s = s.parent;
+}
+
+let env = {};
+while(shells.length) {
+	let s = shells.pop();
+	Object.assign(env, s.env);
   s = s.parent;
 }
+
+subshell.echo(env);

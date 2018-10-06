@@ -6,4 +6,4 @@ if(argv[1] === '--help') {
   return;
 }
 
-shell.echo(...argv.slice(1));
+subshell.echo(...argv.slice(1));

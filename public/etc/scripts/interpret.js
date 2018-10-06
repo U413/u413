@@ -189,8 +189,7 @@ class Shell {
             let jsfun = (new Function(
     					"'use strict';" +
 							"return async function $" + fn.replace(/[^$_a-z\d]/i, "_") +
-							"(shell, argv){" +
-								src + "}"
+							"(subshell, argv){" + src + "}"
     				))();
 
             return async (shell, args) => {
@@ -216,7 +215,6 @@ class Shell {
 		let shargs = await Promise.all(args.map(v => this.eval(v)));
 		shargs.unshift(cmd);
 
-		console.log(cmd);
 		return await (await this.getExecutable(cmd))(this, shargs);
 	}
 

@@ -1,9 +1,9 @@
 'use strict';
 
 if(argv[1] === '--help') {
-  shell.echo("Usage: unset x")
-  shell.echo("Unset an environment variable.");
+  subshell.echo("Usage: unset x")
+  subshell.echo("Unset an environment variable.");
   return;
 }
 
-delete shell.env[argv[1]];
+delete subshell.env[argv[1]];

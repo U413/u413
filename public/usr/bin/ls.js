@@ -10,10 +10,5 @@ if(!dir.startsWith("/")) {
 	dir = shell.getEnv("PWD") + dir;
 }
 
-var rootshell = shell;
-while(rootshell.parent) {
-	rootshell = rootshell.parent;
-}
-
 // Use lsCache instead of /ls/bin directly
-return (await rootshell.lsCache.get(dir)).map(v => v.name);
+return (await shell.lsCache.get(dir)).map(v => v.name);

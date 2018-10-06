@@ -26,7 +26,7 @@ else {
   }
 }
 
-set topic (eval "parseInt($1, 16)|0" $topic);
+set topic (eval "parseInt($1, 16)" $topic);
 if(eval "!$1" $topic) {
 	throw "Invalid topic id";
 }

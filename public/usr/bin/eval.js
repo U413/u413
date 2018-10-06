@@ -11,13 +11,13 @@ let [name, expr, ...args] = argv;
 
 let f = (new Function(
   "'use strict';" +
-  "return async function $evalJS(shell," +
+  "return async function $evalJS(subshell," +
   args.map((v, i) => "$" + (i + 1)).join(",") +
   ") { return " + expr + "}"
 ))();
 
 try {
-  return await f.apply(null, [shell, ...args]);
+  return await f.apply(null, [subshell, ...args]);
 }
 catch(e) {
   throw new ShellError(name + ` (${expr}): \n` + e.stack);

@@ -26,3 +26,4 @@ if(eval "$1 !== $2" $(read -s -p "Confirm password: ") $pass) {
 	name: $name,
 	pass: $pass
 };
+reload;
