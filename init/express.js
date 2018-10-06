@@ -3,7 +3,6 @@
 const
 	express = require("express"),
 	serveStatic = require("serve-static"),
-	cookieParser = require("cookie-parser"),
 	bodyParser = require("body-parser");
 
 const
@@ -41,8 +40,6 @@ router.use((req, res, next) => {
 	res.locals.cwd = req.path;
 	return next();
 });
-
-router.use(cookieParser());
 
 router.use(require("./session"));
 //router.use(require("./passport"));
