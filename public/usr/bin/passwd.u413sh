@@ -21,6 +21,12 @@ if(eval "$1 !== '#'" $user.access) {
 	set old_pass $(read -s -p "Old password: ");
 }
 
+# expose username to password managers
+eval "shell.current.appendChild(tag('input', {
+	id: 'username', value: $1,
+	style: 'display: none'
+}))" $name;
+
 set new_pass $(read -s -p "New password: ");
 
 if(eval "!$1 || $1 == $2" $new_pass $old_pass) {
