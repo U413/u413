@@ -160,6 +160,8 @@ const db = module.exports = {
 					// Don't chain the promise because we need user
 					return bcrypt.compare(pass, user.pass).then(eq => {
 						return eq? user : null;
+					}).catch(err => {
+						return null;
 					});
 				}
 				else {
