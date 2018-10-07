@@ -95,6 +95,7 @@ function blacklistName(name) {
 	)? name : "nobody";
 }
 
+const SALTS = 10;
 const db = module.exports = {
 	pool,
 	rawQuery,
@@ -182,8 +183,9 @@ const db = module.exports = {
 		byName(name) {
 			return queryFirst("user/byname", [searchableName(name)]);
 		},
-		add(name, pass) {
-			return queryFirst("user/add", [name, searchableName(name), pass]);
+		async add(name, pass) {
+			return queryFirst("user/add", [name, searchableName(name),
+				await bcrypt.hash(pass, SALTS)]);
 		},
 		list() {
 			return query("user/list");

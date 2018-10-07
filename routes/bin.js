@@ -6,8 +6,7 @@ if(require.main === module) {
 }
 
 const
-	express = require("express"),
-	bcrypt = require("bcrypt");
+	express = require("express");
 
 const
 	log = requireRoot("./log"),
@@ -74,7 +73,6 @@ router.use('/logout', (req, res, next) => {
 	}
 });
 
-const SALTS = 10;
 router.route('/useradd').
 	post(async (req, res, next) => {
 		let body = req.body;
@@ -91,7 +89,7 @@ router.route('/useradd').
 		}
 		else {
 			let userobj = {name, access: "$"};
-			user = await db.user.add(name, await bcrypt.hash(pass, SALTS));
+			user = await db.user.add(name, pass);
 			req.session.userid = user.id;
 			req.session.user = userobj;
 			res.locals.user = userobj;
