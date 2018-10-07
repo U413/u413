@@ -170,6 +170,10 @@ const db = module.exports = {
 				}
 			})
 		},
+		async passwd(name, pass) {
+			return !!queryFirst("user/passwd", [searchableName(name),
+				await bcrypt.hash(pass, SALTS)]);
+		},
 		async inGroup(uid, gname) {
 			// count(*) returns a string for some reason, + will coerce it.
 			return !!+(await queryFirst("user/ingroup", [uid, gname])).count;

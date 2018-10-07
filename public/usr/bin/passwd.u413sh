@@ -1,0 +1,43 @@
+if(eval "$1 === '--help'" $1) {
+	echo "Usage: passwd [--] [user]";
+	echo "Interactively change user password.";
+	return;
+}
+
+if(exists $1) {
+	# who are you to decide "--help" is a bad user name?
+	if(eval "$1 === '--'" $1) {
+		set name $2;
+	}
+	else {
+		set name $1;
+	}
+}
+else {
+	set name $user.name;
+}
+
+if(eval "$1 !== '#'" $user.access) {
+	set old_pass $(read -s -p "Old password: ");
+}
+
+set new_pass $(read -s -p "New password: ");
+
+if(eval "!$1 || $1 == $2" $new_pass $old_pass) {
+	throw "Not changed";
+}
+if(eval "$1 !== $2" $(read -s -p "Confirm new password: ") $new_pass) {
+	throw "Passwords don't match";
+}
+
+if (/bin/passwd {
+	user: $name,
+	old: $old_pass,
+	new: $new_pass
+}) {
+	echo "Password updated successfully.";
+	return;
+}
+else {
+	throw "Error.";
+}
