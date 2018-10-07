@@ -6,6 +6,10 @@ if(argv[1] === '--help') {
   return;
 }
 
+if(argv.length < 2) {
+  return window.location.reload();
+}
+
 let p = argv[1] + "";
 if(p.startsWith('/')) {
   window.location.replace(p);
