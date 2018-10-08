@@ -6,8 +6,7 @@ if(require.main === module) {
 }
 
 const
-	express = require("express"),
-	bcrypt = require("bcrypt");
+	express = require("express");
 
 const
 	log = requireRoot("./log"),
@@ -17,7 +16,7 @@ const
 const router = module.exports = new express.Router();
 
 router.use("^/$", route.dir("/bin/", [
-	'login', 'logout', 'useradd',
+	'login', 'logout', 'useradd', 'passwd',
 	'newtopic', 'reply',
 	'bulletin',
 	'sql', 'ls'
@@ -74,7 +73,6 @@ router.use('/logout', (req, res, next) => {
 	}
 });
 
-const SALTS = 10;
 router.route('/useradd').
 	post(async (req, res, next) => {
 		let body = req.body;
@@ -91,7 +89,7 @@ router.route('/useradd').
 		}
 		else {
 			let userobj = {name, access: "$"};
-			user = await db.user.add(name, await bcrypt.hash(pass, SALTS));
+			user = await db.user.add(name, pass);
 			req.session.userid = user.id;
 			req.session.user = userobj;
 			res.locals.user = userobj;
@@ -102,6 +100,28 @@ router.route('/useradd').
 	}).
 	get((req, res, next) => {
 		return res.render('useradd');
+	});
+
+router.route('/passwd').
+	post(async (req, res, next) => {
+		if(!Array.isArray(req.body) || !req.body[1]) {
+			return res.status(400).end("Missing arguments");
+		}
+
+		let {user, old, new:pass} = req.body[1];
+		if(!await db.user.inGroup(req.session.userid, "root")) {
+			if(user !== req.session.user.name) {
+				return res.status(403).end(`You may not modify password of ${user}`);
+			}
+			if(!await db.user.authenticate(user, old)) {
+				return res.status(403).end("Invalid credentials");
+			}
+		}
+		if(!pass) {
+			return res.status(400).end("Password may not be empty");
+		}
+		let ok = await db.user.passwd(user, pass);
+		return res.status(200).json(ok);
 	});
 
 router.route("/groupadd").

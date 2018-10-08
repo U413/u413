@@ -95,6 +95,7 @@ function blacklistName(name) {
 	)? name : "nobody";
 }
 
+const SALTS = 10;
 const db = module.exports = {
 	pool,
 	rawQuery,
@@ -160,12 +161,18 @@ const db = module.exports = {
 					// Don't chain the promise because we need user
 					return bcrypt.compare(pass, user.pass).then(eq => {
 						return eq? user : null;
+					}).catch(err => {
+						return null;
 					});
 				}
 				else {
 					return null;
 				}
 			})
+		},
+		async passwd(name, pass) {
+			return !!queryFirst("user/passwd", [searchableName(name),
+				await bcrypt.hash(pass, SALTS)]);
 		},
 		async inGroup(uid, gname) {
 			// count(*) returns a string for some reason, + will coerce it.
@@ -180,8 +187,9 @@ const db = module.exports = {
 		byName(name) {
 			return queryFirst("user/byname", [searchableName(name)]);
 		},
-		add(name, pass) {
-			return queryFirst("user/add", [name, searchableName(name), pass]);
+		async add(name, pass) {
+			return queryFirst("user/add", [name, searchableName(name),
+				await bcrypt.hash(pass, SALTS)]);
 		},
 		list() {
 			return query("user/list");
